@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar-On-Demand | Your Desktop's New Best Friend</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --card-bg: #16161a;
+            --accent: #4f8ef7;
+            --text: #e8e8e8;
+            --text-dim: #999;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(79, 142, 247, 0.15) 0%, rgba(10, 10, 12, 1) 70%);
+        }
+
+        .hero-badge {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            color: var(--text-dim);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 10px 20px rgba(79, 142, 247, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #3d7ce0;
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 32px;
+            border-radius: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(79, 142, 247, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* Screen Section */
+        .preview {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .screenshot-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .screenshot {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .screenshot-caption {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 120px 0;
+            text-align: center;
+            background: linear-gradient(0deg, rgba(79, 142, 247, 0.05) 0%, rgba(10, 10, 12, 1) 100%);
+        }
+
+        .cta p {
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            color: var(--text-dim);
+        }
+
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .features { padding: 60px 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <div class="hero-badge">Windows ONLY Desktop App</div>
+            <h1>Calendar-On-Demand</h1>
+            <p class="tagline">Your calendar. Always on your desktop. No more alt-tabbing to check your schedule. Just glance and go.</p>
+            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="btn-primary">Download for Windows (v1.0.0)</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="features" class="features">
+            <div class="section-title">
+                <h2>Designed for Focus</h2>
+                <p style="color: var(--text-dim);">Minimalist tools that don't get in your way.</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Aero Glass UI</h3>
+                    <p>Beautifully translucent design that fits right into your workspace without stealing the spotlight.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Two-way Sync</h3>
+                    <p>Always in sync with Google Calendar. Changes you make here reflect everywhere, instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗣️</div>
+                    <h3>Natural Language</h3>
+                    <p>Add events like a human. "Tomorrow at 3pm meeting" is all you need to type.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Magic URLs</h3>
+                    <p>One-click to jump straight into Google Meet, Zoom, or event details. Built for efficiency.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="preview">
+            <div class="screenshot-container">
+                <img src="./screenshot.png" alt="Calendar-On-Demand Screenshot" class="screenshot">
+                <p class="screenshot-caption">Real Google Calendar data. Always on your desktop.</p>
+            </div>
+        </section>
+    </main>
+
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to reclaim your desktop?</h2>
+            <p>Get Calendar-On-Demand for free during our public beta.</p>
+            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="btn-primary">Get the Installer</a>
+            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">Supports Windows 10 & 11</div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Calendar-On-Demand Team. Made for productivity.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll if needed
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

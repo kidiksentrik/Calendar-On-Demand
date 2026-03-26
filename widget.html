@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar-On-Demand</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="widget-container">
+        <div class="bg-overlay"></div>
+        <header>
+
+            <div class="header-left">
+                <h2 id="current-month-year">March 2026</h2>
+                <div class="nav-btns">
+                    <button id="prev-month">&lt;</button>
+                    <button id="home-btn" title="Go to Today">🏠</button>
+                    <button id="next-month">&gt;</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="lock-btn" class="icon-btn" title="Lock/Unlock Position" style="opacity: 0.6; font-size: 0.9rem !important;">📌</button>
+                <button id="sync-btn" class="icon-btn" title="Sync Now">🔄</button>
+                <button id="settings-toggle" class="icon-btn" title="Settings">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="modal hidden">
+            <div class="modal-content">
+                <h3>Settings</h3>
+                
+                <div class="setting-group">
+                    <h4>Behavior</h4>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Launch on startup</span>
+                            <input type="checkbox" id="startup-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Always on Top</span>
+                            <input type="checkbox" id="always-on-top-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Lock Position</span>
+                            <input type="checkbox" id="lock-position-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Stick to Desktop</span>
+                            <input type="checkbox" id="desktop-mode-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>Start of Week</label>
+                        <select id="start-of-week-select">
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <button id="reauth-btn" style="width: 100%; border-color: var(--accent-color); color: var(--accent-color); margin-top: 10px;">Login with Google</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h4>Appearance</h4>
+                    <div class="setting-item row">
+                        <label>Background</label>
+                        <input type="color" id="bg-color-picker" value="#0f0f14">
+                    </div>
+                    <div class="setting-item">
+                        <label>Opacity</label>
+                        <input type="range" id="opacity-slider" min="0.1" max="1.0" step="0.05" value="0.92">
+                    </div>
+                    <div class="setting-item row">
+                        <label>Text Color</label>
+                        <input type="color" id="text-color-picker" value="#e8e8e8">
+                    </div>
+                    <div class="setting-item row">
+                        <label>Accent Color</label>
+                        <input type="color" id="accent-color-picker" value="#4f8ef7">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="close-settings">Done</button>
+                    <button id="reset-settings">Reset to defaults</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="calendar-grid-header">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        
+        <div id="calendar-days" class="calendar-grid">
+            <!-- Days injected here -->
+        </div>
+
+        <div id="sync-indicator" class="sync-indicator hidden">Syncing...</div>
+        
+        <!-- Quick Add Modal -->
+        <div id="quick-add-modal" class="modal hidden">
+            <div class="modal-content">
+                <input type="text" id="quick-add-input" placeholder="Event title + time (e.g. Meeting 14:00)">
+                <div class="setting-item all-day-entry">
+                    <label class="switch">
+                        <span>All Day Event</span>
+                        <input type="checkbox" id="all-day-check">
+                        <span class="slider-toggle"></span>
+                    </label>
+                </div>
+                <div id="extra-fields" class="hidden">
+                    <input type="text" id="event-location" placeholder="Location (optional)">
+                    <textarea id="event-description" placeholder="Description (optional)"></textarea>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Mark as Important</span>
+                            <input type="checkbox" id="important-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Highlight Day Cell</span>
+                            <input type="checkbox" id="highlight-cell-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>Entry Color</label>
+                        <div class="color-presets">
+                            <button class="color-opt" data-color="default" style="background: #444; border: 1px solid #777;"></button>
+                            <button class="color-opt" data-color="#f44336" style="background: #f44336;"></button>
+                            <button class="color-opt" data-color="#ffeb3b" style="background: #ffeb3b;"></button>
+                            <button class="color-opt" data-color="#4caf50" style="background: #4caf50;"></button>
+                            <button class="color-opt" data-color="#2196f3" style="background: #2196f3;"></button>
+                            <button class="color-opt" data-color="#9c27b0" style="background: #9c27b0;"></button>
+                        </div>
+                        <input type="hidden" id="selected-entry-color" value="default">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="toggle-extra">More Options</button>
+                    <button id="save-event">Save</button>
+                    <span class="hint">Esc to cancel</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Details Popup -->
+        <div id="event-popup" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="popup-title"></h3>
+                <p id="popup-time"></p>
+                <p id="popup-calendar-container"><span id="popup-calendar-color" class="color-dot"></span><span id="popup-calendar"></span></p>
+                <div id="popup-description" class="event-description-box"></div>
+
+                <div class="modal-actions">
+                    <button id="edit-event">Edit</button>
+                    <button id="delete-event">Delete</button>
+                    <button id="close-popup">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="widget.js"></script>
+</body>
+</html>
