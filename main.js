@@ -42,26 +42,22 @@ async function createWindow() {
     }
 
     // Move listener BEFORE loadFile to ensure we don't miss the event
-    mainWindow.once('ready-to-show', () => { showWindowIfManual(); });
+    mainWindow.once('ready-to-show', () => { showInitialWindow(); });
 
-    // Fallback: If ready-to-show doesn't fire (e.g. slow auth), force show after 3s if not startup
-    setTimeout(() => { if (mainWindow && !mainWindow.isVisible()) showWindowIfManual(); }, 3000);
+    // Fallback: Force show after 3s if not visible
+    setTimeout(() => { if (mainWindow && !mainWindow.isVisible()) showInitialWindow(); }, 3000);
 
     mainWindow.loadFile(path.join(__dirname, 'widget.html'));
 
-    function showWindowIfManual() {
+    function showInitialWindow() {
         if (!mainWindow) return;
-        const args = process.argv.map(a => a.toLowerCase());
-        const isStartup = args.includes('--startup') || args.includes('--hidden');
         
-        if (!isStartup) {
-            const desktopMode = store.get('desktopMode', false);
-            if (desktopMode) {
-                mainWindow.showInactive();
-            } else {
-                mainWindow.show();
-                mainWindow.focus(); // Ensure it comes to front
-            }
+        const desktopMode = store.get('desktopMode', false);
+        if (desktopMode) {
+            mainWindow.showInactive();
+        } else {
+            mainWindow.show();
+            mainWindow.focus(); // Ensure it comes to front
         }
     }
 
@@ -341,9 +337,7 @@ function updateLoginSettings(value) {
     const loginSettings = {
         openAtLogin: value,
         path: app.getPath('exe'),
-        args: value 
-            ? (isDev ? [path.resolve(__dirname), '--startup'] : ['--', '--startup'])
-            : []
+        args: []
     };
     app.setLoginItemSettings(loginSettings);
     
