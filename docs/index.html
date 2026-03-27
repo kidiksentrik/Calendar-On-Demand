@@ -200,6 +200,24 @@
             color: var(--text-dim);
         }
 
+        .kofi-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .kofi-link:hover {
+            color: var(--text);
+        }
+
+        .footer-kofi {
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             h1 { font-size: 3rem; }
@@ -215,6 +233,7 @@
             <h1>Calendar-On-Demand</h1>
             <p class="tagline">Your calendar. Always on your desktop. No more alt-tabbing to check your schedule. Just glance and go.</p>
             <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="btn-primary">Download for Windows (v1.0.0)</a>
+            <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link">It's free. But if it saved you 5 minutes today, buy me a coffee ☕</a>
         </div>
     </header>
 
@@ -269,6 +288,9 @@
     <footer>
         <div class="container">
             <p>&copy; 2026 Calendar-On-Demand Team. Made for productivity.</p>
+            <div class="footer-kofi">
+                Enjoying the app? <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link" style="margin-top: 0; display: inline;">Support development on Ko-fi ☕</a>
+            </div>
         </div>
     </footer>
 
