@@ -6,6 +6,7 @@ const path = require('path');
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 const store = new Store();
+let authPromise = null;
 
 async function getOAuthClient() {
     console.log('Loading credentials.json...');
@@ -30,6 +31,26 @@ async function getOAuthClient() {
 }
 
 async function authenticate(force = false) {
+    if (authPromise) {
+        console.log('Authentication already in progress, returning existing promise...');
+        return authPromise;
+    }
+
+    authPromise = (async () => {
+        try {
+            const result = await _authenticateInternal(force);
+            authPromise = null;
+            return result;
+        } catch (error) {
+            authPromise = null;
+            throw error;
+        }
+    })();
+
+    return authPromise;
+}
+
+async function _authenticateInternal(force = false) {
     console.log('getting OAuth client...');
     const oAuth2Client = await getOAuthClient();
     console.log('OAuth client ready.');
@@ -52,6 +73,7 @@ async function authenticate(force = false) {
         const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
+            prompt: 'consent'
         });
 
         const authWindow = new BrowserWindow({

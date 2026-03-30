@@ -226,15 +226,15 @@ ipcMain.handle('get-events', async (event, { timeMin, timeMax }) => {
                            err.message.toLowerCase().includes('auth') || 
                            err.message.toLowerCase().includes('token') ||
                            err.message.toLowerCase().includes('expired') ||
-                           err.message.toLowerCase().includes('revoked');
+                           err.message.toLowerCase().includes('revoked') ||
+                           err.message.toLowerCase().includes('invalid_grant');
 
         if (isAuthError) {
-            console.log('Detected auth error (400/401 or token issue), triggering re-authentication flow...');
-            // We call authenticate(true) which will show the BrowserWindow to the user
+            console.log('Detected auth error, triggering singleton re-authentication flow...');
+            // authenticate() is now a singleton, so multiple calls won't spawn multiple windows
             authenticate(true).then(newClient => {
                 authClient = newClient;
-                console.log('Re-authentication successful, next sync should work.');
-                // Optionally notify renderer to try again
+                console.log('Re-authentication successful.');
                 if (mainWindow) mainWindow.webContents.send('sync-now');
             }).catch(e => {
                 console.error('Re-authentication failed:', e.message);
