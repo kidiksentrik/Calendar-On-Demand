@@ -7,9 +7,63 @@ try {
     let startOfWeek = 0;
     let editingEvent = null;
 
+    // Synthesize clean audio chimes programmatically
+    function playChimeSound(isCompleted) {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            
+            if (isCompleted) {
+                // Happy double-chime for task completion (e.g. C5 -> A5)
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.type = 'sine';
+                const now = ctx.currentTime;
+                
+                // Play first note (523Hz)
+                osc.frequency.setValueAtTime(523.25, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                
+                // Play second note (880Hz)
+                osc.frequency.setValueAtTime(880.00, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now + 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else {
+                // Lower drop note for unchecking task
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.type = 'sine';
+                const now = ctx.currentTime;
+                
+                osc.frequency.setValueAtTime(329.63, now);
+                osc.frequency.exponentialRampToValueAtTime(220.00, now + 0.15);
+                
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                
+                osc.start(now);
+                osc.stop(now + 0.16);
+            }
+        } catch (e) {
+            console.warn('Audio feedback failed to play:', e);
+        }
+    }
+
     function stripTags(summary) {
         if (!summary) return '';
         return summary
+            .replace(/^\[[x ]\]\s*/, '') // Remove [x] or [ ] prefixes
             .replace(/\[HIGHLIGHT\]/g, '')
             .replace(/\[IMPORTANT\]/g, '')
             .replace(/\[COLOR:#[0-9a-fA-F]{3,6}\]/g, '')
@@ -50,6 +104,10 @@ try {
     const closeSettings = document.getElementById('close-settings');
     const closePopupBtn = document.getElementById('close-popup');
     const reauthBtn = document.getElementById('reauth-btn');
+
+    // New Todo list container
+    const todoListContainer = document.getElementById('todo-list-container');
+    const todoDateTitle = document.getElementById('todo-date-title');
 
     if (reauthBtn) reauthBtn.onclick = () => ipcRenderer.invoke('reset-auth');
 
@@ -155,6 +213,12 @@ try {
             const ev = document.createElement('div');
             ev.classList.add('event-item');
             
+            // Check if completed
+            const isCompleted = e.summary.startsWith('[x]');
+            if (isCompleted) {
+                ev.classList.add('completed-event');
+            }
+
             let displaySummary = e.summary;
             if (displaySummary.includes('[IMPORTANT]')) {
                 ev.classList.add('important-event');
@@ -177,7 +241,20 @@ try {
             
             ev.innerText = stripTags(displaySummary);
             ev.style.borderLeft = `3px solid ${e.backgroundColor || 'var(--accent-color)'}`;
-            ev.onclick = (event) => { event.stopPropagation(); showEventDetails(e); };
+            ev.onclick = (event) => { 
+                event.stopPropagation(); 
+                editingEvent = null; 
+                selectedDay = dateStr; 
+                openQuickAdd(); 
+                
+                // Automatically trigger the edit mode for this specific clicked event
+                const todoItems = document.querySelectorAll('.todo-title');
+                todoItems.forEach(item => {
+                    if (item.title === e.summary) {
+                        item.click();
+                    }
+                });
+            };
             eventsContainer.appendChild(ev);
         });
 
@@ -223,11 +300,24 @@ try {
             }
         } finally {
             renderCalendar();
+            // Refresh todo modal if it is currently open
+            if (quickAddModal && !quickAddModal.classList.contains('hidden')) {
+                updateTodoListUI();
+            }
         }
     }
 
     function openQuickAdd() {
         if (quickAddModal) quickAddModal.classList.remove('hidden');
+        if (todoDateTitle) {
+            const dateParts = selectedDay.split('-');
+            const formattedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2])
+                .toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            todoDateTitle.innerText = formattedDate;
+        }
+        
+        updateTodoListUI();
+
         if (quickAddInput) { quickAddInput.value = ''; quickAddInput.focus(); }
         if (allDayCheck) allDayCheck.checked = false;
         if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
@@ -239,69 +329,231 @@ try {
         if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden');
     }
 
+    function updateTodoListUI() {
+        if (!todoListContainer) return;
+        todoListContainer.innerHTML = '';
+
+        // Filter events for the selected day
+        const dayEvents = events.filter(e => {
+            const start = e.start.dateTime || e.start.date;
+            return start.startsWith(selectedDay);
+        });
+
+        if (dayEvents.length === 0) {
+            todoListContainer.innerHTML = `<div style="font-size: 0.85rem; opacity: 0.4; padding: 16px; text-align: center;">No tasks for this day.</div>`;
+            return;
+        }
+
+        dayEvents.forEach(e => {
+            const isCompleted = e.summary.startsWith('[x]');
+            const item = document.createElement('div');
+            item.classList.add('todo-item');
+
+            const itemLeft = document.createElement('div');
+            itemLeft.classList.add('todo-item-left');
+
+            const checkbox = document.createElement('div');
+            checkbox.className = `todo-checkbox ${isCompleted ? 'checked' : ''}`;
+            checkbox.onclick = (event) => {
+                event.stopPropagation();
+                toggleTodoStatus(e);
+            };
+
+            const title = document.createElement('span');
+            title.className = `todo-title ${isCompleted ? 'completed' : ''}`;
+            title.innerText = stripTags(e.summary);
+            title.title = e.summary;
+            title.onclick = (event) => {
+                event.stopPropagation();
+                editingEvent = e;
+                
+                // Populate text input
+                if (quickAddInput) {
+                    quickAddInput.value = stripTags(e.summary);
+                    quickAddInput.focus();
+                }
+                
+                // Populate extra options
+                if (eventLocationInput) eventLocationInput.value = e.location || '';
+                if (eventDescriptionInput) eventDescriptionInput.value = e.description || '';
+                if (allDayCheck) allDayCheck.checked = !!e.start.date;
+                if (document.getElementById('important-check')) document.getElementById('important-check').checked = e.summary.includes('[IMPORTANT]');
+                if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = e.summary.includes('[HIGHLIGHT]');
+                
+                // Populate color selection
+                const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+                const selectedColor = colorMatch ? colorMatch[1] : 'default';
+                if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = selectedColor;
+                document.querySelectorAll('.color-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.getAttribute('data-color') === selectedColor);
+                });
+
+                // Auto-show More Options when editing
+                if (extraFields) extraFields.classList.remove('hidden');
+                if (toggleExtraBtn) toggleExtraBtn.classList.add('hidden');
+            };
+
+            itemLeft.appendChild(checkbox);
+            itemLeft.appendChild(title);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('todo-delete-btn');
+            deleteBtn.innerText = '✕';
+            deleteBtn.title = 'Delete';
+            deleteBtn.onclick = async (event) => {
+                event.stopPropagation();
+                item.style.opacity = '0.3';
+                await ipcRenderer.invoke('delete-event', { calendarId: e.calendarId, eventId: e.id });
+                fetchEvents();
+            };
+
+            item.appendChild(itemLeft);
+            item.appendChild(deleteBtn);
+            todoListContainer.appendChild(item);
+        });
+    }
+
+    async function toggleTodoStatus(eventItem) {
+        const isCompleted = eventItem.summary.startsWith('[x]');
+        let newSummary = eventItem.summary;
+        if (isCompleted) {
+            newSummary = eventItem.summary.replace(/^\[x\]\s*/, '');
+        } else {
+            newSummary = '[x] ' + eventItem.summary.replace(/^\[ \]\s*/, '');
+        }
+
+        // 1. Play immediate sound feedback (Clean 8bit chime synthezised on the fly)
+        playChimeSound(!isCompleted);
+
+        // 2. Perform Optimistic UI Update locally
+        eventItem.summary = newSummary; // Mutate local state directly for 0ms delay
+        updateTodoListUI();
+        renderCalendar();
+        
+        const eventData = {
+            summary: newSummary,
+            start: eventItem.start,
+            end: eventItem.end,
+            location: eventItem.location,
+            description: eventItem.description
+        };
+
+        try {
+            await ipcRenderer.invoke('update-event', { 
+                calendarId: eventItem.calendarId, 
+                eventId: eventItem.id, 
+                eventData 
+            });
+            fetchEvents(); // Background sync to ensure data is correct
+        } catch (err) {
+            console.error('Failed to toggle todo status:', err);
+            // Revert changes if API fails
+            fetchEvents();
+        }
+    }
 
 
-    if (toggleExtraBtn) toggleExtraBtn.onclick = () => { if (extraFields) extraFields.classList.remove('hidden'); toggleExtraBtn.classList.add('hidden'); };
+    async function saveCurrentEvent() {
+        const summary = quickAddInput ? stripTags(quickAddInput.value) : '';
+        if (!summary) return;
+        
+        let startStr = null, endStr = null;
+        const durationMatch = summary.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/);
+        const singleTimeMatch = summary.match(/(\d{1,2}:?\d{2})/);
+        function formatPart(t) {
+            if (t.includes(':')) return t;
+            if (t.length === 3) return `0${t[0]}:${t.slice(1)}`;
+            if (t.length === 4) return `${t.slice(0, 2)}:${t.slice(2)}`;
+            return t;
+        }
+        if (durationMatch) { startStr = formatPart(durationMatch[1]); endStr = formatPart(durationMatch[2]); }
+        else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[0]); }
+
+        const offset = getLocalTZOffset();
+        let start = { date: selectedDay }, end = { date: selectedDay };
+        const isAllDayState = allDayCheck ? allDayCheck.checked : (!startStr);
+
+        if (!isAllDayState && startStr) {
+            start = { dateTime: `${selectedDay}T${startStr}:00${offset}` };
+            if (endStr) end = { dateTime: `${selectedDay}T${endStr}:00${offset}` };
+            else { const [h, m] = startStr.split(':').map(Number); const endHour = (h + 1).toString().padStart(2, '0'); end = { dateTime: `${selectedDay}T${endHour}:${m.toString().padStart(2, '0')}:00${offset}` }; }
+        } else {
+            const nextDay = new Date(selectedDay); nextDay.setDate(nextDay.getDate() + 1);
+            end = { date: `${nextDay.getFullYear()}-${(nextDay.getMonth() + 1).toString().padStart(2, '0')}-${nextDay.getDate().toString().padStart(2, '0')}` };
+        }
+
+        const location = eventLocationInput ? eventLocationInput.value : '';
+        const description = eventDescriptionInput ? eventDescriptionInput.value : '';
+        const isImportant = document.getElementById('important-check')?.checked;
+        const isHighlighted = document.getElementById('highlight-cell-check')?.checked;
+        const entryColor = document.getElementById('selected-entry-color')?.value;
+        
+        let finalSummary = summary;
+        
+        // Preserve [x] prefix if it was previously completed
+        if (editingEvent && editingEvent.summary.startsWith('[x]')) {
+            finalSummary = '[x] ' + finalSummary;
+        }
+        
+        if (isImportant) finalSummary += ' [IMPORTANT]';
+        if (isHighlighted) finalSummary += ' [HIGHLIGHT]';
+        if (entryColor && entryColor !== 'default') finalSummary += ` [COLOR:${entryColor}]`;
+        
+        const eventData = { 
+            summary: finalSummary, 
+            start, 
+            end, 
+            location, 
+            description 
+        };
+
+        // Preserve editing event copy
+        const currentEditEvent = editingEvent;
+
+        // Reset inputs immediately for responsive UX
+        quickAddInput.value = '';
+        if (eventLocationInput) eventLocationInput.value = '';
+        if (eventDescriptionInput) eventDescriptionInput.value = '';
+        if (allDayCheck) allDayCheck.checked = false;
+        if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
+        if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
+        if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
+        document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
+        document.querySelector('.color-opt[data-color="default"]')?.classList.add('active');
+        editingEvent = null;
+
+        try {
+            if (currentEditEvent) {
+                await ipcRenderer.invoke('update-event', { 
+                    calendarId: currentEditEvent.calendarId, 
+                    eventId: currentEditEvent.id, 
+                    eventData 
+                });
+            } else {
+                await ipcRenderer.invoke('create-event', eventData);
+            }
+        } catch (err) {
+            console.error('Failed to save event:', err);
+        }
+        
+        fetchEvents();
+    }
 
     if (quickAddInput) {
         quickAddInput.onkeydown = async (e) => {
             if (e.key === 'Enter') {
-                const summary = quickAddInput ? stripTags(quickAddInput.value) : '';
-                if (!summary) return;
-                let startStr = null, endStr = null;
-                const durationMatch = summary.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/);
-                const singleTimeMatch = summary.match(/(\d{1,2}:?\d{2})/);
-                function formatPart(t) {
-                    if (t.includes(':')) return t;
-                    if (t.length === 3) return `0${t[0]}:${t.slice(1)}`;
-                    if (t.length === 4) return `${t.slice(0, 2)}:${t.slice(2)}`;
-                    return t;
-                }
-                if (durationMatch) { startStr = formatPart(durationMatch[1]); endStr = formatPart(durationMatch[2]); }
-                else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[0]); }
-
-
-                const offset = getLocalTZOffset();
-                let start = { date: selectedDay }, end = { date: selectedDay };
-                const isAllDayState = allDayCheck ? allDayCheck.checked : (!startStr);
-
-                if (!isAllDayState && startStr) {
-                    start = { dateTime: `${selectedDay}T${startStr}:00${offset}` };
-                    if (endStr) end = { dateTime: `${selectedDay}T${endStr}:00${offset}` };
-                    else { const [h, m] = startStr.split(':').map(Number); const endHour = (h + 1).toString().padStart(2, '0'); end = { dateTime: `${selectedDay}T${endHour}:${m.toString().padStart(2, '0')}:00${offset}` }; }
-                } else {
-                    const nextDay = new Date(selectedDay); nextDay.setDate(nextDay.getDate() + 1);
-                    end = { date: `${nextDay.getFullYear()}-${(nextDay.getMonth() + 1).toString().padStart(2, '0')}-${nextDay.getDate().toString().padStart(2, '0')}` };
-                }
-
-                const location = eventLocationInput ? eventLocationInput.value : '';
-                const description = eventDescriptionInput ? eventDescriptionInput.value : '';
-                const isImportant = document.getElementById('important-check')?.checked;
-                const isHighlighted = document.getElementById('highlight-cell-check')?.checked;
-                const entryColor = document.getElementById('selected-entry-color')?.value;
-                
-                let finalSummary = summary;
-                if (isImportant) finalSummary += ' [IMPORTANT]';
-                if (isHighlighted) finalSummary += ' [HIGHLIGHT]';
-                if (entryColor && entryColor !== 'default') finalSummary += ` [COLOR:${entryColor}]`;
-                
-                const eventData = { 
-                    summary: finalSummary, 
-                    start, 
-                    end, 
-                    location, 
-                    description 
-                };
-
-
-                if (editingEvent) await ipcRenderer.invoke('update-event', { calendarId: editingEvent.calendarId, eventId: editingEvent.id, eventData });
-                else await ipcRenderer.invoke('create-event', eventData);
-                closeAllModals(); fetchEvents();
-            } else if (e.key === 'Escape') closeAllModals();
+                await saveCurrentEvent();
+            } else if (e.key === 'Escape') {
+                closeAllModals();
+            }
         };
     }
 
-    if (saveEventBtn) saveEventBtn.onclick = () => { if (quickAddInput) { const event = new KeyboardEvent('keydown', { key: 'Enter' }); quickAddInput.dispatchEvent(event); } };
+    if (saveEventBtn) {
+        saveEventBtn.onclick = async () => {
+            await saveCurrentEvent();
+        };
+    }
 
     function showEventDetails(event) {
         editingEvent = event;
@@ -380,12 +632,33 @@ try {
         if (quickAddModal) quickAddModal.classList.add('hidden');
         if (settingsOverlay) settingsOverlay.classList.add('hidden');
         if (eventPopup) eventPopup.classList.add('hidden');
-        if (quickAddInput) quickAddInput.value = ''; if (eventLocationInput) eventLocationInput.value = ''; if (eventDescriptionInput) eventDescriptionInput.value = '';
-        if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden'); editingEvent = null;
+        if (quickAddInput) quickAddInput.value = ''; 
+        if (eventLocationInput) eventLocationInput.value = ''; 
+        if (eventDescriptionInput) eventDescriptionInput.value = '';
+        if (allDayCheck) allDayCheck.checked = false;
+        if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
+        if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
+        if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
+        document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
+        document.querySelector('.color-opt[data-color="default"]')?.classList.add('active');
+        if (extraFields) extraFields.classList.add('hidden');
+        if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden'); 
+        editingEvent = null;
     }
 
-    window.onclick = (e) => { if (e.target.classList.contains('modal')) closeAllModals(); };
-    if (closePopupBtn) closePopupBtn.onclick = () => closeAllModals();
+    async function handleAutoSaveAndClose() {
+        if (quickAddInput && quickAddInput.value.trim() !== '') {
+            await saveCurrentEvent();
+        }
+        closeAllModals();
+    }
+
+    window.onclick = async (e) => { 
+        if (e.target.classList.contains('modal')) {
+            await handleAutoSaveAndClose(); 
+        }
+    };
+    if (closePopupBtn) closePopupBtn.onclick = async () => await handleAutoSaveAndClose();
     if (prevMonthBtn) prevMonthBtn.onclick = () => { currentViewDate.setMonth(currentViewDate.getMonth() - 1); fetchEvents(); };
     if (nextMonthBtn) nextMonthBtn.onclick = () => { currentViewDate.setMonth(currentViewDate.getMonth() + 1); fetchEvents(); };
     if (homeBtn) homeBtn.onclick = () => { currentViewDate = new Date(); fetchEvents(); };

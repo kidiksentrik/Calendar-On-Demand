@@ -4,7 +4,7 @@
     --text-color: #e8e8e8;
     --accent-color: #4f8ef7;
     --border-color: rgba(255, 255, 255, 0.08);
-    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 
@@ -522,7 +522,7 @@ input[type="color"]::-webkit-color-swatch {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    overflow-y: auto;
+    overflow: hidden; /* Prevent horizontal and vertical scrollbars */
 }
 
 .event-dot {
@@ -640,3 +640,205 @@ input[type="color"]::-webkit-color-swatch {
     font-size: 0.7rem;
     opacity: 0.5;
 }
+
+/* ==========================================
+   Todo List Modal Styles
+   ========================================== */
+.todo-modal {
+    max-width: 340px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #18181f !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+    padding: 20px !important;
+}
+
+.todo-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 10px;
+}
+
+.todo-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.todo-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar for Todo List */
+.todo-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05); /* Slightly brighter background for contrast */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.todo-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.todo-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.todo-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.6); /* Brighter border */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.todo-checkbox:hover {
+    border-color: var(--accent-color);
+}
+
+.todo-checkbox.checked {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.todo-checkbox.checked::after {
+    content: "✓";
+    font-size: 10px;
+    font-weight: bold;
+    color: #000;
+}
+
+.todo-title {
+    font-size: 0.85rem;
+    color: #ffffff; /* Explicit white text for contrast */
+    font-weight: 500; /* Medium weight */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.todo-title.completed {
+    text-decoration: line-through;
+    opacity: 0.35;
+}
+
+.todo-delete-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.todo-delete-btn:hover {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.1);
+}
+
+.todo-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.todo-input-row input {
+    flex: 1;
+    margin-bottom: 0 !important;
+}
+
+.primary-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--accent-color);
+    border: none;
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* Event Item inside main calendar grid */
+.event-item {
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 4px 6px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    background: rgba(255, 255, 255, 0.08); /* Default background for readability */
+    color: #ffffff; /* Fallback white text (removed !important) */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* Drop shadow for text clarity */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: normal; /* Allow text wrapping */
+    word-wrap: break-word; /* Wrap long words */
+    word-break: break-all;
+    line-height: 1.25; /* Tight line height for multiline text */
+    max-height: 46px; /* Limit block height to max 3 lines to protect layout */
+    overflow: hidden; /* Hide extra text if it exceeds max height */
+}
+
+.event-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(1px);
+}
+
+.event-item.completed-event {
+    text-decoration: line-through;
+    opacity: 0.35;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-left-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.event-item.completed-event:hover {
+    opacity: 0.6;
+}
+
+

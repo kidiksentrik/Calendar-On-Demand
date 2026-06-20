@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Calendar-On-Demand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -110,18 +113,32 @@
 
         <div id="sync-indicator" class="sync-indicator hidden">Syncing...</div>
         
-        <!-- Quick Add Modal -->
+        <!-- Quick Add (Todo List) Modal -->
         <div id="quick-add-modal" class="modal hidden">
-            <div class="modal-content">
-                <input type="text" id="quick-add-input" placeholder="Event title + time (e.g. Meeting 14:00)">
-                <div class="setting-item all-day-entry">
+            <div class="modal-content todo-modal">
+                <div class="todo-header">
+                    <h3 id="todo-date-title">Date</h3>
+                </div>
+                
+                <!-- Todo list container -->
+                <div id="todo-list-container" class="todo-list">
+                    <!-- Todo items will be dynamically injected here -->
+                </div>
+
+                <!-- Input area for adding a new todo -->
+                <div class="todo-input-row">
+                    <input type="text" id="quick-add-input" placeholder="Add a new task (e.g. Clean room 14:00)...">
+                    <button id="save-event" class="primary-btn">+</button>
+                </div>
+
+                <div class="setting-item all-day-entry hidden">
                     <label class="switch">
                         <span>All Day Event</span>
                         <input type="checkbox" id="all-day-check">
                         <span class="slider-toggle"></span>
                     </label>
                 </div>
-                <div id="extra-fields" class="hidden">
+                <div id="extra-fields">
                     <input type="text" id="event-location" placeholder="Location (optional)">
                     <textarea id="event-description" placeholder="Description (optional)"></textarea>
                     <div class="setting-item">
@@ -151,29 +168,12 @@
                         <input type="hidden" id="selected-entry-color" value="default">
                     </div>
                 </div>
-                <div class="modal-actions">
-                    <button id="toggle-extra">More Options</button>
-                    <button id="save-event">Save</button>
-                    <span class="hint">Esc to cancel</span>
+                <div class="modal-actions" style="margin-top: 10px;">
+                    <span class="hint">Esc to close</span>
                 </div>
             </div>
         </div>
 
-        <!-- Event Details Popup -->
-        <div id="event-popup" class="modal hidden">
-            <div class="modal-content">
-                <h3 id="popup-title"></h3>
-                <p id="popup-time"></p>
-                <p id="popup-calendar-container"><span id="popup-calendar-color" class="color-dot"></span><span id="popup-calendar"></span></p>
-                <div id="popup-description" class="event-description-box"></div>
-
-                <div class="modal-actions">
-                    <button id="edit-event">Edit</button>
-                    <button id="delete-event">Delete</button>
-                    <button id="close-popup">Close</button>
-                </div>
-            </div>
-        </div>
     </div>
     <script src="widget.js"></script>
 </body>

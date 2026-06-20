@@ -1,6 +1,6 @@
 {
   "name": "calendar-on-demand",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Desktop widget for Google Calendar",
   "author": "Calendar-On-Demand Team",
   "main": "main.js",

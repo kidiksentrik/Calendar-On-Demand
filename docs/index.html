@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar-On-Demand | Your Desktop's New Best Friend</title>
+    <meta name="description" content="Calendar-On-Demand is a free Windows desktop widget that keeps your Google Calendar always visible. No more alt-tabbing.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -12,17 +13,14 @@
             --bg: #0a0a0c;
             --card-bg: #16161a;
             --accent: #4f8ef7;
+            --accent2: #a78bfa;
             --text: #e8e8e8;
             --text-dim: #999;
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -32,13 +30,34 @@
             overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
-        /* Hero Section */
+        /* ── Update Banner ── */
+        .update-banner {
+            background: linear-gradient(90deg, rgba(79,142,247,0.15), rgba(167,139,250,0.15));
+            border-bottom: 1px solid rgba(79,142,247,0.25);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .update-banner strong { color: var(--text); }
+        .update-banner a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(79,142,247,0.4);
+            border-radius: 20px;
+            padding: 2px 10px;
+            transition: all 0.2s;
+        }
+        .update-banner a:hover { background: rgba(79,142,247,0.15); }
+
+        /* ── Hero ── */
         header {
             height: 100vh;
             display: flex;
@@ -58,6 +77,7 @@
             color: var(--accent);
             margin-bottom: 24px;
             font-weight: 600;
+            letter-spacing: 0.02em;
         }
 
         h1 {
@@ -78,6 +98,14 @@
             margin-bottom: 40px;
         }
 
+        .hero-btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
         .btn-primary {
             background: var(--accent);
             color: white;
@@ -86,28 +114,49 @@
             font-weight: 600;
             text-decoration: none;
             font-size: 1.1rem;
-            transition: transform 0.2s, background 0.2s;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
             box-shadow: 0 10px 20px rgba(79, 142, 247, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
+        .btn-primary:hover { background: #3d7ce0; transform: translateY(-2px); box-shadow: 0 14px 28px rgba(79,142,247,0.4); }
 
-        .btn-primary:hover {
-            background: #3d7ce0;
-            transform: translateY(-2px);
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--text);
+            padding: 16px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
 
-        /* Features Section */
-        .features {
-            padding: 100px 0;
+        .kofi-link {
+            display: inline-block;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
         }
+        .kofi-link:hover { color: var(--text); }
 
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .section-title h2 {
-            font-size: 2.5rem;
+        /* ── Features ── */
+        .features { padding: 100px 0; }
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .section-title h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
+        .section-label {
+            font-size: 0.75rem;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
             margin-bottom: 12px;
         }
 
@@ -122,75 +171,98 @@
             border: 1px solid var(--border);
             padding: 32px;
             border-radius: 20px;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, transform 0.2s;
         }
-
-        .feature-card:hover {
-            border-color: var(--accent);
-        }
+        .feature-card:hover { border-color: var(--accent); transform: translateY(-4px); }
 
         .feature-icon {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             background: rgba(79, 142, 247, 0.1);
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             margin-bottom: 20px;
-            color: var(--accent);
             font-size: 1.5rem;
         }
 
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
-        }
+        .feature-card h3 { font-size: 1.15rem; margin-bottom: 10px; }
+        .feature-card p { color: var(--text-dim); font-size: 0.95rem; }
 
-        .feature-card p {
-            color: var(--text-dim);
-            font-size: 0.95rem;
-        }
-
-        /* Screen Section */
-        .preview {
-            padding: 60px 0;
-            text-align: center;
-        }
-
-        .screenshot-container {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
+        /* ── Screenshot ── */
+        .preview { padding: 60px 0; text-align: center; }
+        .screenshot-container { width: 100%; max-width: 900px; margin: 0 auto; text-align: center; }
         .screenshot {
             width: 100%;
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             margin-bottom: 20px;
         }
+        .screenshot-caption { color: var(--text-dim); font-size: 0.9rem; font-style: italic; }
 
-        .screenshot-caption {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            font-style: italic;
+        /* ── Changelog Section ── */
+        .changelog { padding: 80px 0; }
+        .changelog-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 20px; }
+
+        .changelog-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px 28px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: start;
+            transition: border-color 0.2s, transform 0.2s;
         }
+        .changelog-item:hover { border-color: rgba(79,142,247,0.4); transform: translateX(4px); }
+        .changelog-item.latest { border-color: rgba(79,142,247,0.5); background: linear-gradient(135deg, #16161a, #1a1a24); }
 
-        /* CTA Section */
+        .cl-version-block { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 80px; }
+        .cl-version {
+            font-size: 1.1rem; font-weight: 700; color: var(--accent);
+            background: rgba(79,142,247,0.12);
+            padding: 4px 10px; border-radius: 8px;
+            white-space: nowrap;
+        }
+        .cl-latest-badge {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: #000;
+            padding: 2px 8px; border-radius: 20px;
+        }
+        .cl-date { font-size: 0.75rem; color: var(--text-dim); }
+
+        .cl-body h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+        .cl-notes { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+        .cl-notes li { font-size: 0.875rem; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; }
+        .cl-notes li::before { content: '•'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+        .cl-notes li.new::before { content: '✦'; color: #4ade80; }
+        .cl-notes li.fix::before { content: '⚙'; color: #facc15; }
+        .cl-notes li.improve::before { content: '↑'; color: var(--accent2); }
+
+        .cl-download {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--accent); color: white;
+            text-decoration: none; padding: 8px 16px;
+            border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            transition: all 0.2s; white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(79,142,247,0.25);
+        }
+        .cl-download:hover { background: #3d7ce0; transform: translateY(-1px); }
+        .cl-download.old {
+            background: transparent; color: var(--text-dim);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+        .cl-download.old:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+
+        /* ── CTA ── */
         .cta {
             padding: 120px 0;
             text-align: center;
-            background: linear-gradient(0deg, rgba(79, 142, 247, 0.05) 0%, rgba(10, 10, 12, 1) 100%);
+            background: linear-gradient(0deg, rgba(79,142,247,0.05) 0%, rgba(10,10,12,1) 100%);
         }
-
-        .cta p {
-            margin-bottom: 30px;
-            font-size: 1.2rem;
-            color: var(--text-dim);
-        }
+        .cta p { margin-bottom: 30px; font-size: 1.2rem; color: var(--text-dim); }
 
         footer {
             padding: 40px 0;
@@ -199,40 +271,38 @@
             font-size: 0.9rem;
             color: var(--text-dim);
         }
+        .footer-kofi { margin-top: 8px; font-size: 0.85rem; }
+        .footer-kofi a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+        .footer-kofi a:hover { color: var(--text); }
 
-        .kofi-link {
-            display: inline-block;
-            margin-top: 16px;
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .kofi-link:hover {
-            color: var(--text);
-        }
-
-        .footer-kofi {
-            margin-top: 8px;
-            font-size: 0.85rem;
-        }
-
-        /* Mobile Responsive */
+        /* ── Mobile ── */
         @media (max-width: 768px) {
             h1 { font-size: 3rem; }
             .features { padding: 60px 0; }
+            .changelog-item { grid-template-columns: 1fr; gap: 14px; }
+            .cl-download { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Update Banner -->
+    <div class="update-banner">
+        🎉 <strong>v1.0.2 is out!</strong> — Sound feedback, layout fixes & UX improvements.
+        <a href="#changelog">See what's new →</a>
+    </div>
+
     <header>
         <div class="container">
-            <div class="hero-badge">Windows ONLY Desktop App</div>
+            <div class="hero-badge">✦ Windows Desktop App · Free & Open Source</div>
             <h1>Calendar-On-Demand</h1>
             <p class="tagline">Your calendar. Always on your desktop. No more alt-tabbing to check your schedule. Just glance and go.</p>
-            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.1/Calendar-On-Demand-Setup-1.0.1.exe" class="btn-primary">Download for Windows (v1.0.1)</a>
+            <div class="hero-btns">
+                <a id="hero-download-btn" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand-Setup-1.0.2.exe" class="btn-primary">
+                    ⬇ Download for Windows <span style="opacity:0.75;font-size:0.85em;">(v1.0.2)</span>
+                </a>
+                <a href="#changelog" class="btn-secondary">📋 Changelog</a>
+            </div>
             <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link">It's free. But if it saved you 5 minutes today, buy me a coffee ☕</a>
         </div>
     </header>
@@ -240,10 +310,10 @@
     <main class="container">
         <section id="features" class="features">
             <div class="section-title">
+                <div class="section-label">Features</div>
                 <h2>Designed for Focus</h2>
                 <p style="color: var(--text-dim);">Minimalist tools that don't get in your way.</p>
             </div>
-            
             <div class="feature-grid">
                 <div class="feature-card">
                     <div class="feature-icon">✨</div>
@@ -258,7 +328,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">📅</div>
                     <h3>Simple Scheduling</h3>
-                    <p>Just simply click and add your schedule and time, it will be added to our google calendar properly (With proper timezone!)</p>
+                    <p>Just click and add your schedule with proper time & timezone — pushed straight to Google Calendar.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔗</div>
@@ -274,14 +344,85 @@
                 <p class="screenshot-caption">Real Google Calendar data. Always on your desktop.</p>
             </div>
         </section>
+
+        <!-- ── Changelog ── -->
+        <section id="changelog" class="changelog">
+            <div class="section-title">
+                <div class="section-label">Release History</div>
+                <h2>What's New</h2>
+                <p style="color: var(--text-dim);">Every update, documented. Download any version below.</p>
+            </div>
+
+            <ul class="changelog-list">
+
+                <!-- v1.0.2 -->
+                <li class="changelog-item latest">
+                    <div class="cl-version-block">
+                        <span class="cl-version">v1.0.2</span>
+                        <span class="cl-latest-badge">Latest</span>
+                        <span class="cl-date">2026-06-20</span>
+                    </div>
+                    <div class="cl-body">
+                        <h3>Sound Feedback & Layout Improvements</h3>
+                        <ul class="cl-notes">
+                            <li class="new">Task completion now plays a satisfying chime sound via Web Audio API</li>
+                            <li class="new">Clicking any event or blank area now opens a unified edit/add panel</li>
+                            <li class="improve">Long event titles now wrap instead of overflowing into adjacent day cells</li>
+                            <li class="improve">Optimistic UI updates — checkboxes respond instantly without waiting for server</li>
+                            <li class="fix">Removed unused scrollbar that appeared on calendar event hover</li>
+                            <li class="fix">Removed broken "More Options" button from event editor</li>
+                            <li class="fix">Event color filter now correctly updates text contrast</li>
+                        </ul>
+                    </div>
+                    <a id="dl-v102" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand-Setup-1.0.2.exe" class="cl-download">⬇ Download</a>
+                </li>
+
+                <!-- v1.0.1 -->
+                <li class="changelog-item">
+                    <div class="cl-version-block">
+                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.1</span>
+                        <span class="cl-date">2026-05-15</span>
+                    </div>
+                    <div class="cl-body">
+                        <h3>Bug Fixes & Auth Stability</h3>
+                        <ul class="cl-notes">
+                            <li class="fix">Fixed multiple login windows appearing on startup</li>
+                            <li class="fix">Improved Google auth token persistence</li>
+                            <li class="improve">Landing page and docs updated with Ko-fi support links</li>
+                        </ul>
+                    </div>
+                    <a id="dl-v101" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.1/Calendar-On-Demand-Setup-1.0.1.exe" class="cl-download old">⬇ Download</a>
+                </li>
+
+                <!-- v1.0.0 -->
+                <li class="changelog-item">
+                    <div class="cl-version-block">
+                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.0</span>
+                        <span class="cl-date">2026-04-01</span>
+                    </div>
+                    <div class="cl-body">
+                        <h3>Initial Public Release 🎉</h3>
+                        <ul class="cl-notes">
+                            <li class="new">Google Calendar two-way sync</li>
+                            <li class="new">Aero glass desktop widget</li>
+                            <li class="new">Click-to-add scheduling with timezone support</li>
+                            <li class="new">Magic URL detection for Meet/Zoom</li>
+                            <li class="new">System tray integration & auto-launch</li>
+                        </ul>
+                    </div>
+                    <a id="dl-v100" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="cl-download old">⬇ Download</a>
+                </li>
+
+            </ul>
+        </section>
     </main>
 
     <section class="cta">
         <div class="container">
             <h2>Ready to reclaim your desktop?</h2>
-            <p>Get Calendar-On-Demand for free during our public beta.</p>
-            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.1/Calendar-On-Demand-Setup-1.0.1.exe" class="btn-primary">Get the Installer</a>
-            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">Supports Windows 10 & 11</div>
+            <p>Get Calendar-On-Demand for free. No ads, no telemetry.</p>
+            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand-Setup-1.0.2.exe" class="btn-primary">⬇ Get the Installer (v1.0.2)</a>
+            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">Supports Windows 10 &amp; 11</div>
         </div>
     </section>
 
@@ -290,19 +431,16 @@
             <p>&copy; 2026 Built with ❤️ by a solo developer.</p>
             <div class="footer-kofi">
                 <div style="margin-bottom: 8px; opacity: 0.8;">Constantly improving based on your feedback.</div>
-                Enjoying the app? <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link" style="margin-top: 0; display: inline;">Support development on Ko-fi ☕</a>
+                Enjoying the app? <a href="https://ko-fi.com/kidiksentrik" target="_blank">Support development on Ko-fi ☕</a>
             </div>
         </div>
     </footer>
 
     <script>
-        // Smooth scroll if needed
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
             });
         });
     </script>
