@@ -1,48 +1,48 @@
 {
-  "name": "calendar-on-demand",
-  "version": "1.0.2",
-  "description": "Desktop widget for Google Calendar",
-  "author": "Calendar-On-Demand Team",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-builder",
-    "publish": "electron-builder build --publish always"
-  },
-  "dependencies": {
-    "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.1",
-    "googleapis": "^122.0.0"
-  },
-  "devDependencies": {
-    "electron": "^25.3.0",
-    "electron-builder": "^24.6.3"
-  },
-  "build": {
-    "appId": "com.calendar.ondemand",
-    "productName": "Calendar-On-Demand",
-    "win": {
-      "target": [
-        "nsis"
-      ],
-      "icon": "tray_icon.png"
-    },
-    "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": false,
-      "shortcutName": "Calendar-On-Demand"
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "kidiksentrik",
-        "repo": "Calendar-On-Demand"
-      }
-    ],
-    "files": [
-      "**/*",
-      "!dist/*"
-    ]
-  }
+    "name":  "calendar-on-demand",
+    "version":  "1.0.0",
+    "description":  "Desktop widget for Google Calendar",
+    "author":  "Calendar-On-Demand Team",
+    "main":  "main.js",
+    "scripts":  {
+                    "start":  "electron .",
+                    "build":  "electron-builder",
+                    "publish":  "electron-builder build --publish always"
+                },
+    "dependencies":  {
+                         "electron-store":  "^8.1.0",
+                         "electron-updater":  "^6.1.1",
+                         "googleapis":  "^122.0.0"
+                     },
+    "devDependencies":  {
+                            "electron":  "^25.3.0",
+                            "electron-builder":  "^24.6.3"
+                        },
+    "build":  {
+                  "appId":  "com.calendar.ondemand",
+                  "productName":  "Calendar-On-Demand",
+                  "win":  {
+                              "target":  [
+                                             "nsis"
+                                         ],
+                              "icon":  "tray_icon.png"
+                          },
+                  "nsis":  {
+                               "oneClick":  true,
+                               "perMachine":  false,
+                               "allowToChangeInstallationDirectory":  false,
+                               "shortcutName":  "Calendar-On-Demand"
+                           },
+                  "publish":  [
+                                  {
+                                      "provider":  "github",
+                                      "owner":  "kidiksentrik",
+                                      "repo":  "Calendar-On-Demand"
+                                  }
+                              ],
+                  "files":  [
+                                "**/*",
+                                "!dist/*"
+                            ]
+              }
 }
