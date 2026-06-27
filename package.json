@@ -1,6 +1,6 @@
 {
     "name":  "calendar-on-demand",
-    "version":  "1.0.4",
+    "version":  "1.0.5",
     "description":  "Desktop widget for Google Calendar",
     "author":  "Calendar-On-Demand Team",
     "main":  "main.js",
@@ -25,7 +25,8 @@
                               "target":  [
                                              "nsis"
                                          ],
-                              "icon":  "tray_icon.png"
+                              "icon":  "tray_icon.png",
+                              "artifactName":  "${productName}-Setup-${version}.${ext}"
                           },
                   "nsis":  {
                                "oneClick":  true,
