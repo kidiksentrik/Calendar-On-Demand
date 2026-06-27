@@ -28,6 +28,7 @@ async function createWindow() {
         type: desktopMode ? 'desktop' : undefined,
         skipTaskbar: true,
         movable: !lockPosition,
+        resizable: !lockPosition,
         show: false,
         webPreferences: {
             nodeIntegration: true,
@@ -284,6 +285,7 @@ ipcMain.on('set-always-on-top', (event, value) => {
 ipcMain.on('set-lock-position', (event, value) => {
     if (mainWindow) {
         mainWindow.setMovable(!value);
+        mainWindow.setResizable(!value);
         store.set('lockPosition', value);
     }
 });
@@ -333,11 +335,10 @@ ipcMain.handle('get-login-settings', () => {
 function updateLoginSettings(value) {
     store.set('openAtLogin', value);
     
-    const isDev = !app.isPackaged;
     const loginSettings = {
         openAtLogin: value,
         path: app.getPath('exe'),
-        args: []
+        args: ['--hidden']
     };
     app.setLoginItemSettings(loginSettings);
     

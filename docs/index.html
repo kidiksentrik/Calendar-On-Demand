@@ -36,7 +36,7 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
-        /* ── Update Banner ── */
+        /* ?? Update Banner ?? */
         .update-banner {
             background: linear-gradient(90deg, rgba(79,142,247,0.15), rgba(167,139,250,0.15));
             border-bottom: 1px solid rgba(79,142,247,0.25);
@@ -61,7 +61,7 @@
         }
         .update-banner a:hover { background: rgba(79,142,247,0.15); }
 
-        /* ── Hero ── */
+        /* ?? Hero ?? */
         header {
             height: 100vh;
             display: flex;
@@ -151,7 +151,7 @@
         }
         .kofi-link:hover { color: var(--text); }
 
-        /* ── Features ── */
+        /* ?? Features ?? */
         .features { padding: 100px 0; }
         .section-title { text-align: center; margin-bottom: 60px; }
         .section-title h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
@@ -191,7 +191,7 @@
         .feature-card h3 { font-size: 1.15rem; margin-bottom: 10px; }
         .feature-card p { color: var(--text-dim); font-size: 0.95rem; }
 
-        /* ── Screenshot ── */
+        /* ?? Screenshot ?? */
         .preview { padding: 60px 0; text-align: center; }
         .screenshot-container { width: 100%; max-width: 900px; margin: 0 auto; text-align: center; }
         .screenshot {
@@ -203,7 +203,7 @@
         }
         .screenshot-caption { color: var(--text-dim); font-size: 0.9rem; font-style: italic; }
 
-        /* ── Changelog Section ── */
+        /* ?? Changelog Section ?? */
         .changelog { padding: 80px 0; }
         .changelog-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 20px; }
 
@@ -239,10 +239,10 @@
         .cl-body h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; color: var(--text); }
         .cl-notes { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px; }
         .cl-notes li { font-size: 0.875rem; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; }
-        .cl-notes li::before { content: '•'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
-        .cl-notes li.new::before { content: '✦'; color: #4ade80; }
-        .cl-notes li.fix::before { content: '⚙'; color: #facc15; }
-        .cl-notes li.improve::before { content: '↑'; color: var(--accent2); }
+        .cl-notes li::before { content: '??; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+        .cl-notes li.new::before { content: '??; color: #4ade80; }
+        .cl-notes li.fix::before { content: '??; color: #facc15; }
+        .cl-notes li.improve::before { content: '??; color: var(--accent2); }
 
         .cl-download {
             display: inline-flex; align-items: center; gap: 6px;
@@ -260,7 +260,7 @@
         }
         .cl-download.old:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
 
-        /* ── CTA ── */
+        /* ?? CTA ?? */
         .cta {
             padding: 120px 0;
             text-align: center;
@@ -268,7 +268,7 @@
         }
         .cta p { margin-bottom: 30px; font-size: 1.2rem; color: var(--text-dim); }
 
-        /* ── Footer ── */
+        /* ?? Footer ?? */
         footer {
             padding: 40px 0;
             border-top: 1px solid var(--border);
@@ -280,7 +280,7 @@
         .footer-kofi a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
         .footer-kofi a:hover { color: var(--text); }
 
-        /* ── Mobile ── */
+        /* ?? Mobile ?? */
         @media (max-width: 768px) {
             h1 { font-size: 3rem; }
             .features { padding: 60px 0; }
@@ -292,22 +292,21 @@
 <body>
 
     <div class="update-banner">
-        🎉 <strong>v1.0.2 is out!</strong> — Sound feedback, layout fixes & UX improvements.
-        <a href="#changelog">See what's new →</a>
+        ?럦 <strong>v1.0.3 is out!</strong> ??고정 버튼 크기 조절 잠금 수정, 슬립 해제 시 인증창 공백 화면 수정<a href="#changelog">See what's new ??/a>
     </div>
 
     <header>
         <div class="container">
-            <div class="hero-badge">✦ Windows Desktop App · Free & Open Source</div>
+            <div class="hero-badge">??Windows Desktop App 쨌 Free & Open Source</div>
             <h1>Calendar-On-Demand</h1>
             <p class="tagline">Your calendar. Always on your desktop. No more alt-tabbing to check your schedule. Just glance and go.</p>
             <div class="hero-btns">
                 <a id="hero-download-btn" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand.Setup.1.0.2.exe" class="btn-primary">
-                    ⬇ Download for Windows <span style="opacity:0.75;font-size:0.85em;">(v1.0.2)</span>
+                    燧?Download for Windows <span style="opacity:0.75;font-size:0.85em;">(v1.0.3)</span>
                 </a>
-                <a href="#changelog" class="btn-secondary">📋 Changelog</a>
+                <a href="#changelog" class="btn-secondary">?뱥 Changelog</a>
             </div>
-            <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link">It's free. But if it saved you 5 minutes today, buy me a coffee ☕</a>
+            <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link">It's free. But if it saved you 5 minutes today, buy me a coffee ??/a>
         </div>
     </header>
 
@@ -320,22 +319,22 @@
             </div>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">✨</div>
+                    <div class="feature-icon">??/div>
                     <h3>Aero Glass UI</h3>
                     <p>Beautifully translucent design that fits right into your workspace without stealing the spotlight.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
+                    <div class="feature-icon">?봽</div>
                     <h3>Two-way Sync</h3>
                     <p>Always in sync with Google Calendar. Changes you make here reflect everywhere, instantly.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📅</div>
+                    <div class="feature-icon">?뱟</div>
                     <h3>Simple Scheduling</h3>
-                    <p>Just click and add your schedule with proper time & timezone — pushed straight to Google Calendar.</p>
+                    <p>Just click and add your schedule with proper time & timezone ??pushed straight to Google Calendar.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔗</div>
+                    <div class="feature-icon">?뵕</div>
                     <h3>Magic URLs</h3>
                     <p>One-click to jump straight into Google Meet, Zoom, or event details. Built for efficiency.</p>
                 </div>
@@ -370,13 +369,13 @@
                             <li class="new">Task completion now plays a satisfying chime sound via Web Audio API</li>
                             <li class="new">Clicking any event or blank area now opens a unified edit/add panel</li>
                             <li class="improve">Long event titles now wrap instead of overflowing into adjacent day cells</li>
-                            <li class="improve">Optimistic UI updates — checkboxes respond instantly without waiting for server</li>
+                            <li class="improve">Optimistic UI updates ??checkboxes respond instantly without waiting for server</li>
                             <li class="fix">Removed unused scrollbar that appeared on calendar event hover</li>
                             <li class="fix">Removed broken "More Options" button from event editor</li>
                             <li class="fix">Event color filter now correctly updates text contrast</li>
                         </ul>
                     </div>
-                    <a id="dl-v102" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand.Setup.1.0.2.exe" class="cl-download">⬇ Download</a>
+                    <a id="dl-v102" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand.Setup.1.0.2.exe" class="cl-download">燧?Download</a>
                 </li>
 
                 <li class="changelog-item">
@@ -392,7 +391,7 @@
                             <li class="improve">Landing page and docs updated with Ko-fi support links</li>
                         </ul>
                     </div>
-                    <a id="dl-v101" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.1/Calendar-On-Demand-Setup-1.0.1.exe" class="cl-download old">⬇ Download</a>
+                    <a id="dl-v101" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.3/Calendar-On-Demand-Setup-1.0.3.exe" class="cl-download old">燧?Download</a>
                 </li>
 
                 <li class="changelog-item">
@@ -401,7 +400,7 @@
                         <span class="cl-date">2026-04-01</span>
                     </div>
                     <div class="cl-body">
-                        <h3>Initial Public Release 🎉</h3>
+                        <h3>Initial Public Release ?럦</h3>
                         <ul class="cl-notes">
                             <li class="new">Google Calendar two-way sync</li>
                             <li class="new">Aero glass desktop widget</li>
@@ -410,7 +409,7 @@
                             <li class="new">System tray integration & auto-launch</li>
                         </ul>
                     </div>
-                    <a id="dl-v100" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="cl-download old">⬇ Download</a>
+                    <a id="dl-v100" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.3/Calendar-On-Demand-Setup-1.0.3.exe" class="cl-download old">燧?Download</a>
                 </li>
 
             </ul>
@@ -421,17 +420,17 @@
         <div class="container">
             <h2>Ready to reclaim your desktop?</h2>
             <p>Get Calendar-On-Demand for free. No ads, no telemetry.</p>
-            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand.Setup.1.0.2.exe" class="btn-primary">⬇ Get the Installer (v1.0.2)</a>
+            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand.Setup.1.0.2.exe" class="btn-primary">燧?Get the Installer (v1.0.3)</a>
             <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">Supports Windows 10 &amp; 11</div>
         </div>
     </section>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Built with ❤️ by a solo developer.</p>
+            <p>&copy; 2026 Built with ?ㅿ툘 by a solo developer.</p>
             <div class="footer-kofi">
                 <div style="margin-bottom: 8px; opacity: 0.8;">Constantly improving based on your feedback.</div>
-                Enjoying the app? <a href="https://ko-fi.com/kidiksentrik" target="_blank">Support development on Ko-fi ☕</a>
+                Enjoying the app? <a href="https://ko-fi.com/kidiksentrik" target="_blank">Support development on Ko-fi ??/a>
             </div>
         </div>
     </footer>

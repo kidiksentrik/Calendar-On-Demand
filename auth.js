@@ -79,11 +79,15 @@ async function _authenticateInternal(force = false) {
         const authWindow = new BrowserWindow({
             width: 500,
             height: 600,
-            show: true,
+            show: false,
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true
             }
+        });
+
+        authWindow.once('ready-to-show', () => {
+            authWindow.show();
         });
 
         authWindow.loadURL(authUrl);
