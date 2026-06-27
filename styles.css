@@ -612,6 +612,14 @@ input[type="color"]::-webkit-color-swatch {
     font-size: 0.85rem;
 }
 
+.app-version {
+    font-size: 0.7rem;
+    color: var(--text-color);
+    opacity: 0.4;
+    text-align: center;
+    margin-top: 12px;
+}
+
 #delete-event {
     background: #f44336;
     color: white;

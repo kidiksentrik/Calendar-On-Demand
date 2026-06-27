@@ -316,7 +316,8 @@ ipcMain.handle('get-settings', () => {
         'text-color': store.get('text-color', '#e8e8e8'),
         'accent-color': store.get('accent-color', '#4f8ef7'),
         'bg-opacity': store.get('bg-opacity', 0.92),
-        startOfWeek: store.get('startOfWeek', 0)
+        startOfWeek: store.get('startOfWeek', 0),
+        version: app.getVersion()
     };
 });
 

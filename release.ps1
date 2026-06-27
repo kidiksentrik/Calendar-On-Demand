@@ -23,7 +23,7 @@ Write-Host ""
 
 # ── 1. package.json 버전 업데이트 ──────────────────────────────
 Write-Host "[1/6] package.json 버전을 $Version 으로 업데이트..." -ForegroundColor Yellow
-$pkg = Get-Content "package.json" -Raw | ConvertFrom-Json
+$pkg = Get-Content "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
 $pkg.version = $Version
 $json = $pkg | ConvertTo-Json -Depth 10
 [System.IO.File]::WriteAllText((Resolve-Path "package.json").Path, $json, [System.Text.UTF8Encoding]::new($false))
@@ -31,7 +31,7 @@ Write-Host "      ✓ package.json 업데이트 완료" -ForegroundColor Green
 
 # ── 2. docs/index.html 다운로드 링크 & Changelog 업데이트 ──────
 Write-Host "[2/6] 웹사이트 docs/index.html 업데이트..." -ForegroundColor Yellow
-$html = Get-Content "docs/index.html" -Raw
+$html = Get-Content "docs/index.html" -Raw -Encoding UTF8
 
 # 이전 버전 다운로드 링크 전체를 새 버전으로 교체
 $html = $html -replace 'releases/download/v[\d\.]+/Calendar-On-Demand-Setup-[\d\.]+\.exe', "releases/download/v$Version/Calendar-On-Demand-Setup-$Version.exe"

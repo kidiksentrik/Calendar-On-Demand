@@ -104,6 +104,7 @@ try {
     const closeSettings = document.getElementById('close-settings');
     const closePopupBtn = document.getElementById('close-popup');
     const reauthBtn = document.getElementById('reauth-btn');
+    const appVersionLabel = document.getElementById('settings-app-version');
 
     // New Todo list container
     const todoListContainer = document.getElementById('todo-list-container');
@@ -745,6 +746,9 @@ try {
             startOfWeek = s.startOfWeek || 0;
             if (s.lockPosition) updateLockUI(true);
             applyTheme({ 'bg-base': s['bg-base'], 'text-color': s['text-color'], 'accent-color': s['accent-color'], 'bg-opacity': s['bg-opacity'] });
+            if (s.version && appVersionLabel) {
+                appVersionLabel.textContent = `v${s.version}`;
+            }
         }
         renderCalendar(); // Render immediately with empty state/local settings
         fetchEvents();
