@@ -46,7 +46,8 @@ $html = $html -replace '(<span class="cl-version">)v[\d\.]+(<\/span>\s*<\/div>\s
 Write-Host "      ✓ Website updated successfully" -ForegroundColor Green
 
 # ── 3. Electron Build ───────────────────────────────────────────
-Write-Host "[3/6] Starting Electron build (takes 2-3 mins)..." -ForegroundColor Yellow
+Write-Host "[3/6] Cleaning dist folder and starting Electron build (takes 2-3 mins)..." -ForegroundColor Yellow
+Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
 $env:CSC_IDENTITY_AUTO_DISCOVERY = "false"
 npm run build
 if ($LASTEXITCODE -ne 0) {
@@ -57,9 +58,9 @@ Write-Host "      ✓ Build completed successfully" -ForegroundColor Green
 
 # ── 4. Verify Built .exe File ───────────────────────────────────
 Write-Host "[4/6] Verifying built installer file..." -ForegroundColor Yellow
-$exeFile = Get-ChildItem "dist" -Filter "*.exe" | Where-Object { $_.Name -like "*Setup*" } | Select-Object -First 1
+$exeFile = Get-ChildItem "dist" -Filter "*$Version*.exe" | Select-Object -First 1
 if (-not $exeFile) {
-    Write-Host "      ✗ Could not find setup .exe in dist folder." -ForegroundColor Red
+    Write-Host "      ✗ Could not find setup .exe for version $Version in dist folder." -ForegroundColor Red
     exit 1
 }
 Write-Host "      ✓ $($exeFile.Name) ($([Math]::Round($exeFile.Length/1MB, 1)) MB)" -ForegroundColor Green
