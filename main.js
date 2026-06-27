@@ -368,4 +368,7 @@ function setupAutoUpdater() {
     autoUpdater.on('error', (err) => {
         console.error('Auto-updater error:', err);
     });
+
+    // Check for updates on startup
+    autoUpdater.checkForUpdatesAndNotify();
 }

@@ -73,7 +73,7 @@ git push origin main
 Write-Host "      ✓ GitHub push completed successfully" -ForegroundColor Green
 
 # ── 6. Create GitHub Release & Upload Installer ─────────────────
-Write-Host "[6/6] Creating GitHub Release v$Version and uploading file..." -ForegroundColor Yellow
+Write-Host "[6/6] Creating GitHub Release v$Version and uploading files..." -ForegroundColor Yellow
 
 $releaseNotes = @"
 ## What's New in v$Version
@@ -84,7 +84,18 @@ $Notes
 *Full changelog: https://kidiksentrik.github.io/Calendar-On-Demand/#changelog*
 "@
 
-gh release create "v$Version" $exeFile.FullName `
+$ymlFile = Join-Path "dist" "latest.yml"
+$blockmapFile = Get-ChildItem "dist" -Filter "*$Version*.exe.blockmap" | Select-Object -First 1
+
+$uploadFiles = @($exeFile.FullName)
+if (Test-Path $ymlFile) {
+    $uploadFiles += (Resolve-Path $ymlFile).Path
+}
+if ($blockmapFile) {
+    $uploadFiles += $blockmapFile.FullName
+}
+
+gh release create "v$Version" $uploadFiles `
     --title "v$Version - $Notes" `
     --notes $releaseNotes
 
