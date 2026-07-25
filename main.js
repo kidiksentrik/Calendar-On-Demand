@@ -258,6 +258,11 @@ ipcMain.handle('reset-auth', async () => {
     }
 });
 
+ipcMain.handle('install-update', () => {
+    console.log('Install update requested from renderer...');
+    autoUpdater.quitAndInstall();
+});
+
 ipcMain.handle('create-event', async (event, eventData) => {
     return await createEvent(authClient, eventData);
 });
@@ -351,18 +356,24 @@ ipcMain.on('set-login-settings', (event, settings) => {
 });
 
 function setupAutoUpdater() {
-    autoUpdater.on('update-available', () => {
+    autoUpdater.on('update-available', (info) => {
         new Notification({
             title: 'Calendar-On-Demand',
-            body: 'A new update is available. Downloading now...'
+            body: `A new update (v${info.version}) is available. Downloading now...`
         }).show();
+        if (mainWindow) {
+            mainWindow.webContents.send('update-available', info.version);
+        }
     });
 
-    autoUpdater.on('update-downloaded', () => {
+    autoUpdater.on('update-downloaded', (info) => {
         new Notification({
             title: 'Calendar-On-Demand',
-            body: 'Update downloaded. It will be installed on next launch.'
+            body: `Update v${info.version} downloaded. Click to install.`
         }).show();
+        if (mainWindow) {
+            mainWindow.webContents.send('update-downloaded', info.version);
+        }
     });
 
     autoUpdater.on('error', (err) => {

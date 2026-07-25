@@ -33,8 +33,9 @@ Write-Host "      ✓ package.json updated successfully" -ForegroundColor Green
 Write-Host "[2/6] Updating website docs/index.html..." -ForegroundColor Yellow
 $html = Get-Content "docs/index.html" -Raw -Encoding UTF8
 
-# Replace previous version download link with the new version link
-$html = $html -replace 'releases/download/v[\d\.]+/Calendar-On-Demand-Setup-[\d\.]+\.exe', "releases/download/v$Version/Calendar-On-Demand-Setup-$Version.exe"
+# Replace previous version download link with the new version link for main buttons only
+$html = $html -replace 'id="hero-download-btn" href="[^"]+"', ('id="hero-download-btn" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v' + $Version + '/Calendar-On-Demand-Setup-' + $Version + '.exe"')
+$html = $html -replace 'href="[^"]+Calendar-On-Demand-Setup-[^"]+\.exe" class="btn-primary"', ('href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v' + $Version + '/Calendar-On-Demand-Setup-' + $Version + '.exe" class="btn-primary"')
 # Replace version text
 $html = $html -replace '\(v[\d\.]+\)', "(v$Version)"
 # Replace update banner

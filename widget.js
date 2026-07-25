@@ -784,4 +784,23 @@ try {
             fetchEvents();
         }
     });
+
+    const updateIndicator = document.getElementById('update-indicator');
+    if (updateIndicator) {
+        ipcRenderer.on('update-available', (event, version) => {
+            updateIndicator.innerText = `New v${version} downloading...`;
+            updateIndicator.classList.remove('hidden');
+            updateIndicator.style.cursor = 'default';
+            updateIndicator.onclick = null;
+        });
+
+        ipcRenderer.on('update-downloaded', (event, version) => {
+            updateIndicator.innerText = `Install v${version} now`;
+            updateIndicator.classList.remove('hidden');
+            updateIndicator.style.cursor = 'pointer';
+            updateIndicator.onclick = () => {
+                ipcRenderer.invoke('install-update');
+            };
+        });
+    }
 } catch (e) { alert('JS Error: ' + e.message); }

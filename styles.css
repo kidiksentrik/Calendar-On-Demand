@@ -849,4 +849,31 @@ input[type="color"]::-webkit-color-swatch {
     opacity: 0.6;
 }
 
+.update-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+    font-size: 0.7rem;
+    color: #00c853;
+    background: rgba(0, 200, 83, 0.1);
+    border: 1px solid rgba(0, 200, 83, 0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    z-index: 10;
+    -webkit-app-region: no-drag;
+}
+
+.update-indicator:hover {
+    background: rgba(0, 200, 83, 0.2);
+    border-color: rgba(0, 200, 83, 0.4);
+    transform: translateY(-1px);
+}
+
+.update-indicator.hidden {
+    display: none;
+}
+
 
