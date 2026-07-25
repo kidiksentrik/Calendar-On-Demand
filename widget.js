@@ -7,6 +7,19 @@ try {
     let startOfWeek = 0;
     let editingEvent = null;
 
+    let lastSyncTime = 0;
+    let syncTimer = null;
+    let errorCount = 0;
+    const NORMAL_SYNC_INTERVAL = 900000; // 15 minutes
+    const BACKOFF_DELAYS = [60000, 120000, 240000, 900000]; // 1m, 2m, 4m, 15m
+
+    function scheduleNextSync(delay) {
+        if (syncTimer) {
+            clearTimeout(syncTimer);
+        }
+        syncTimer = setTimeout(fetchEvents, delay);
+    }
+
     // Synthesize clean audio chimes programmatically
     function playChimeSound(isCompleted) {
         try {
@@ -273,6 +286,11 @@ try {
     }
 
     async function fetchEvents() {
+        if (syncTimer) {
+            clearTimeout(syncTimer);
+            syncTimer = null;
+        }
+
         if (syncIndicator) {
             syncIndicator.innerText = 'Syncing...';
             syncIndicator.classList.remove('hidden', 'error');
@@ -282,14 +300,15 @@ try {
         const timeMax = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 2, 0).toISOString();
         
         try {
-            // Add a logical timeout on the renderer side as well if needed, 
-            // but we'll mostly rely on the main process fix.
             events = await ipcRenderer.invoke('get-events', { timeMin, timeMax });
+            lastSyncTime = Date.now();
+            errorCount = 0;
             if (syncIndicator) {
                 syncIndicator.classList.add('hidden');
                 syncIndicator.onclick = null;
                 syncIndicator.style.cursor = 'default';
             }
+            scheduleNextSync(NORMAL_SYNC_INTERVAL);
         } catch (err) { 
             console.error('Fetch error:', err);
             if (syncIndicator) {
@@ -299,6 +318,11 @@ try {
                 syncIndicator.style.cursor = 'pointer';
                 syncIndicator.onclick = () => ipcRenderer.invoke('reset-auth');
             }
+            
+            const delay = BACKOFF_DELAYS[Math.min(errorCount, BACKOFF_DELAYS.length - 1)];
+            errorCount++;
+            console.log(`Sync failed. Retrying in ${delay / 1000} seconds...`);
+            scheduleNextSync(delay);
         } finally {
             renderCalendar();
             // Refresh todo modal if it is currently open
@@ -753,5 +777,11 @@ try {
         renderCalendar(); // Render immediately with empty state/local settings
         fetchEvents();
     });
-    setInterval(fetchEvents, 30000);
+
+    window.addEventListener('focus', () => {
+        if (Date.now() - lastSyncTime > 60000) {
+            console.log('Window focused and more than 1 minute passed since last sync. Syncing now...');
+            fetchEvents();
+        }
+    });
 } catch (e) { alert('JS Error: ' + e.message); }
