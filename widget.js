@@ -421,6 +421,21 @@ try {
             itemLeft.appendChild(checkbox);
             itemLeft.appendChild(title);
 
+            // Meeting join button (Google Meet or other conference link)
+            const meetUrl = e.hangoutLink ||
+                e.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri;
+            if (meetUrl) {
+                const joinBtn = document.createElement('button');
+                joinBtn.className = 'todo-join-btn';
+                joinBtn.innerText = '📹 Join';
+                joinBtn.title = `Join meeting: ${meetUrl}`;
+                joinBtn.onclick = (event) => {
+                    event.stopPropagation();
+                    shell.openExternal(meetUrl);
+                };
+                itemLeft.appendChild(joinBtn);
+            }
+
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('todo-delete-btn');
             deleteBtn.innerText = '✕';

@@ -780,6 +780,26 @@ input[type="color"]::-webkit-color-swatch {
     background: rgba(255, 82, 82, 0.1);
 }
 
+.todo-join-btn {
+    background: rgba(52, 199, 89, 0.15);
+    border: 1px solid rgba(52, 199, 89, 0.4);
+    color: #34c759;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.todo-join-btn:hover {
+    background: rgba(52, 199, 89, 0.3);
+    border-color: rgba(52, 199, 89, 0.7);
+    transform: scale(1.04);
+}
+
 .todo-input-row {
     display: flex;
     gap: 8px;
