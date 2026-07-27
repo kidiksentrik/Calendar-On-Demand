@@ -428,6 +428,10 @@ try {
             deleteBtn.onclick = async (event) => {
                 event.stopPropagation();
                 item.style.opacity = '0.3';
+                // Clear input and editingEvent immediately so that clicking outside
+                // after deletion does NOT trigger saveCurrentEvent() and recreate the entry.
+                if (quickAddInput) quickAddInput.value = '';
+                editingEvent = null;
                 await ipcRenderer.invoke('delete-event', { calendarId: e.calendarId, eventId: e.id });
                 fetchEvents();
             };
