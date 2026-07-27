@@ -40,8 +40,38 @@ $html = $html -replace 'href="[^"]+Calendar-On-Demand-Setup-[^"]+\.exe" class="b
 $html = $html -replace '\(v[\d\.]+\)', "(v$Version)"
 # Replace update banner
 $html = $html -replace '(<strong>v[\d\.]+ is out!</strong>[^<]*)', "<strong>v$Version is out!</strong> - $Notes"
-# Replace latest badge version text
-$html = $html -replace '(<span class="cl-version">)v[\d\.]+(<\/span>\s*<\/div>\s*<div[^>]*>\s*<span class="cl-body">)', "`${1}v$Version`${2}"
+
+# ── Changelog: demote old Latest entry, then insert new Latest at top ──
+# 1. Remove "latest" class from old li
+$html = $html -replace '<li class="changelog-item latest">', '<li class="changelog-item">'
+# 2. Remove old Latest badge
+$html = $html -replace '\s*<span class="cl-latest-badge">Latest</span>', ''
+# 3. Add dim style to the previously-latest cl-version (it has no style attribute yet)
+$html = $html -replace '<span class="cl-version">(v[^<]+)</span>', '<span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">$1</span>'
+# 4. Mark old latest download button as "old" (only the one without "old" suffix)
+$html = $html -replace 'class="cl-download">', 'class="cl-download old">'
+
+# 5. Build and insert new Latest entry at top of list
+$today = Get-Date -Format "yyyy-MM-dd"
+$versionId = $Version.Replace('.', '')
+$newEntry = @"
+                <li class="changelog-item latest">
+                    <div class="cl-version-block">
+                        <span class="cl-version">v$Version</span>
+                        <span class="cl-latest-badge">Latest</span>
+                        <span class="cl-date">$today</span>
+                    </div>
+                    <div class="cl-body">
+                        <h3>$Notes</h3>
+                        <ul class="cl-notes">
+                            <li class="fix">$Notes</li>
+                        </ul>
+                    </div>
+                    <a id="dl-v$versionId" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v$Version/Calendar-On-Demand-Setup-$Version.exe" class="cl-download">&#x2b07; Download</a>
+                </li>
+
+"@
+$html = $html -replace '(<ul class="changelog-list">)', "`$1`r`n`r`n$newEntry"
 
 [System.IO.File]::WriteAllText((Resolve-Path "docs/index.html").Path, $html, [System.Text.UTF8Encoding]::new($false))
 Write-Host "      ✓ Website updated successfully" -ForegroundColor Green
