@@ -380,6 +380,7 @@ function setupAutoUpdater() {
         console.error('Auto-updater error:', err);
     });
 
-    // Check for updates on startup
+    // Check for updates on startup, then every 24 hours
     autoUpdater.checkForUpdatesAndNotify();
+    setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 24 * 60 * 60 * 1000);
 }
