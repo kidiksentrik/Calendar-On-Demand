@@ -224,18 +224,163 @@
             h1 { font-size: 3rem; }
             .features { padding: 60px 0; }
         }
+
+        /* New Elements */
+        .top-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 24px 0;
+            z-index: 100;
+        }
+
+        .top-nav .container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .feedback-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            background: var(--glass);
+            padding: 10px 20px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .feedback-link:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .ph-badge {
+            display: inline-block;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .ph-badge:hover {
+            transform: scale(1.02);
+        }
+
+        .review-badge {
+            margin-top: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .review-badge::before {
+            content: '"';
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            font-size: 4rem;
+            color: var(--glass);
+            font-family: serif;
+            line-height: 1;
+            z-index: 0;
+        }
+
+        .review-content {
+            font-size: 1.05rem;
+            color: var(--text);
+            font-style: italic;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            line-height: 1.5;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        .review-author img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-info strong {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .author-info span {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
     </style>
 </head>
 <body>
 
+    <nav class="top-nav">
+        <div class="container">
+            <a href="https://tally.so/r/CalendarOnDemandFeedback" target="_blank" class="feedback-link">
+                <span>Leave Feedback</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </a>
+        </div>
+    </nav>
+
     <header>
         <div class="container">
             <div class="hero-badge">Windows ONLY Desktop App</div>
+            
+            <a href="https://www.producthunt.com/posts/calendar-on-demand" target="_blank" class="ph-badge">
+                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=474020&theme=dark" alt="Calendar-On-Demand - Featured on Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" onerror="this.src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=calendar-on-demand&theme=dark';" />
+            </a>
+
             <h1>Calendar-On-Demand</h1>
             <p class="tagline">Your calendar. Always on your desktop. No more alt-tabbing to check your schedule. Just glance and go.</p>
-            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="btn-primary">Download for Windows (v1.0.0)</a>
-            <a href="versions.html" class="btn-primary" style="margin-left: 10px;">Changelog</a>
-            <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link">It's free. But if it saved you 5 minutes today, buy me a coffee ☕</a>
+            
+            <div style="margin-bottom: 20px;">
+                <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="btn-primary">Download for Windows (v1.0.0)</a>
+                <a href="versions.html" class="btn-primary" style="margin-left: 10px; background: rgba(255,255,255,0.1); color: var(--text);">Changelog</a>
+            </div>
+            
+            <div class="review-badge">
+                <div class="review-content">
+                    "Aero Glass Google Calendar widget for Windows desktop is a clever idea."
+                </div>
+                <div class="review-author">
+                    <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=2c3e50&color=fff" alt="Zvonimir Sabljic" />
+                    <div class="author-info">
+                        <strong>Zvonimir Sabljic</strong>
+                        <span>Founder of Pazi</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link" style="margin-top: 30px;">It's free. But if it saved you 5 minutes today, buy me a coffee ☕</a>
         </div>
     </header>
 
