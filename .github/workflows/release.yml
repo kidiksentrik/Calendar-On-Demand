@@ -25,6 +25,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create credentials.json
+        run: echo "$CREDENTIALS_JSON" > credentials.json
+        env:
+          CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS }}
+        shell: bash
+
       - name: Publish Release
         run: npx electron-builder --publish always
         env:
