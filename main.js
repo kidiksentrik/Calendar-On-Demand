@@ -158,7 +158,9 @@ app.whenReady().then(async () => {
         }
     } catch (error) {
         console.error('Failed in main process:', error);
-        app.quit();
+        const { dialog } = require('electron');
+        dialog.showErrorBox('Startup Error', error.message || String(error));
+        // Remove app.quit() so it doesn't just disappear silently
     }
 });
 
@@ -356,7 +358,8 @@ ipcMain.on('set-login-settings', (event, settings) => {
 });
 
 function setupAutoUpdater() {
-    autoUpdater.on('update-available', (info) => {
+    try {
+        autoUpdater.on('update-available', (info) => {
         new Notification({
             title: 'Calendar-On-Demand',
             body: `A new update (v${info.version}) is available. Downloading now...`
@@ -380,7 +383,12 @@ function setupAutoUpdater() {
         console.error('Auto-updater error:', err);
     });
 
-    // Check for updates on startup, then every 24 hours
-    autoUpdater.checkForUpdatesAndNotify();
-    setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 24 * 60 * 60 * 1000);
+        // Check for updates on startup, then every 24 hours
+        autoUpdater.checkForUpdatesAndNotify().catch(e => console.error('Update check failed:', e));
+        setInterval(() => {
+            autoUpdater.checkForUpdatesAndNotify().catch(e => console.error('Update check failed:', e));
+        }, 24 * 60 * 60 * 1000);
+    } catch (err) {
+        console.error('Failed to initialize auto-updater:', err);
+    }
 }
