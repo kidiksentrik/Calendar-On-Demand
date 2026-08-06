@@ -1,6 +1,6 @@
 const { google } = require('googleapis');
 const Store = require('electron-store');
-const { BrowserWindow } = require('electron');
+const { BrowserWindow, session } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -56,8 +56,9 @@ async function _authenticateInternal(force = false) {
     console.log('OAuth client ready.');
     
     if (force) {
-        console.log('Forced re-authentication, clearing stored token...');
+        console.log('Forced re-authentication, clearing stored token and session data...');
         store.delete('token');
+        await session.defaultSession.clearStorageData();
     }
 
     const token = store.get('token');
