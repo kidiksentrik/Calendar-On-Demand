@@ -392,6 +392,106 @@
             font-size: 0.85rem;
             color: var(--text-dim);
         }
+
+        /* macOS Guide Modal CSS */
+        .mac-guide-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .mac-guide-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .mac-guide-content {
+            background: rgba(20, 20, 25, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .mac-guide-modal.show .mac-guide-content {
+            transform: translateY(0);
+        }
+
+        .mac-guide-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .mac-guide-close:hover { color: white; }
+
+        .guide-step {
+            margin-bottom: 25px;
+        }
+        .guide-step h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .guide-step p {
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .code-snippet {
+            display: flex;
+            align-items: center;
+            background: #0f0f14;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 10px;
+        }
+        .code-snippet code {
+            flex-grow: 1;
+            font-family: monospace;
+            color: #a8c7fa;
+            font-size: 0.9rem;
+            user-select: all;
+            overflow-x: auto;
+        }
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .copy-btn.copied { background: var(--success); color: #000; }
     </style>
 </head>
 <body>
@@ -424,8 +524,8 @@
                 </a>
                 <a href="#changelog" class="btn-secondary">📋 Changelog</a>
             </div>
-            <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 30px; font-style: italic;">
-                *If the Mac app is blocked, right-click the app icon and select "Open".
+            <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 30px;">
+                <a href="#" id="open-mac-guide" style="color: var(--accent); text-decoration: none; font-weight: 500;">Need help installing on Mac? 🍎</a>
             </div>
             
             <div class="review-badge">
@@ -734,9 +834,39 @@
             <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.4/Calendar-On-Demand-Mac-1.2.4.dmg" class="btn-primary" style="background: rgba(255, 255, 255, 0.1); color: var(--text-color); margin-right: 10px;">
                 ⬇ Download for Mac <span style="font-size: 0.8em; opacity: 0.8;">(v1.2.4)</span>
             </a>
-            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">Supports Windows 10 &amp; 11, and macOS</div>
+            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">
+                Supports Windows 10 &amp; 11, and macOS<br><br>
+                <a href="#" id="open-mac-guide-footer" style="color: var(--text-dim); text-decoration: underline;">macOS Installation Guide</a>
+            </div>
         </div>
     </section>
+
+    <!-- macOS Guide Modal -->
+    <div class="mac-guide-modal" id="mac-guide-modal">
+        <div class="mac-guide-content">
+            <button class="mac-guide-close" id="mac-guide-close">&times;</button>
+            <h3 style="margin-bottom: 25px; font-size: 1.5rem; text-align: left;">macOS Installation Guide 🍎</h3>
+            
+            <div class="guide-step">
+                <h4>1. Install the App</h4>
+                <p>Double-click the downloaded <strong>.dmg</strong> file, and drag the <strong>Calendar-On-Demand</strong> icon into your <strong>Applications</strong> folder.</p>
+            </div>
+            
+            <div class="guide-step">
+                <h4>2. Unlock the App (First time only)</h4>
+                <p>Because this app is free and not signed through Apple's paid developer program, macOS will initially block it. To unlock it safely, open the <strong>Terminal</strong> app and run this command:</p>
+                <div class="code-snippet">
+                    <code id="mac-command">xattr -cr /Applications/Calendar-On-Demand.app</code>
+                    <button class="copy-btn" id="copy-mac-command">Copy</button>
+                </div>
+            </div>
+            
+            <div class="guide-step">
+                <h4>3. Future Updates</h4>
+                <p>Since auto-updates are disabled for unsigned Mac apps, you can check back here occasionally. Download the new version, overwrite the old one in Applications, and run the command above one more time.</p>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container">
@@ -748,6 +878,49 @@
         </div>
     </footer>
 
+    <script>
+        // macOS Guide Modal Logic
+        const modal = document.getElementById('mac-guide-modal');
+        const openBtnHero = document.getElementById('open-mac-guide');
+        const openBtnFooter = document.getElementById('open-mac-guide-footer');
+        const closeBtn = document.getElementById('mac-guide-close');
+        const copyBtn = document.getElementById('copy-mac-command');
+        const codeText = document.getElementById('mac-command').innerText;
+
+        function openModal(e) {
+            e.preventDefault();
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+        }
+
+        if (openBtnHero) openBtnHero.addEventListener('click', openModal);
+        if (openBtnFooter) openBtnFooter.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Copy to clipboard
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    copyBtn.innerText = 'Copied!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.innerText = 'Copy';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+        }
+    </script>
     <script>
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
