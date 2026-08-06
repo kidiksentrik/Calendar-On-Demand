@@ -32,7 +32,7 @@
                               "target":  [
                                              "dmg"
                                          ],
-                              "icon":  "tray_icon.png",
+                              "identity": null,
                               "artifactName":  "${productName}-Mac-${version}.${ext}"
                           },
                   "nsis":  {
