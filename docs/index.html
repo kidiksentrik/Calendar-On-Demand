@@ -203,6 +203,35 @@
         }
         .screenshot-caption { color: var(--text-dim); font-size: 0.9rem; font-style: italic; }
 
+        .os-toggle {
+            display: inline-flex;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 4px;
+            margin-bottom: 30px;
+        }
+        .os-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 26px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .os-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 142, 247, 0.3);
+        }
+        .os-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.05); }
+        .preview-pane { display: none; animation: fadeIn 0.3s ease; }
+        .preview-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         /* ── Changelog Section ── */
         .changelog { padding: 80px 0; }
         .changelog-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 20px; }
@@ -577,9 +606,22 @@
         </section>
 
         <section class="preview">
-            <div class="screenshot-container">
-                <img src="./screenshot.png" alt="Calendar-On-Demand Screenshot" class="screenshot">
-                <p class="screenshot-caption">Real Google Calendar data. Always on your desktop.</p>
+            <div class="os-toggle">
+                <button class="os-btn active" data-target="preview-win">Windows</button>
+                <button class="os-btn" data-target="preview-mac">macOS</button>
+            </div>
+            
+            <div class="screenshot-container preview-pane active" id="preview-win">
+                <img src="./screenshot.png" alt="Calendar-On-Demand Screenshot on Windows" class="screenshot">
+                <p class="screenshot-caption">Real Google Calendar data. Always on your Windows desktop.</p>
+            </div>
+            
+            <div class="screenshot-container preview-pane" id="preview-mac">
+                <img src="./mac-screenshot-full.png" alt="Calendar-On-Demand Screenshot on macOS" class="screenshot">
+                <div style="margin-top: 20px;">
+                    <img src="./mac-screenshot.png" alt="Calendar-On-Demand close-up on macOS" class="screenshot" style="max-width: 700px; margin: 0 auto;">
+                </div>
+                <p class="screenshot-caption">Seamlessly integrated into your Mac workspace.</p>
             </div>
         </section>
 
@@ -922,6 +964,17 @@
         }
     </script>
     <script>
+        // OS Preview Toggle Logic
+        document.querySelectorAll('.os-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.os-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.preview-pane').forEach(p => p.classList.remove('active'));
+                
+                this.classList.add('active');
+                document.getElementById(this.getAttribute('data-target')).classList.add('active');
+            });
+        });
+
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
