@@ -224,13 +224,15 @@ ipcMain.handle('get-events', async (event, { timeMin, timeMax }) => {
     } catch (err) {
         console.error('API Error in get-events:', err.message);
         
-        const isAuthError = err.code === 401 || 
-                           err.code === 400 || 
-                           err.message.toLowerCase().includes('auth') || 
-                           err.message.toLowerCase().includes('token') ||
+        const isNetworkError = typeof err.code === 'string' && ['ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET', 'ECONNREFUSED', 'EAI_AGAIN', 'ERR_INTERNET_DISCONNECTED', 'EHOSTUNREACH', 'ENETUNREACH'].includes(err.code);
+        
+        const isAuthError = !isNetworkError && (
+                           err.code === 401 || 
+                           (err.code === 400 && err.message.toLowerCase().includes('invalid_grant')) ||
                            err.message.toLowerCase().includes('expired') ||
                            err.message.toLowerCase().includes('revoked') ||
-                           err.message.toLowerCase().includes('invalid_grant');
+                           err.message.toLowerCase().includes('invalid_grant')
+        );
 
         if (isAuthError) {
             console.log('Detected auth error, triggering singleton re-authentication flow...');

@@ -1,6 +1,6 @@
 {
     "name":  "calendar-on-demand",
-    "version":  "1.2.4",
+    "version":  "1.2.5",
     "description":  "Desktop widget for Google Calendar",
     "author":  "Calendar-On-Demand Team",
     "main":  "main.js",
@@ -32,7 +32,7 @@
                               "target":  [
                                              "dmg"
                                          ],
-                              "identity": null,
+                              "identity":  null,
                               "artifactName":  "${productName}-Mac-${version}.${ext}"
                           },
                   "nsis":  {
