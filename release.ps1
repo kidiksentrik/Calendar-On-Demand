@@ -48,8 +48,9 @@ $html = $html -replace '<li class="changelog-item latest">', '<li class="changel
 $html = $html -replace '\s*<span class="cl-latest-badge">Latest</span>', ''
 # 3. Add dim style to the previously-latest cl-version (it has no style attribute yet)
 $html = $html -replace '<span class="cl-version">(v[^<]+)</span>', '<span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">$1</span>'
-# 4. Mark old latest download button as "old" (only the one without "old" suffix)
+# 4. Mark old latest download button as "old" (both Windows and Mac)
 $html = $html -replace 'class="cl-download">', 'class="cl-download old">'
+$html = $html -replace 'class="cl-download" style="[^"]*">', 'class="cl-download old">'
 
 # 5. Build and insert new Latest entry at top of list
 $today = Get-Date -Format "yyyy-MM-dd"
@@ -67,7 +68,10 @@ $newEntry = @"
                             <li class="fix">$Notes</li>
                         </ul>
                     </div>
-                    <a id="dl-v$versionId" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v$Version/Calendar-On-Demand-Setup-$Version.exe" class="cl-download">&#x2b07; Download</a>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a id="dl-v$versionId-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v$Version/Calendar-On-Demand-Setup-$Version.exe" class="cl-download">&#x2b07; Windows</a>
+                        <a id="dl-v$versionId-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v$Version/Calendar-On-Demand-Mac-$Version.dmg" class="cl-download" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);">&#x2b07; Mac</a>
+                    </div>
                 </li>
 
 "@
