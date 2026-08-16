@@ -21,15 +21,15 @@ Write-Host "  Version: v$Version" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# â”€â”€ 1. Update package.json Version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ 1. Update package.json Version ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host "[1/6] Updating package.json version to $Version..." -ForegroundColor Yellow
 $pkg = Get-Content "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
 $pkg.version = $Version
 $json = $pkg | ConvertTo-Json -Depth 10
 [System.IO.File]::WriteAllText((Resolve-Path "package.json").Path, $json, [System.Text.UTF8Encoding]::new($false))
-Write-Host "      âœ“ package.json updated successfully" -ForegroundColor Green
+Write-Host "      ??package.json updated successfully" -ForegroundColor Green
 
-# â”€â”€ 2. Update website docs/index.html â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ 2. Update website docs/index.html ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host "[2/6] Updating website docs/index.html..." -ForegroundColor Yellow
 $html = Get-Content "docs/index.html" -Raw -Encoding UTF8
 
@@ -41,7 +41,7 @@ $html = $html -replace '\(v[\d\.]+\)', "(v$Version)"
 # Replace update banner
 $html = $html -replace '(<strong>v[\d\.]+ is out!</strong>[^<]*)', "<strong>v$Version is out!</strong> - $Notes"
 
-# â”€â”€ Changelog: demote old Latest entry, then insert new Latest at top â”€â”€
+# ?€?€ Changelog: demote old Latest entry, then insert new Latest at top ?€?€
 # 1. Remove "latest" class from old li
 $html = $html -replace '<li class="changelog-item latest">', '<li class="changelog-item">'
 # 2. Remove old Latest badge
@@ -78,36 +78,36 @@ $newEntry = @"
 $html = $html -replace '(<ul class="changelog-list">)', "`$1`r`n`r`n$newEntry"
 
 [System.IO.File]::WriteAllText((Resolve-Path "docs/index.html").Path, $html, [System.Text.UTF8Encoding]::new($false))
-Write-Host "      âœ“ Website updated successfully" -ForegroundColor Green
+Write-Host "      ??Website updated successfully" -ForegroundColor Green
 
-# â”€â”€ 3. Electron Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ 3. Electron Build ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host "[3/6] Cleaning dist folder and starting Electron build (takes 2-3 mins)..." -ForegroundColor Yellow
 Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
 $env:CSC_IDENTITY_AUTO_DISCOVERY = "false"
 npm run build
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "      âœ— Build failed! Please check if you have administrator permissions." -ForegroundColor Red
+    Write-Host "      ??Build failed! Please check if you have administrator permissions." -ForegroundColor Red
     exit 1
 }
-Write-Host "      âœ“ Build completed successfully" -ForegroundColor Green
+Write-Host "      ??Build completed successfully" -ForegroundColor Green
 
-# â”€â”€ 4. Verify Built .exe File â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ 4. Verify Built .exe File ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host "[4/6] Verifying built installer file..." -ForegroundColor Yellow
 $exeFile = Get-ChildItem "dist" -Filter "*$Version*.exe" | Select-Object -First 1
 if (-not $exeFile) {
-    Write-Host "      âœ— Could not find setup .exe for version $Version in dist folder." -ForegroundColor Red
+    Write-Host "      ??Could not find setup .exe for version $Version in dist folder." -ForegroundColor Red
     exit 1
 }
-Write-Host "      âœ“ $($exeFile.Name) ($([Math]::Round($exeFile.Length/1MB, 1)) MB)" -ForegroundColor Green
+Write-Host "      ??$($exeFile.Name) ($([Math]::Round($exeFile.Length/1MB, 1)) MB)" -ForegroundColor Green
 
-# â”€â”€ 5. Git Commit & Push â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ 5. Git Commit & Push ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host "[5/6] Committing and pushing changes..." -ForegroundColor Yellow
 git add -A
 git commit -m "feat: v$Version - $Notes"
 git push origin main
-Write-Host "      âœ“ GitHub push completed successfully" -ForegroundColor Green
+Write-Host "      ??GitHub push completed successfully" -ForegroundColor Green
 
-# â”€â”€ 6. Create GitHub Release & Upload Installer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ 6. Create GitHub Release & Upload Installer ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host "[6/6] Creating GitHub Release v$Version and uploading files..." -ForegroundColor Yellow
 
 $releaseNotes = @"
@@ -134,9 +134,9 @@ gh release create "v$Version" $uploadFiles `
     --title "v$Version - $Notes" `
     --notes $releaseNotes
 
-Write-Host "      âœ“ Release uploaded successfully" -ForegroundColor Green
+Write-Host "      ??Release uploaded successfully" -ForegroundColor Green
 
-# â”€â”€ Completed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ?€?€ Completed ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "  Release Successful! v$Version" -ForegroundColor Green
