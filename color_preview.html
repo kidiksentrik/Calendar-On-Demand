@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Color Palette Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f0f14;
+            color: #e8e8e8;
+            font-family: 'Inter', sans-serif;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h2 { margin: 0 0 10px 0; }
+        .palette-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .color-circle {
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .events-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 600px;
+        }
+        .event-item {
+            font-size: 0.85rem; font-weight: 500;
+            padding: 8px 12px; border-radius: 4px;
+            color: #000;
+            text-shadow: none; /* No shadow needed for black text on light bg */
+            border-left: 4px solid rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h2>1. Color Picker Options (widget.html)</h2>
+    <div class="palette-container">
+        <div class="color-circle" style="background: #444;"></div>
+        <div class="color-circle" style="background: #ff9e99;"></div>
+        <div class="color-circle" style="background: #ffc77d;"></div>
+        <div class="color-circle" style="background: #fff59d;"></div>
+        <div class="color-circle" style="background: #a5d6a7;"></div>
+        <div class="color-circle" style="background: #80cbc4;"></div>
+        <div class="color-circle" style="background: #90caf9;"></div>
+        <div class="color-circle" style="background: #9fa8da;"></div>
+        <div class="color-circle" style="background: #ce93d8;"></div>
+        <div class="color-circle" style="background: #f48fb1;"></div>
+        <div class="color-circle" style="background: #bcaaa4;"></div>
+    </div>
+
+    <h2>2. Calendar Event Blocks Preview</h2>
+    <p style="opacity: 0.7; font-size: 0.9rem; margin-top:-10px;">Notice how the black text remains crisp and highly legible on every background color.</p>
+    <div class="events-container">
+        <div class="event-item" style="background: #ff9e99;">20:00 Takeout trashbags</div>
+        <div class="event-item" style="background: #ffc77d;">10:00 Team Meeting</div>
+        <div class="event-item" style="background: #fff59d;">PVT PW expire</div>
+        <div class="event-item" style="background: #a5d6a7;">Buy groceries</div>
+        <div class="event-item" style="background: #80cbc4;">Oncall 1000-1800</div>
+        <div class="event-item" style="background: #90caf9;">Doctor appointment</div>
+        <div class="event-item" style="background: #9fa8da;">Payday ⭐</div>
+        <div class="event-item" style="background: #ce93d8;">Dinner with Sarah</div>
+        <div class="event-item" style="background: #f48fb1;">Gym Session</div>
+        <div class="event-item" style="background: #bcaaa4;">Review documents</div>
+    </div>
+</body>
+</html>
