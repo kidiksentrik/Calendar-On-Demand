@@ -374,7 +374,8 @@ try {
         // Filter events for the selected day
         const dayEvents = events.filter(e => {
             const start = e.start.dateTime || e.start.date;
-            return start.startsWith(selectedDay);
+            const isReadOnly = e.accessRole === 'reader' || e.accessRole === 'freeBusyReader';
+            return start.startsWith(selectedDay) && !isReadOnly;
         });
 
         if (dayEvents.length === 0) {
@@ -384,6 +385,7 @@ try {
 
         dayEvents.forEach(e => {
             const isCompleted = e.summary.startsWith('[x]');
+            
             const item = document.createElement('div');
             item.classList.add('todo-item');
 
@@ -396,11 +398,13 @@ try {
                 event.stopPropagation();
                 toggleTodoStatus(e);
             };
+            itemLeft.appendChild(checkbox);
 
             const title = document.createElement('span');
             title.className = `todo-title ${isCompleted ? 'completed' : ''}`;
             title.innerText = stripTags(e.summary);
             title.title = e.summary;
+            
             title.onclick = (event) => {
                 event.stopPropagation();
                 editingEvent = e;
@@ -431,7 +435,6 @@ try {
                 if (toggleExtraBtn) toggleExtraBtn.classList.add('hidden');
             };
 
-            itemLeft.appendChild(checkbox);
             itemLeft.appendChild(title);
 
             // Meeting join button (Google Meet or other conference link)
@@ -449,6 +452,8 @@ try {
                 itemLeft.appendChild(joinBtn);
             }
 
+            item.appendChild(itemLeft);
+            
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('todo-delete-btn');
             deleteBtn.innerText = '✕';
@@ -463,9 +468,8 @@ try {
                 await ipcRenderer.invoke('delete-event', { calendarId: e.calendarId, eventId: e.id });
                 fetchEvents();
             };
-
-            item.appendChild(itemLeft);
             item.appendChild(deleteBtn);
+
             todoListContainer.appendChild(item);
         });
     }

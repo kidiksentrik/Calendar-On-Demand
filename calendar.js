@@ -8,7 +8,8 @@ async function getCalendars(auth) {
         summary: cal.summary,
         backgroundColor: cal.backgroundColor,
         foregroundColor: cal.foregroundColor,
-        primary: cal.primary || false
+        primary: cal.primary || false,
+        accessRole: cal.accessRole
     }));
 }
 
@@ -39,7 +40,8 @@ async function listEvents(auth, timeMin, timeMax, selectedCalendarIds = null) {
             calendarId: cal.id,
             calendarName: cal.summary,
             backgroundColor: cal.backgroundColor,
-            foregroundColor: cal.foregroundColor
+            foregroundColor: cal.foregroundColor,
+            accessRole: cal.accessRole
         }));
         
         allEvents.push(...events);
