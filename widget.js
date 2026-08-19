@@ -705,7 +705,40 @@ try {
 
     async function handleAutoSaveAndClose() {
         if (quickAddInput && quickAddInput.value.trim() !== '') {
-            await saveCurrentEvent();
+            let shouldSave = true;
+            if (editingEvent) {
+                const currentText = stripTags(quickAddInput.value);
+                const originalText = stripTags(editingEvent.summary);
+                const currentLoc = eventLocationInput ? eventLocationInput.value : '';
+                const originalLoc = editingEvent.location || '';
+                const currentDesc = eventDescriptionInput ? eventDescriptionInput.value : '';
+                const originalDesc = editingEvent.description || '';
+                const currentImportant = document.getElementById('important-check')?.checked || false;
+                const originalImportant = editingEvent.summary.includes('[IMPORTANT]');
+                const currentHighlight = document.getElementById('highlight-cell-check')?.checked || false;
+                const originalHighlight = editingEvent.summary.includes('[HIGHLIGHT]');
+                
+                const colorMatch = editingEvent.summary.match(/\\[COLOR:(#[0-9a-fA-F]{3,6})\\]/);
+                const originalColor = colorMatch ? colorMatch[1] : 'default';
+                const currentColor = document.getElementById('selected-entry-color')?.value || 'default';
+                
+                const currentAllDay = allDayCheck ? allDayCheck.checked : false;
+                const originalAllDay = !!editingEvent.start.date;
+
+                if (currentText === originalText && 
+                    currentLoc === originalLoc && 
+                    currentDesc === originalDesc && 
+                    currentImportant === originalImportant && 
+                    currentHighlight === originalHighlight && 
+                    currentColor === originalColor &&
+                    currentAllDay === originalAllDay) {
+                    shouldSave = false;
+                }
+            }
+
+            if (shouldSave) {
+                await saveCurrentEvent();
+            }
         }
         closeAllModals();
     }
