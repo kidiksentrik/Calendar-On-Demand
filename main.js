@@ -3,7 +3,7 @@ const path = require('path');
 const Store = require('electron-store');
 const { autoUpdater } = require('electron-updater');
 const { authenticate } = require('./auth');
-const { listEvents, createEvent, updateEvent, deleteEvent } = require('./calendar');
+const { getCalendars, listEvents, createEvent, updateEvent, deleteEvent } = require('./calendar');
 
 const store = new Store();
 let tray = null;
@@ -172,7 +172,14 @@ app.on('window-all-closed', () => {
 
 
 // IPC Handlers
-ipcMain.handle('get-events', async (event, { timeMin, timeMax }) => {
+ipcMain.handle('get-calendars', async () => {
+    if (!authClient) {
+        authClient = await authenticate();
+    }
+    return await getCalendars(authClient);
+});
+
+ipcMain.handle('get-events', async (event, { timeMin, timeMax, selectedCalendarIds }) => {
     // Utility for timeout
     const withTimeout = (promise, ms) => {
         const timeout = new Promise((_, reject) => {
@@ -187,40 +194,11 @@ ipcMain.handle('get-events', async (event, { timeMin, timeMax }) => {
             authClient = await authenticate();
         }
 
-        const { google } = require('googleapis');
-        const calendar = google.calendar({ version: 'v3', auth: authClient });
-        
-        // Fetch calendar list to get colors with 10s timeout
-        console.log('Fetching calendar list...');
-        const calList = await withTimeout(calendar.calendarList.list(), 10000);
-        
-        const colorMap = {};
-        if (calList.data.items) {
-            calList.data.items.forEach(item => {
-                colorMap[item.id] = {
-                    backgroundColor: item.backgroundColor,
-                    foregroundColor: item.foregroundColor,
-                    summary: item.summary
-                };
-            });
-        }
-
-        console.log('Fetching events...');
-        const res = await withTimeout(calendar.events.list({
-            calendarId: 'primary',
-            timeMin,
-            timeMax,
-            singleEvents: true,
-            orderBy: 'startTime',
-        }), 10000);
-
-        // Enrich events with calendar info (color)
-        return res.data.items.map(e => ({
-            ...e,
-            calendarId: 'primary',
-            backgroundColor: colorMap['primary']?.backgroundColor || '#4f8ef7',
-            calendarName: colorMap['primary']?.summary || 'Primary'
-        }));
+        console.log('Fetching events via listEvents...');
+        const timeMinDate = new Date(timeMin);
+        const timeMaxDate = new Date(timeMax);
+        const events = await withTimeout(listEvents(authClient, timeMinDate, timeMaxDate, selectedCalendarIds), 10000);
+        return events;
     } catch (err) {
         console.error('API Error in get-events:', err.message);
         

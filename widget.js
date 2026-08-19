@@ -6,6 +6,15 @@ try {
     let selectedDay = null;
     let startOfWeek = 0;
     let editingEvent = null;
+    let allCalendars = [];
+    let selectedCalendarIds = null;
+
+    try {
+        const savedIds = localStorage.getItem('selectedCalendarIds');
+        if (savedIds) {
+            selectedCalendarIds = JSON.parse(savedIds);
+        }
+    } catch(e) {}
 
     let lastSyncTime = 0;
     let syncTimer = null;
@@ -300,7 +309,11 @@ try {
         const timeMax = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 2, 0).toISOString();
         
         try {
-            events = await ipcRenderer.invoke('get-events', { timeMin, timeMax });
+            events = await ipcRenderer.invoke('get-events', { 
+                timeMin, 
+                timeMax, 
+                selectedCalendarIds 
+            });
             lastSyncTime = Date.now();
             errorCount = 0;
             if (syncIndicator) {
@@ -736,6 +749,59 @@ try {
                 if (lockPositionCheck) lockPositionCheck.checked = settings.lockPosition || false;
                 if (desktopModeCheck) desktopModeCheck.checked = settings.desktopMode || false;
                 if (startOfWeekSelect) startOfWeekSelect.value = settings.startOfWeek || 0;
+                
+                // Fetch and render calendars
+                try {
+                    const cList = document.getElementById('calendars-list');
+                    if (cList) {
+                        cList.innerHTML = '<div style="font-size: 0.85rem; opacity: 0.5;">Loading...</div>';
+                        allCalendars = await ipcRenderer.invoke('get-calendars');
+                        cList.innerHTML = '';
+                        
+                        if (!selectedCalendarIds && allCalendars.length > 0) {
+                            selectedCalendarIds = allCalendars.map(c => c.id);
+                            localStorage.setItem('selectedCalendarIds', JSON.stringify(selectedCalendarIds));
+                        }
+
+                        allCalendars.forEach(cal => {
+                            const item = document.createElement('div');
+                            item.className = 'setting-item';
+                            item.style.marginBottom = '8px';
+                            
+                            const isChecked = selectedCalendarIds ? selectedCalendarIds.includes(cal.id) : true;
+                            
+                            item.innerHTML = `
+                                <label class="switch">
+                                    <span style="display:flex; align-items:center; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <span class="calendar-item-color" style="background-color: ${cal.backgroundColor}"></span>
+                                        ${cal.summary}
+                                    </span>
+                                    <input type="checkbox" value="${cal.id}" ${isChecked ? 'checked' : ''}>
+                                    <span class="slider-toggle"></span>
+                                </label>
+                            `;
+                            
+                            const checkbox = item.querySelector('input');
+                            checkbox.onchange = (e) => {
+                                if (!selectedCalendarIds) selectedCalendarIds = allCalendars.map(c => c.id);
+                                
+                                if (e.target.checked) {
+                                    if (!selectedCalendarIds.includes(cal.id)) selectedCalendarIds.push(cal.id);
+                                } else {
+                                    selectedCalendarIds = selectedCalendarIds.filter(id => id !== cal.id);
+                                }
+                                localStorage.setItem('selectedCalendarIds', JSON.stringify(selectedCalendarIds));
+                                fetchEvents();
+                            };
+                            cList.appendChild(item);
+                        });
+                    }
+                } catch(err) {
+                    console.error('Failed to load calendars', err);
+                    const cList = document.getElementById('calendars-list');
+                    if (cList) cList.innerHTML = '<div style="font-size: 0.85rem; color: #ff5252;">Failed to load</div>';
+                }
+
                 if (settingsOverlay) settingsOverlay.classList.remove('hidden');
             } catch (err) {
                 console.error('Settings error:', err);

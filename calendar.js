@@ -1,11 +1,27 @@
 const { google } = require('googleapis');
 
-async function listEvents(auth, timeMin, timeMax) {
+async function getCalendars(auth) {
+    const calendar = google.calendar({ version: 'v3', auth });
+    const calendarList = await calendar.calendarList.list();
+    return calendarList.data.items.map(cal => ({
+        id: cal.id,
+        summary: cal.summary,
+        backgroundColor: cal.backgroundColor,
+        foregroundColor: cal.foregroundColor,
+        primary: cal.primary || false
+    }));
+}
+
+async function listEvents(auth, timeMin, timeMax, selectedCalendarIds = null) {
     const calendar = google.calendar({ version: 'v3', auth });
     
     // First, list all calendars to get their colors
     const calendarList = await calendar.calendarList.list();
-    const calendars = calendarList.data.items;
+    let calendars = calendarList.data.items;
+
+    if (selectedCalendarIds && Array.isArray(selectedCalendarIds)) {
+        calendars = calendars.filter(cal => selectedCalendarIds.includes(cal.id));
+    }
 
     const allEvents = [];
     
@@ -59,4 +75,4 @@ async function deleteEvent(auth, calendarId, eventId) {
     });
 }
 
-module.exports = { listEvents, createEvent, updateEvent, deleteEvent };
+module.exports = { getCalendars, listEvents, createEvent, updateEvent, deleteEvent };

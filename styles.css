@@ -220,6 +220,34 @@ header button:hover {
     margin-bottom: 12px;
 }
 
+.calendars-list {
+    max-height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 4px;
+    margin-bottom: 12px;
+}
+.calendars-list::-webkit-scrollbar {
+    width: 4px;
+}
+.calendars-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+.calendars-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+.calendar-item-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
 
 .setting-item {
     margin-bottom: 16px;
