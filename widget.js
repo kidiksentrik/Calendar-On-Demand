@@ -718,7 +718,7 @@ try {
                 const currentHighlight = document.getElementById('highlight-cell-check')?.checked || false;
                 const originalHighlight = editingEvent.summary.includes('[HIGHLIGHT]');
                 
-                const colorMatch = editingEvent.summary.match(/\\[COLOR:(#[0-9a-fA-F]{3,6})\\]/);
+                const colorMatch = editingEvent.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
                 const originalColor = colorMatch ? colorMatch[1] : 'default';
                 const currentColor = document.getElementById('selected-entry-color')?.value || 'default';
                 
