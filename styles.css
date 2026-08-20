@@ -400,24 +400,45 @@ input[type="color"]::-webkit-color-swatch {
     background: rgba(244, 67, 54, 0.1);
 }
 
+.color-category-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-color);
+    opacity: 0.5;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
 .color-presets {
-    display: flex;
-    gap: 8px;
-    margin-top: 4px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    padding: 4px 0;
 }
 
 .color-opt {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    border: 2px solid transparent;
+    border: none;
     cursor: pointer;
     padding: 0;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.color-opt:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 2;
 }
 
 .color-opt.active {
-    border-color: #fff;
-    transform: scale(1.1);
+    transform: scale(0.8);
+    box-shadow: 0 0 0 2px #18181f, 0 0 0 4px currentColor, 0 4px 10px rgba(0,0,0,0.4) !important;
+    z-index: 2;
 }
 
 .color-dot {
