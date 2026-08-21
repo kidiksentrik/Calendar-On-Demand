@@ -84,10 +84,12 @@ async function _authenticateInternal(force = false) {
 
         server = http.createServer(async (req, res) => {
             try {
-                if (req.url.indexOf('/?code=') > -1) {
+                const parsedUrl = new URL(req.url, `http://127.0.0.1:${server.address().port}`);
+                const code = parsedUrl.searchParams.get('code');
+                const error = parsedUrl.searchParams.get('error');
+
+                if (code) {
                     isResolved = true;
-                    const qs = new URL(req.url, `http://127.0.0.1:${server.address().port}`).searchParams;
-                    const code = qs.get('code');
                     
                     res.writeHead(200, { 'Content-Type': 'text/html' });
                     res.end('<html><head><style>body{font-family: sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background:#0a0a0c; color:#fff; text-align:center;}</style></head><body><h2>Authentication Successful!</h2><p>You can close this tab and return to Calendar-On-Demand.</p></body></html>');
@@ -98,11 +100,14 @@ async function _authenticateInternal(force = false) {
                     oAuth2Client.setCredentials(tokens);
                     store.set('token', tokens);
                     resolve(oAuth2Client);
-                } else if (req.url.indexOf('/?error=') > -1) {
+                } else if (error) {
                     res.writeHead(200, { 'Content-Type': 'text/html' });
                     res.end('<html><body><h2>Authentication Failed</h2><p>You can close this tab.</p></body></html>');
                     cleanup();
                     reject(new Error('Authentication rejected by user.'));
+                } else {
+                    res.writeHead(404);
+                    res.end();
                 }
             } catch (e) {
                 cleanup();
