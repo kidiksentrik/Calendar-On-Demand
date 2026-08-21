@@ -1,8 +1,9 @@
 const { google } = require('googleapis');
 const Store = require('electron-store');
-const { BrowserWindow, session } = require('electron');
+const { session, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 const store = new Store();
@@ -68,7 +69,7 @@ async function _authenticateInternal(force = false) {
         return oAuth2Client;
     }
 
-    console.log('No stored token, starting BrowserWindow auth flow...');
+    console.log('No stored token, starting System Browser auth flow...');
     return new Promise((resolve, reject) => {
 
         const authUrl = oAuth2Client.generateAuthUrl({
@@ -77,58 +78,55 @@ async function _authenticateInternal(force = false) {
             prompt: 'consent'
         });
 
-        const authWindow = new BrowserWindow({
-            width: 500,
-            height: 600,
-            show: false,
-            webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true
-            }
-        });
-
-        authWindow.once('ready-to-show', () => {
-            authWindow.show();
-        });
-
-        authWindow.loadURL(authUrl);
-
+        let server;
         let isResolved = false;
 
-        const handleRedirect = async (urlStr) => {
-            if (urlStr.includes('code=')) {
-                const url = new URL(urlStr);
-                const code = url.searchParams.get('code');
-                
-                if (code) {
-                    isResolved = true;
-                    authWindow.destroy();
-                    try {
-                        const { tokens } = await oAuth2Client.getToken(code);
-                        oAuth2Client.setCredentials(tokens);
-                        store.set('token', tokens);
-                        resolve(oAuth2Client);
-                    } catch (e) {
-                        reject(e);
-                    }
-                }
+        const cleanup = () => {
+            if (server) {
+                server.close();
+                server = null;
             }
         };
 
-        authWindow.webContents.on('will-navigate', (event, url) => {
-            handleRedirect(url);
-        });
+        server = http.createServer(async (req, res) => {
+            try {
+                if (req.url.indexOf('/?code=') > -1) {
+                    isResolved = true;
+                    const qs = new URL(req.url, 'http://localhost').searchParams;
+                    const code = qs.get('code');
+                    
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><head><style>body{font-family: sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background:#0a0a0c; color:#fff; text-align:center;}</style></head><body><h2>Authentication Successful!</h2><p>You can close this tab and return to Calendar-On-Demand.</p></body></html>');
+                    
+                    cleanup();
 
-        authWindow.webContents.on('will-redirect', (event, url) => {
-            handleRedirect(url);
-        });
-
-        authWindow.on('closed', () => {
-            if (!isResolved) {
-                reject(new Error('User closed the auth window'));
+                    const { tokens } = await oAuth2Client.getToken(code);
+                    oAuth2Client.setCredentials(tokens);
+                    store.set('token', tokens);
+                    resolve(oAuth2Client);
+                } else if (req.url.indexOf('/?error=') > -1) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><body><h2>Authentication Failed</h2><p>You can close this tab.</p></body></html>');
+                    cleanup();
+                    reject(new Error('Authentication rejected by user.'));
+                }
+            } catch (e) {
+                cleanup();
+                reject(e);
             }
         });
 
+        server.listen(80, () => {
+            console.log('Local server listening on port 80 for OAuth callback...');
+            shell.openExternal(authUrl);
+        });
+
+        server.on('error', (err) => {
+            console.error('Error starting local server:', err);
+            // Fallback to random port if 80 is in use, but redirect_uris in credentials might not match.
+            // Assuming port 80 works for http://localhost in standard environments.
+            reject(err);
+        });
     });
 }
 
