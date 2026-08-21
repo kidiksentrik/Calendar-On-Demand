@@ -86,7 +86,7 @@ async function _authenticateInternal(force = false) {
             try {
                 if (req.url.indexOf('/?code=') > -1) {
                     isResolved = true;
-                    const qs = new URL(req.url, `http://localhost:${server.address().port}`).searchParams;
+                    const qs = new URL(req.url, `http://127.0.0.1:${server.address().port}`).searchParams;
                     const code = qs.get('code');
                     
                     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -110,11 +110,11 @@ async function _authenticateInternal(force = false) {
             }
         });
 
-        server.listen(0, () => {
+        server.listen(0, '127.0.0.1', () => {
             const port = server.address().port;
             console.log(`Local server listening on port ${port} for OAuth callback...`);
             
-            oAuth2Client.redirectUri = `http://localhost:${port}`;
+            oAuth2Client.redirectUri = `http://127.0.0.1:${port}`;
             const authUrl = oAuth2Client.generateAuthUrl({
                 access_type: 'offline',
                 scope: SCOPES,
