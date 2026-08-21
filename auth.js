@@ -72,12 +72,6 @@ async function _authenticateInternal(force = false) {
     console.log('No stored token, starting System Browser auth flow...');
     return new Promise((resolve, reject) => {
 
-        const authUrl = oAuth2Client.generateAuthUrl({
-            access_type: 'offline',
-            scope: SCOPES,
-            prompt: 'consent'
-        });
-
         let server;
         let isResolved = false;
 
@@ -92,7 +86,7 @@ async function _authenticateInternal(force = false) {
             try {
                 if (req.url.indexOf('/?code=') > -1) {
                     isResolved = true;
-                    const qs = new URL(req.url, 'http://localhost').searchParams;
+                    const qs = new URL(req.url, `http://localhost:${server.address().port}`).searchParams;
                     const code = qs.get('code');
                     
                     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -116,8 +110,17 @@ async function _authenticateInternal(force = false) {
             }
         });
 
-        server.listen(80, () => {
-            console.log('Local server listening on port 80 for OAuth callback...');
+        server.listen(0, () => {
+            const port = server.address().port;
+            console.log(`Local server listening on port ${port} for OAuth callback...`);
+            
+            oAuth2Client.redirectUri = `http://localhost:${port}`;
+            const authUrl = oAuth2Client.generateAuthUrl({
+                access_type: 'offline',
+                scope: SCOPES,
+                prompt: 'consent'
+            });
+
             shell.openExternal(authUrl);
         });
 
