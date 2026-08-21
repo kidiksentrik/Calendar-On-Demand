@@ -84,7 +84,8 @@ async function _authenticateInternal(force = false) {
 
         server = http.createServer(async (req, res) => {
             try {
-                const parsedUrl = new URL(req.url, `http://127.0.0.1:${server.address().port}`);
+                if (!server) return; // Server already cleaned up
+                const parsedUrl = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`);
                 const code = parsedUrl.searchParams.get('code');
                 const error = parsedUrl.searchParams.get('error');
 
