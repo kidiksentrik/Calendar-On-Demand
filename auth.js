@@ -123,8 +123,7 @@ async function _authenticateInternal(force = false) {
             oAuth2Client.redirectUri = `http://127.0.0.1:${port}`;
             const authUrl = oAuth2Client.generateAuthUrl({
                 access_type: 'offline',
-                scope: SCOPES,
-                prompt: 'consent'
+                scope: SCOPES
             });
 
             shell.openExternal(authUrl);
