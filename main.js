@@ -9,6 +9,23 @@ const store = new Store();
 let tray = null;
 let mainWindow = null;
 let authClient = null;
+let isQuitting = false;
+
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+    app.quit();
+} else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.show();
+            mainWindow.focus();
+        }
+    });
+    
+    app.on('before-quit', () => {
+        isQuitting = true;
+    });
 
 async function createWindow() {
     const { width, height, x, y } = store.get('windowBounds') || { width: 350, height: 450, x: undefined, y: undefined };
@@ -64,6 +81,13 @@ async function createWindow() {
 
     mainWindow.on('resize', saveBounds);
     mainWindow.on('move', saveBounds);
+
+    mainWindow.on('close', (event) => {
+        if (!isQuitting) {
+            event.preventDefault();
+            mainWindow.hide();
+        }
+    });
 
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -163,11 +187,13 @@ app.whenReady().then(async () => {
         // Remove app.quit() so it doesn't just disappear silently
     }
 });
+} // End of gotTheLock block
 
 
 app.on('window-all-closed', () => {
-    // For a tray-based app, we don't want to quit even if all windows are closed.
-    // The app should stay alive in the system tray.
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
 
@@ -242,7 +268,14 @@ ipcMain.handle('reset-auth', async () => {
 
 ipcMain.handle('install-update', () => {
     console.log('Install update requested from renderer...');
-    autoUpdater.quitAndInstall();
+    isQuitting = true;
+    autoUpdater.quitAndInstall(false, true);
+    
+    // Fallback: forcefully exit after 1.5 seconds to guarantee NSIS installer 
+    // doesn't throw the "cannot be closed" error if graceful quit hangs.
+    setTimeout(() => {
+        app.exit(0);
+    }, 1500);
 });
 
 ipcMain.handle('create-event', async (event, eventData) => {
