@@ -9,12 +9,7 @@ try {
     let allCalendars = [];
     let selectedCalendarIds = null;
 
-    try {
-        const savedIds = localStorage.getItem('selectedCalendarIds');
-        if (savedIds) {
-            selectedCalendarIds = JSON.parse(savedIds);
-        }
-    } catch(e) {}
+    // selectedCalendarIds will be loaded from ipcRenderer 'get-settings'
 
     let lastSyncTime = 0;
     let syncTimer = null;
@@ -797,7 +792,7 @@ try {
                         
                         if (!selectedCalendarIds && allCalendars.length > 0) {
                             selectedCalendarIds = allCalendars.map(c => c.id);
-                            localStorage.setItem('selectedCalendarIds', JSON.stringify(selectedCalendarIds));
+                            ipcRenderer.send('set-selected-calendars', selectedCalendarIds);
                         }
 
                         allCalendars.forEach(cal => {
@@ -827,7 +822,7 @@ try {
                                 } else {
                                     selectedCalendarIds = selectedCalendarIds.filter(id => id !== cal.id);
                                 }
-                                localStorage.setItem('selectedCalendarIds', JSON.stringify(selectedCalendarIds));
+                                ipcRenderer.send('set-selected-calendars', selectedCalendarIds);
                                 fetchEvents();
                             };
                             cList.appendChild(item);
@@ -890,6 +885,7 @@ try {
     ipcRenderer.invoke('get-settings').then(s => {
         if (s) {
             startOfWeek = s.startOfWeek || 0;
+            if (s.selectedCalendarIds !== undefined && s.selectedCalendarIds !== null) selectedCalendarIds = s.selectedCalendarIds;
             if (s.lockPosition) updateLockUI(true);
             applyTheme({ 'bg-base': s['bg-base'], 'text-color': s['text-color'], 'accent-color': s['accent-color'], 'bg-opacity': s['bg-opacity'] });
             if (s.version && appVersionLabel) {

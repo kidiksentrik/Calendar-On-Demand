@@ -304,12 +304,17 @@ ipcMain.handle('get-settings', () => {
         'accent-color': store.get('accent-color', '#4f8ef7'),
         'bg-opacity': store.get('bg-opacity', 0.92),
         startOfWeek: store.get('startOfWeek', 0),
+        selectedCalendarIds: store.get('selectedCalendarIds', null),
         version: app.getVersion()
     };
 });
 
 ipcMain.on('set-start-of-week', (event, value) => {
     store.set('startOfWeek', value);
+});
+
+ipcMain.on('set-selected-calendars', (event, value) => {
+    store.set('selectedCalendarIds', value);
 });
 
 ipcMain.handle('get-login-settings', () => {
@@ -323,10 +328,11 @@ ipcMain.handle('get-login-settings', () => {
 function updateLoginSettings(value) {
     store.set('openAtLogin', value);
     
+    const args = app.isPackaged ? ['--hidden'] : [app.getAppPath(), '--hidden'];
     const loginSettings = {
         openAtLogin: value,
-        path: app.getPath('exe'),
-        args: ['--hidden']
+        path: process.execPath,
+        args: args
     };
     app.setLoginItemSettings(loginSettings);
     
