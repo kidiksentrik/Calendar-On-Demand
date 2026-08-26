@@ -21,16 +21,16 @@ Write-Host "  Version: v$Version" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ?€?€ 1. Update package.json Version ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-Write-Host "[1/6] Updating package.json version to $Version..." -ForegroundColor Yellow
+# ?ï¿½?ï¿½ 1. Update package.json Version ?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½
+Write-Host "[1/3] Updating package.json version to $Version..." -ForegroundColor Yellow
 $pkg = Get-Content "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
 $pkg.version = $Version
 $json = $pkg | ConvertTo-Json -Depth 10
 [System.IO.File]::WriteAllText((Resolve-Path "package.json").Path, $json, [System.Text.UTF8Encoding]::new($false))
 Write-Host "      ??package.json updated successfully" -ForegroundColor Green
 
-# ?€?€ 2. Update website docs/index.html ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-Write-Host "[2/6] Updating website docs/index.html..." -ForegroundColor Yellow
+# ?ï¿½?ï¿½ 2. Update website docs/index.html ?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½
+Write-Host "[2/3] Updating website docs/index.html..." -ForegroundColor Yellow
 $html = Get-Content "docs/index.html" -Raw -Encoding UTF8
 
 # Replace previous version download link with the new version link for main buttons only
@@ -41,7 +41,7 @@ $html = $html -replace '\(v[\d\.]+\)', "(v$Version)"
 # Replace update banner
 $html = $html -replace '(<strong>v[\d\.]+ is out!</strong>[^<]*)', "<strong>v$Version is out!</strong> - $Notes"
 
-# ?€?€ Changelog: demote old Latest entry, then insert new Latest at top ?€?€
+# ?ï¿½?ï¿½ Changelog: demote old Latest entry, then insert new Latest at top ?ï¿½?ï¿½
 # 1. Remove "latest" class from old li
 $html = $html -replace '<li class="changelog-item latest">', '<li class="changelog-item">'
 # 2. Remove old Latest badge
@@ -80,67 +80,26 @@ $html = $html -replace '(<ul class="changelog-list">)', "`$1`r`n`r`n$newEntry"
 [System.IO.File]::WriteAllText((Resolve-Path "docs/index.html").Path, $html, [System.Text.UTF8Encoding]::new($false))
 Write-Host "      ??Website updated successfully" -ForegroundColor Green
 
-# ?€?€ 3. Electron Build ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-Write-Host "[3/6] Cleaning dist folder and starting Electron build (takes 2-3 mins)..." -ForegroundColor Yellow
-Remove-Item "dist" -Recurse -Force -ErrorAction SilentlyContinue
-$env:CSC_IDENTITY_AUTO_DISCOVERY = "false"
-npm run build
+# ?ï¿½?ï¿½ 3. Electron Build ?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½
+# STEP 3. Push Git Tag -> GitHub Actions builds Windows + Mac automatically
+Write-Host "[3/3] Creating and pushing git tag v$Version..." -ForegroundColor Yellow
+Write-Host "      GitHub Actions will now build for Windows and Mac automatically." -ForegroundColor Cyan
+git tag "v$Version"
+git push origin "v$Version"
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "      ??Build failed! Please check if you have administrator permissions." -ForegroundColor Red
+    Write-Host "      ERROR: Failed to push tag. Release may already exist." -ForegroundColor Red
     exit 1
 }
-Write-Host "      ??Build completed successfully" -ForegroundColor Green
+Write-Host "      OK Tag v$Version pushed successfully" -ForegroundColor Green
 
-# ?€?€ 4. Verify Built .exe File ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-Write-Host "[4/6] Verifying built installer file..." -ForegroundColor Yellow
-$exeFile = Get-ChildItem "dist" -Filter "*$Version*.exe" | Select-Object -First 1
-if (-not $exeFile) {
-    Write-Host "      ??Could not find setup .exe for version $Version in dist folder." -ForegroundColor Red
-    exit 1
-}
-Write-Host "      ??$($exeFile.Name) ($([Math]::Round($exeFile.Length/1MB, 1)) MB)" -ForegroundColor Green
-
-# ?€?€ 5. Git Commit & Push ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-Write-Host "[5/6] Committing and pushing changes..." -ForegroundColor Yellow
-git add -A
-git commit -m "feat: v$Version - $Notes"
-git push origin main
-Write-Host "      ??GitHub push completed successfully" -ForegroundColor Green
-
-# ?€?€ 6. Create GitHub Release & Upload Installer ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-Write-Host "[6/6] Creating GitHub Release v$Version and uploading files..." -ForegroundColor Yellow
-
-$releaseNotes = @"
-## What's New in v$Version
-
-$Notes
-
----
-*Full changelog: https://kidiksentrik.github.io/Calendar-On-Demand/#changelog*
-"@
-
-$ymlFile = Join-Path "dist" "latest.yml"
-$blockmapFile = Get-ChildItem "dist" -Filter "*$Version*.exe.blockmap" | Select-Object -First 1
-
-$uploadFiles = @($exeFile.FullName)
-if (Test-Path $ymlFile) {
-    $uploadFiles += (Resolve-Path $ymlFile).Path
-}
-if ($blockmapFile) {
-    $uploadFiles += $blockmapFile.FullName
-}
-
-gh release create "v$Version" $uploadFiles `
-    --title "v$Version - $Notes" `
-    --notes $releaseNotes
-
-Write-Host "      ??Release uploaded successfully" -ForegroundColor Green
-
-# ?€?€ Completed ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+# Completed
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  Release Successful! v$Version" -ForegroundColor Green
-Write-Host "  Release: https://github.com/kidiksentrik/Calendar-On-Demand/releases/tag/v$Version" -ForegroundColor Cyan
-Write-Host "  Website: https://kidiksentrik.github.io/Calendar-On-Demand/" -ForegroundColor Cyan
+Write-Host "  Tag pushed! GitHub Actions is now building:" -ForegroundColor Green
+Write-Host "   Windows (.exe) + Mac (.dmg)" -ForegroundColor Green
+Write-Host "  Check progress at:" -ForegroundColor Cyan
+Write-Host "  https://github.com/kidiksentrik/Calendar-On-Demand/actions" -ForegroundColor Cyan
+Write-Host "  Release will appear at:" -ForegroundColor Cyan
+Write-Host "  https://github.com/kidiksentrik/Calendar-On-Demand/releases/tag/v$Version" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
