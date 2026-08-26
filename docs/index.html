@@ -2,608 +2,351 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="google-site-verification" content="l8kz_CCdsv0-WJNQrLo8BenbXSz-VqNGdrOVpvBJTLM" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta name="google-site-verification" content="18kz_CCdsv0-WJNQrLo8BenbXSz-VqNGdrOVpvBJTLM" />
-
-    <title>Calendar-On-Demand | Free Google Calendar Desktop Widget for Windows</title>
-    <meta name="description" content="Download Calendar-On-Demand, a free open-source Windows desktop calendar widget with two-way sync. Keep your Google Calendar always visible on your desktop background without alt-tabbing.">
-    
+    <title>Calendar-On-Demand | Your Desktop's New Best Friend</title>
+    <meta name="description" content="Calendar-On-Demand is a free Windows desktop app that puts your Google Calendar always on your screen. No more alt-tabbing. Google verified.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0c;
-            --card-bg: #16161a;
-            --accent: #4f8ef7;
-            --accent2: #a78bfa;
-            --text: #e8e8e8;
-            --text-dim: #999;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --bg:        #080c08;
+            --bg-card:   #111611;
+            --green:     #3a6b3a;
+            --green-glow:rgba(58,107,58,0.18);
+            --text:      #e8ece8;
+            --text-dim:  #7a8f7a;
+            --text-mute: #4a5f4a;
+            --border:    rgba(255,255,255,0.07);
+            --border-green: rgba(58,107,58,0.35);
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            line-height:1.6;
+            overflow-x:hidden;
+            -webkit-font-smoothing:antialiased;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
-
-        /* ── Update Banner ── */
-        .update-banner {
-            background: linear-gradient(90deg, rgba(79,142,247,0.15), rgba(167,139,250,0.15));
-            border-bottom: 1px solid rgba(79,142,247,0.25);
-            padding: 10px 20px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        /* NAV */
+        nav {
+            position:fixed; top:0; left:0; width:100%; z-index:100;
+            padding:20px 0;
+            background:rgba(8,12,8,0.8);
+            backdrop-filter:blur(16px);
+            -webkit-backdrop-filter:blur(16px);
+            border-bottom:1px solid transparent;
+            transition:border-color 0.3s;
         }
-        .update-banner strong { color: var(--text); }
-        .update-banner a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid rgba(79,142,247,0.4);
-            border-radius: 20px;
-            padding: 2px 10px;
-            transition: all 0.2s;
+        nav.scrolled { border-color:var(--border); }
+        .nav-inner {
+            max-width:1080px; margin:0 auto; padding:0 28px;
+            display:flex; justify-content:space-between; align-items:center;
         }
-        .update-banner a:hover { background: rgba(79,142,247,0.15); }
+        .nav-logo {
+            font-weight:700; font-size:1rem; color:var(--text);
+            letter-spacing:-0.3px; text-decoration:none;
+        }
+        .nav-logo span { color:var(--green); }
+        .nav-link {
+            display:flex; align-items:center; gap:7px;
+            color:var(--text-dim); text-decoration:none;
+            font-size:0.875rem; font-weight:500;
+            background:rgba(255,255,255,0.04); padding:8px 18px;
+            border-radius:100px; border:1px solid var(--border);
+            transition:all 0.2s;
+        }
+        .nav-link:hover { color:var(--text); background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.12); }
 
-        /* ── Hero ── */
+        /* HERO */
         header {
-            min-height: 100vh;
-            padding: 120px 0 60px 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background: radial-gradient(circle at 50% 50%, rgba(79, 142, 247, 0.15) 0%, rgba(10, 10, 12, 1) 70%);
+            min-height:100vh; display:flex; flex-direction:column;
+            justify-content:center; align-items:center; text-align:center;
+            padding:120px 28px 80px; position:relative; overflow:hidden;
         }
-
-        .hero-badge {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 6px 16px;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            color: var(--accent);
-            margin-bottom: 24px;
-            font-weight: 600;
-            letter-spacing: 0.02em;
+        .hero-glow {
+            position:absolute; top:50%; left:50%;
+            transform:translate(-50%,-60%);
+            width:700px; height:500px;
+            background:radial-gradient(ellipse at center,rgba(58,107,58,0.22) 0%,transparent 70%);
+            pointer-events:none;
         }
-
+        .verify-badge {
+            display:inline-flex; align-items:center; gap:7px;
+            background:rgba(58,107,58,0.12); border:1px solid var(--border-green);
+            color:#7ec47e; padding:6px 16px; border-radius:100px;
+            font-size:0.82rem; font-weight:500; margin-bottom:28px; letter-spacing:0.01em;
+        }
         h1 {
-            font-size: clamp(2.5rem, 8vw, 4.5rem);
-            font-weight: 800;
-            letter-spacing: -2px;
-            margin-bottom: 16px;
-            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size:clamp(2.8rem,7vw,5rem); font-weight:800;
+            letter-spacing:-2.5px; line-height:1.05; margin-bottom:20px;
+            background:linear-gradient(175deg,#ffffff 0%,#a8baa8 100%);
+            -webkit-background-clip:text; background-clip:text;
+            -webkit-text-fill-color:transparent; max-width:760px;
         }
-
         .tagline {
-            font-size: clamp(1.1rem, 3vw, 1.4rem);
-            color: var(--text-dim);
-            max-width: 600px;
-            margin-bottom: 40px;
+            font-size:clamp(1rem,2.5vw,1.2rem); color:var(--text-dim);
+            max-width:520px; margin-bottom:40px; line-height:1.65;
         }
-
-        .hero-btns {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 20px;
+        .hero-cta {
+            display:flex; gap:12px; align-items:center;
+            flex-wrap:wrap; justify-content:center; margin-bottom:56px;
         }
-
         .btn-primary {
-            background: var(--accent);
-            color: white;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-            box-shadow: 0 10px 20px rgba(79, 142, 247, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display:inline-flex; align-items:center; gap:8px;
+            background:var(--green); color:#fff; padding:14px 28px;
+            border-radius:10px; font-weight:600; text-decoration:none;
+            font-size:0.95rem; transition:background 0.2s,transform 0.15s;
+            box-shadow:0 4px 20px rgba(58,107,58,0.35);
         }
-        .btn-primary:hover { background: #3d7ce0; transform: translateY(-2px); box-shadow: 0 14px 28px rgba(79,142,247,0.4); }
-
+        .btn-primary:hover { background:#4a7e4a; transform:translateY(-1px); }
         .btn-secondary {
-            background: var(--glass);
-            color: var(--text);
-            padding: 16px 28px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 1rem;
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(255,255,255,0.05); color:var(--text-dim);
+            padding:14px 24px; border-radius:10px; font-weight:500;
+            text-decoration:none; font-size:0.95rem;
+            border:1px solid var(--border); transition:all 0.2s;
         }
-        .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
-
-        .kofi-link {
-            display: inline-block;
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
+        .btn-secondary:hover { background:rgba(255,255,255,0.08); color:var(--text); border-color:rgba(255,255,255,0.12); }
+        .btn-changelog {
+            display:inline-flex; align-items:center;
+            color:var(--text-mute); text-decoration:none;
+            font-size:0.85rem; font-weight:500; padding:8px 4px;
+            transition:color 0.2s;
         }
-        .kofi-link:hover { color: var(--text); }
+        .btn-changelog:hover { color:var(--text-dim); }
 
-        /* ── Features ── */
-        .features { padding: 100px 0; }
-        .section-title { text-align: center; margin-bottom: 60px; }
-        .section-title h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 12px; }
+        /* Trust pills */
+        .trust-row {
+            display:flex; gap:10px; align-items:center;
+            justify-content:center; flex-wrap:wrap; margin-bottom:64px;
+        }
+        .trust-pill {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(255,255,255,0.04); border:1px solid var(--border);
+            color:var(--text-dim); padding:5px 14px; border-radius:100px;
+            font-size:0.8rem; font-weight:500;
+        }
+        .trust-dot { color:var(--text-mute); font-size:0.7rem; }
+
+        /* Hero screenshot */
+        .hero-screenshot { width:100%; max-width:920px; margin:0 auto; position:relative; }
+        .hero-screenshot::before {
+            content:''; position:absolute; inset:-1px; border-radius:17px;
+            background:linear-gradient(135deg,rgba(58,107,58,0.3),rgba(255,255,255,0.04),transparent);
+            z-index:1; pointer-events:none;
+        }
+        .hero-screenshot img {
+            width:100%; border-radius:16px; border:1px solid var(--border);
+            box-shadow:0 0 0 1px rgba(0,0,0,0.5),0 40px 80px rgba(0,0,0,0.7),0 0 60px rgba(58,107,58,0.08);
+            display:block; position:relative; z-index:0;
+        }
+
+        /* Container */
+        .container { max-width:1080px; margin:0 auto; padding:0 28px; }
+
+        /* Section */
         .section-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--accent);
-            margin-bottom: 12px;
+            display:inline-block; color:#7ec47e; font-size:0.78rem;
+            font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px;
         }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 24px;
+        .section-title {
+            font-size:clamp(1.8rem,4vw,2.6rem); font-weight:700;
+            letter-spacing:-1px; margin-bottom:14px; line-height:1.15;
         }
+        .section-sub { color:var(--text-dim); font-size:1rem; max-width:480px; line-height:1.65; }
 
+        /* Features */
+        .features { padding:100px 0; border-top:1px solid var(--border); }
+        .features-header { text-align:center; margin-bottom:60px; }
+        .features-header .section-sub { margin:0 auto; }
+        .feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; }
         .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 32px;
-            border-radius: 20px;
-            transition: border-color 0.3s, transform 0.2s;
+            background:var(--bg-card); border:1px solid var(--border);
+            padding:28px; border-radius:16px; transition:border-color 0.25s,background 0.25s;
         }
-        .feature-card:hover { border-color: var(--accent); transform: translateY(-4px); }
-
+        .feature-card:hover { border-color:var(--border-green); background:rgba(58,107,58,0.05); }
         .feature-icon {
-            width: 48px; height: 48px;
-            background: rgba(79, 142, 247, 0.1);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
+            width:44px; height:44px; background:rgba(58,107,58,0.12);
+            border-radius:10px; display:flex; align-items:center; justify-content:center;
+            font-size:1.3rem; margin-bottom:18px;
         }
+        .feature-card h3 { font-size:1rem; font-weight:600; margin-bottom:8px; }
+        .feature-card p { color:var(--text-dim); font-size:0.875rem; line-height:1.6; }
 
-        .feature-card h3 { font-size: 1.15rem; margin-bottom: 10px; }
-        .feature-card p { color: var(--text-dim); font-size: 0.95rem; }
-
-        /* ── Screenshot ── */
-        .preview { padding: 60px 0; text-align: center; }
-        .screenshot-container { width: 100%; max-width: 900px; margin: 0 auto; text-align: center; }
-        .screenshot {
-            width: 100%;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+        /* Secondary screenshot */
+        .preview { padding:80px 0 100px; border-top:1px solid var(--border); }
+        .preview-header { margin-bottom:48px; }
+        .preview-img {
+            width:100%; border-radius:14px; border:1px solid var(--border);
+            box-shadow:0 24px 60px rgba(0,0,0,0.5); display:block;
         }
-        .screenshot-caption { color: var(--text-dim); font-size: 0.9rem; font-style: italic; }
+        .preview-caption { margin-top:16px; color:var(--text-mute); font-size:0.85rem; font-style:italic; }
 
-        .os-toggle {
-            display: inline-flex;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 4px;
-            margin-bottom: 30px;
+        /* Quote */
+        .quote-section { padding:80px 0; border-top:1px solid var(--border); }
+        .quote-card {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:20px; padding:36px 40px; max-width:560px; position:relative;
         }
-        .os-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            padding: 8px 24px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 26px;
-            cursor: pointer;
-            transition: all 0.2s;
+        .quote-mark {
+            position:absolute; top:12px; left:20px; font-size:4rem;
+            color:rgba(58,107,58,0.15); font-family:Georgia,serif; line-height:1;
         }
-        .os-btn.active {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 4px 12px rgba(79, 142, 247, 0.3);
+        .quote-text {
+            font-size:1.05rem; font-style:italic; color:var(--text);
+            margin-bottom:20px; position:relative; z-index:1; line-height:1.6;
         }
-        .os-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.05); }
-        .preview-pane { display: none; animation: fadeIn 0.3s ease; }
-        .preview-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .quote-author {
+            display:flex; align-items:center; gap:12px;
+            border-top:1px solid var(--border); padding-top:18px;
+        }
+        .quote-author img { width:40px; height:40px; border-radius:50%; border:1px solid var(--border); }
+        .author-name { font-size:0.9rem; font-weight:600; }
+        .author-role { font-size:0.8rem; color:var(--text-dim); }
 
-        /* ── Changelog Section ── */
-        .changelog { padding: 80px 0; }
-        .changelog-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 20px; }
-
-        .changelog-item {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px 28px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 20px;
-            align-items: start;
-            transition: border-color 0.2s, transform 0.2s;
+        /* CTA */
+        .cta-section {
+            padding:120px 0; border-top:1px solid var(--border); text-align:center;
+            background:radial-gradient(ellipse at 50% 0%,rgba(58,107,58,0.1) 0%,transparent 65%);
         }
-        .changelog-item:hover { border-color: rgba(79,142,247,0.4); transform: translateX(4px); }
-        .changelog-item.latest { border-color: rgba(79,142,247,0.5); background: linear-gradient(135deg, #16161a, #1a1a24); }
+        .cta-section h2 { font-size:clamp(2rem,5vw,3.2rem); font-weight:800; letter-spacing:-1.5px; margin-bottom:14px; }
+        .cta-section p { color:var(--text-dim); font-size:1.05rem; margin-bottom:36px; }
+        .cta-meta { margin-top:16px; font-size:0.8rem; color:var(--text-mute); }
 
-        .cl-version-block { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 80px; }
+        /* Footer */
+        footer { padding:40px 0; border-top:1px solid var(--border); text-align:center; font-size:0.875rem; color:var(--text-mute); }
+        footer a { color:var(--text-dim); text-decoration:none; transition:color 0.2s; }
+        footer a:hover { color:var(--text); }
+        .footer-links { display:flex; gap:20px; justify-content:center; align-items:center; margin-top:16px; }
+        .footer-sep { color:var(--border); }
+
+        /* PH */
+        .ph-wrap { margin-bottom:28px; }
+        .ph-wrap img { transition:transform 0.2s; }
+        .ph-wrap img:hover { transform:scale(1.02); }
+
+        /* Changelog */
+        .changelog-section { padding:80px 0 60px; border-top:1px solid var(--border); }
+        .changelog-list { display:flex; flex-direction:column; gap:0; }
+        .cl-item {
+            display:flex; gap:24px; padding:20px 0;
+            border-bottom:1px solid var(--border);
+            transition:opacity 0.3s;
+        }
+        .cl-item:last-child { border-bottom:none; }
+        .cl-hidden { display:none; }
         .cl-version {
-            font-size: 1.1rem; font-weight: 700; color: var(--accent);
-            background: rgba(79,142,247,0.12);
-            padding: 4px 10px; border-radius: 8px;
-            white-space: nowrap;
+            min-width:160px; font-size:0.9rem; font-weight:600;
+            color:var(--text); display:flex; align-items:flex-start;
+            gap:8px; flex-wrap:wrap; padding-top:2px;
         }
-        .cl-latest-badge {
-            font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-            background: linear-gradient(90deg, var(--accent), var(--accent2));
-            color: #000;
-            padding: 2px 8px; border-radius: 20px;
+        .cl-date { font-size:0.78rem; color:var(--text-mute); font-weight:400; }
+        .cl-tag {
+            font-size:0.7rem; padding:2px 8px; border-radius:100px;
+            background:rgba(200,80,80,0.15); color:#e08080;
+            border:1px solid rgba(200,80,80,0.25); font-weight:500;
         }
-        .cl-date { font-size: 0.75rem; color: var(--text-dim); }
+        .cl-body { color:var(--text-dim); font-size:0.9rem; line-height:1.65; flex:1; }
+        .changelog-toggle {
+            margin-top:28px;
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(255,255,255,0.04); border:1px solid var(--border);
+            color:var(--text-dim); padding:10px 20px; border-radius:100px;
+            font-size:0.875rem; font-weight:500; cursor:pointer;
+            transition:all 0.2s; font-family:inherit;
+        }
+        .changelog-toggle:hover { background:rgba(255,255,255,0.07); color:var(--text); border-color:rgba(255,255,255,0.12); }
+        .changelog-toggle.open svg { transform:rotate(180deg); }
+        .changelog-toggle svg { transition:transform 0.3s; }
 
-        .cl-body h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; color: var(--text); }
-        .cl-notes { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-        .cl-notes li { font-size: 0.875rem; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; }
-        .cl-notes li::before { content: '•'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
-        .cl-notes li.new::before { content: '✦'; color: #4ade80; }
-        .cl-notes li.fix::before { content: '⚙'; color: #facc15; }
-        .cl-notes li.improve::before { content: '↑'; color: var(--accent2); }
-
-        .cl-download {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: var(--accent); color: white;
-            text-decoration: none; padding: 8px 16px;
-            border-radius: 8px; font-size: 0.85rem; font-weight: 600;
-            transition: all 0.2s; white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(79,142,247,0.25);
+        @media (max-width:640px) {
+            h1 { letter-spacing:-1.5px; }
+            .hero-cta { flex-direction:column; width:100%; }
+            .btn-primary, .btn-secondary { width:100%; text-align:center; }
+            .quote-card { padding:28px 24px; }
+            .cl-item { flex-direction:column; gap:6px; }
+            .cl-version { min-width:unset; }
         }
-        .cl-download:hover { background: #3d7ce0; transform: translateY(-1px); }
-        .cl-download.old {
-            background: transparent; color: var(--text-dim);
-            border: 1px solid var(--border);
-            box-shadow: none;
-        }
-        .cl-download.old:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
-
-        /* ── CTA ── */
-        .cta {
-            padding: 120px 0;
-            text-align: center;
-            background: linear-gradient(0deg, rgba(79,142,247,0.05) 0%, rgba(10,10,12,1) 100%);
-        }
-        .cta p { margin-bottom: 30px; font-size: 1.2rem; color: var(--text-dim); }
-
-        /* ── Footer ── */
-        footer {
-            padding: 40px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-dim);
-        }
-        .footer-kofi { margin-top: 8px; font-size: 0.85rem; }
-        .footer-kofi a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
-        .footer-kofi a:hover { color: var(--text); }
-
-        /* ── Mobile ── */
-        @media (max-width: 768px) {
-            h1 { font-size: 3rem; }
-            .features { padding: 60px 0; }
-            .changelog-item { grid-template-columns: 1fr; gap: 14px; }
-            .cl-download { width: 100%; justify-content: center; }
-        }
-
-        /* ── New Elements ── */
-        .feedback-floating {
-            position: absolute;
-            top: 60px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            background: var(--glass);
-            padding: 10px 20px;
-            border-radius: 100px;
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-            z-index: 100;
-        }
-
-        .feedback-floating:hover {
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .ph-badge {
-            display: inline-block;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
-        
-        .ph-badge:hover {
-            transform: scale(1.02);
-        }
-
-        .review-badge {
-            margin-top: 40px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px 24px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: left;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .review-badge::before {
-            content: '"';
-            position: absolute;
-            top: 5px;
-            left: 15px;
-            font-size: 4rem;
-            color: var(--glass);
-            font-family: serif;
-            line-height: 1;
-            z-index: 0;
-        }
-
-        .review-content {
-            font-size: 1.05rem;
-            color: var(--text);
-            font-style: italic;
-            margin-bottom: 16px;
-            position: relative;
-            z-index: 1;
-            line-height: 1.5;
-        }
-
-        .review-author {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-top: 1px solid var(--border);
-            padding-top: 16px;
-        }
-
-        .review-author img {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .author-info {
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-        }
-
-        .author-info strong {
-            font-size: 0.95rem;
-            color: var(--text);
-        }
-
-        .author-info span {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-        }
-
-        /* macOS Guide Modal CSS */
-        .mac-guide-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .mac-guide-modal.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .mac-guide-content {
-            background: rgba(20, 20, 25, 0.95);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 600px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-            position: relative;
-        }
-        
-        .mac-guide-modal.show .mac-guide-content {
-            transform: translateY(0);
-        }
-
-        .mac-guide-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .mac-guide-close:hover { color: white; }
-
-        .guide-step {
-            margin-bottom: 25px;
-        }
-        .guide-step h4 {
-            color: var(--accent);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .guide-step p {
-            font-size: 0.95rem;
-            color: var(--text);
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-        
-        .code-snippet {
-            display: flex;
-            align-items: center;
-            background: #0f0f14;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-top: 10px;
-        }
-        .code-snippet code {
-            flex-grow: 1;
-            font-family: monospace;
-            color: #a8c7fa;
-            font-size: 0.9rem;
-            user-select: all;
-            overflow-x: auto;
-        }
-        .copy-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: background 0.2s;
-            margin-left: 10px;
-            flex-shrink: 0;
-        }
-        .copy-btn:hover { background: rgba(255,255,255,0.2); }
-        .copy-btn.copied { background: var(--success); color: #000; }
     </style>
 </head>
 <body>
 
-    <div class="update-banner">
-        🎉 <strong>v1.3.13 is out!</strong> - Fix: Removed forced account chooser screen during automatic Google login<a href="#changelog">See what's new →</a>
-    </div>
-
-    <a href="https://tally.so/r/ODZJJR" target="_blank" class="feedback-floating">
-        <span>Leave Feedback</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-    </a>
+    <nav id="main-nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">Calendar<span>·</span>On<span>·</span>Demand</a>
+            <a href="https://tally.so/r/ODZJJR" target="_blank" rel="noopener" class="nav-link">
+                Leave Feedback
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </a>
+        </div>
+    </nav>
 
     <header>
-        <div class="container">
-            <div style="background: rgba(255, 171, 0, 0.1); border: 1px solid rgba(255, 171, 0, 0.3); color: #e6a23c; padding: 16px 24px; border-radius: 12px; font-size: 0.95rem; margin-bottom: 30px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.5; text-align: left; box-shadow: 0 4px 20px rgba(230, 162, 60, 0.05); backdrop-filter: blur(10px);">
-                <strong style="color: #f3d19e; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 1.05rem;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    Google Verification in Progress
-                </strong>
-                The app is currently undergoing official Google security verification, and we have reached our temporary 100-user limit.
-                <div style="margin-top: 12px; margin-bottom: 4px;">
-                    <a href="https://tally.so/r/dWJyoV" target="_blank" style="display: inline-block; background: #e6a23c; color: #1a1a1a; padding: 8px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: transform 0.2s;">
-                        🔔 Join the Waitlist for Early Access
-                    </a>
-                </div>
-                <div style="opacity: 0.85; font-size: 0.85rem; margin-top: 12px; border-top: 1px solid rgba(230, 162, 60, 0.2); padding-top: 10px;">
-                    * You can still download the app below, but new Google sign-ins will be blocked until verification is complete.
-                </div>
-            </div>
+        <div class="hero-glow"></div>
 
-            <div class="hero-badge">✦ Windows & Mac Desktop App · Free & Open Source</div>
-            
-            <a href="https://www.producthunt.com/posts/calendar-on-demand" target="_blank" class="ph-badge">
-                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=474020&theme=dark" alt="Calendar-On-Demand - Featured on Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" onerror="this.src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=calendar-on-demand&theme=dark';" />
+        <div class="verify-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Google verification process completed
+        </div>
+
+        <div class="ph-wrap">
+            <a href="https://www.producthunt.com/posts/calendar-on-demand" target="_blank" rel="noopener">
+                <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=474020&theme=dark" alt="Calendar-On-Demand on Product Hunt" width="220" height="48" onerror="this.style.display='none'">
             </a>
+        </div>
 
-            <h1>Calendar-On-Demand</h1>
-            <p class="tagline">Your calendar. Always on your desktop. No more alt-tabbing to check your schedule. Just glance and go.</p>
-            
-            <div class="hero-btns" style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
-                <a href="https://tally.so/r/dWJyoV" target="_blank" class="btn-primary" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #1a1a1a; font-size: 1.15rem; padding: 18px 40px; box-shadow: 0 10px 30px rgba(253, 160, 133, 0.3); border: none;">
-                    🔔 Join Early Access Waitlist <span style="font-size: 0.85em; opacity: 0.8; font-weight: normal; margin-left: 6px;">(If you get an error during Google Login)</span>
-                </a>
-                
-                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px;">
-                    <a id="hero-download-btn" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.13/Calendar-On-Demand-Setup-1.3.13.exe" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border); padding: 12px 24px; font-size: 1rem;">
-                        ⬇ Windows <span style="opacity:0.75;font-size:0.85em;">(v1.3.13)</span>
-                    </a>
-                    <a id="hero-download-mac-btn" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.6/Calendar-On-Demand-Mac-1.2.6.dmg" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border); padding: 12px 24px; font-size: 1rem;">
-                        ⬇ Mac <span style="opacity:0.75;font-size:0.85em;">(v1.3.13)</span>
-                    </a>
-                    <a href="#changelog" class="btn-secondary" style="padding: 12px 24px; font-size: 1rem;">📋 Changelog</a>
-                </div>
-            </div>
-            <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 30px;">
-                <a href="#" id="open-mac-guide" style="color: var(--accent); text-decoration: none; font-weight: 500;">Need help installing on Mac? 🍎</a>
-            </div>
-            
-            <div class="review-badge">
-                <div class="review-content">
-                    "Aero Glass Google Calendar widget for Windows desktop is a clever idea."
-                </div>
-                <div class="review-author">
-                    <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=2c3e50&color=fff" alt="Zvonimir Sabljic" />
-                    <div class="author-info">
-                        <strong>Zvonimir Sabljic</strong>
-                        <span>Founder of Pazi</span>
-                    </div>
-                </div>
-            </div>
+        <h1>Your Calendar.<br>Always There.</h1>
+        <p class="tagline">No more alt-tabbing to check your schedule. Your Google Calendar lives on your desktop — always visible, always in sync.</p>
 
-            <a href="https://ko-fi.com/kidiksentrik" target="_blank" class="kofi-link" style="margin-top: 30px;">It's free. But if it saved you 5 minutes today, buy me a coffee ☕</a>
+        <div class="hero-cta">
+            <a href="#" id="hero-win-btn" class="btn-primary" onclick="triggerDownload('win');return false;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                Download for Windows
+            </a>
+            <a href="#" id="hero-mac-btn" class="btn-secondary" onclick="triggerDownload('mac');return false;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+                Download for Mac
+            </a>
+            <a href="#changelog" class="btn-changelog">Changelog</a>
+        </div>
+
+        <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener" style="color:var(--text-mute);font-size:0.85rem;text-decoration:none;transition:color 0.2s;margin-bottom:40px;" onmouseover="this.style.color='var(--text-dim)'" onmouseout="this.style.color='var(--text-mute)'">
+            It's free. But if it saved you 5 minutes today, buy me a coffee ☕
+        </a>
+
+        <div class="trust-row">
+            <span class="trust-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                90+ Users
+            </span>
+            <span class="trust-dot">·</span>
+            <span class="trust-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Google Verified
+            </span>
+            <span class="trust-dot">·</span>
+            <span class="trust-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Windows 10 &amp; 11
+            </span>
+        </div>
+
+        <div class="hero-screenshot">
+            <img src="./2026-08-26 08_51_45-Calendar-On-Demand.png" alt="Calendar-On-Demand desktop widget showing September 2026 with colorful events" loading="eager">
         </div>
     </header>
 
-    <main class="container">
-        <section id="features" class="features">
-            <div class="section-title">
-                <div class="section-label">Features</div>
-                <h2>Designed for Focus</h2>
-                <p style="color: var(--text-dim);">Minimalist tools that don't get in your way.</p>
+    <section class="features">
+        <div class="container">
+            <div class="features-header">
+                <span class="section-label">Features</span>
+                <h2 class="section-title">Designed for Focus</h2>
+                <p class="section-sub">Minimalist tools that stay out of your way — and your line of sight.</p>
             </div>
             <div class="feature-grid">
                 <div class="feature-card">
@@ -614,698 +357,224 @@
                 <div class="feature-card">
                     <div class="feature-icon">🎨</div>
                     <h3>10 Pastel Colorways</h3>
-                    <p>Categorize your events with 10 carefully curated pastel colors designed for perfect text readability.</p>
+                    <p>Categorize your events with 10 carefully curated pastel colors, designed for perfect readability.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔄</div>
                     <h3>Two-way Sync</h3>
-                    <p>Always in sync with Google Calendar. Changes you make here reflect everywhere, instantly.</p>
+                    <p>Always in sync with Google Calendar. Changes made here reflect everywhere, instantly.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📅</div>
                     <h3>Simple Scheduling</h3>
-                    <p>Just click and add your schedule with proper time & timezone — pushed straight to Google Calendar.</p>
+                    <p>Click and add your event — it lands on Google Calendar with the correct timezone, automatically.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔗</div>
                     <h3>Magic URLs</h3>
-                    <p>One-click to jump straight into Google Meet, Zoom, or event details. Built for efficiency.</p>
+                    <p>One click to jump into Google Meet, Zoom, or event details. Built for efficiency.</p>
                 </div>
-            </div>
-        </section>
-
-        <section class="preview">
-            <div class="os-toggle">
-                <button class="os-btn active" data-target="preview-win">Windows</button>
-                <button class="os-btn" data-target="preview-mac">macOS</button>
-            </div>
-            
-            <div class="screenshot-container preview-pane active" id="preview-win">
-                <img src="./screenshot.png" alt="Calendar-On-Demand Screenshot on Windows" class="screenshot">
-                <p class="screenshot-caption">Real Google Calendar data. Always on your Windows desktop.</p>
-            </div>
-            
-            <div class="screenshot-container preview-pane" id="preview-mac">
-                <img src="./mac-screenshot-full.png" alt="Calendar-On-Demand Screenshot on macOS" class="screenshot">
-                <div style="margin-top: 20px;">
-                    <img src="./mac-screenshot.png" alt="Calendar-On-Demand close-up on macOS" class="screenshot" style="max-width: 700px; margin: 0 auto;">
-                </div>
-                <p class="screenshot-caption">Seamlessly integrated into your Mac workspace.</p>
-            </div>
-        </section>
-
-        <section id="changelog" class="changelog">
-            <div class="section-title">
-                <div class="section-label">Release History</div>
-                <h2>What's New</h2>
-                <p style="color: var(--text-dim);">Every update, documented. Download any version below.</p>
-            </div>
-
-            <ul class="changelog-list">
-
-                <li class="changelog-item latest">
-                    <div class="cl-version-block">
-                        <span class="cl-version">v1.3.13</span>
-                        <span class="cl-latest-badge">Latest</span>
-                        <span class="cl-date">2026-08-22</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix: Removed forced account chooser screen during automatic Google login</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix: Removed forced account chooser screen during automatic Google login</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v1313-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.13/Calendar-On-Demand-Setup-1.3.13.exe" class="cl-download">&#x2b07; Windows</a>
-                        <a id="dl-v1313-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.13/Calendar-On-Demand-Mac-1.3.13.dmg" class="cl-download" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.12</span>
-                        <span class="cl-date">2026-08-22</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix NSIS update error where app could not be closed</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix NSIS update error where app could not be closed</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v1312-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.12/Calendar-On-Demand-Setup-1.3.12.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v1312-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.12/Calendar-On-Demand-Mac-1.3.12.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.11</span>
-                        <span class="cl-date">2026-08-22</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix calendar toggle state and auto-start at boot</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix calendar toggle state and auto-start at boot</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v1311-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.11/Calendar-On-Demand-Setup-1.3.11.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v1311-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.11/Calendar-On-Demand-Mac-1.3.11.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.10</span>
-                        <span class="cl-date">2026-08-21</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix crash on consecutive requests to OAuth server</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix crash on consecutive requests to OAuth server</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v1310-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.10/Calendar-On-Demand-Setup-1.3.10.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v1310-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.10/Calendar-On-Demand-Mac-1.3.10.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.9</span>
-                        <span class="cl-date">2026-08-21</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix OAuth redirect query string parsing to prevent connection hanging</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix OAuth redirect query string parsing to prevent connection hanging</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v139-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.9/Calendar-On-Demand-Setup-1.3.9.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v139-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.9/Calendar-On-Demand-Mac-1.3.9.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.8</span>
-                        <span class="cl-date">2026-08-21</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix IPv6/IPv4 localhost resolution issue causing infinite loading on OAuth consent</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix IPv6/IPv4 localhost resolution issue causing infinite loading on OAuth consent</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v138-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.8/Calendar-On-Demand-Setup-1.3.8.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v138-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.8/Calendar-On-Demand-Mac-1.3.8.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.7</span>
-                        <span class="cl-date">2026-08-21</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix OAuth loopback port issue on login</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix OAuth loopback port issue on login</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v137-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.7/Calendar-On-Demand-Setup-1.3.7.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v137-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.7/Calendar-On-Demand-Mac-1.3.7.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.6</span>
-                        <span class="cl-date">2026-08-21</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Migrated Google OAuth flow from embedded popup to the System Default Browser. Complies with Google's latest security policies and resolves issue where the URL bar was hidden during login.</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Migrated Google OAuth flow from embedded popup to the System Default Browser. Complies with Google's latest security policies and resolves issue where the URL bar was hidden during login.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v136-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.6/Calendar-On-Demand-Setup-1.3.6.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v136-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.6/Calendar-On-Demand-Mac-1.3.6.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.5</span>
-                        <span class="cl-date">2026-08-20</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Redesigned color picker UI with grid layout and premium selection effects</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Redesigned color picker UI with grid layout and premium selection effects</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v135-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.5/Calendar-On-Demand-Setup-1.3.5.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v135-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.5/Calendar-On-Demand-Mac-1.3.5.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.4</span>
-                        <span class="cl-date">2026-08-20</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Added vibrant color options for calendar event highlights</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Added vibrant color options for calendar event highlights</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v134-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.4/Calendar-On-Demand-Setup-1.3.4.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v134-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.4/Calendar-On-Demand-Mac-1.3.4.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.3</span>
-                        <span class="cl-date">2026-08-19</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Enhancement: Read-only calendar events (like Public Holidays) are now hidden from the Quick Add / Todo modal to keep your task list clean, while remaining visible on the main calendar grid.</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Enhancement: Read-only calendar events (like Public Holidays) are now hidden from the Quick Add / Todo modal to keep your task list clean, while remaining visible on the main calendar grid.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v133-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.3/Calendar-On-Demand-Setup-1.3.3.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v133-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.3/Calendar-On-Demand-Mac-1.3.3.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.2</span>
-                        <span class="cl-date">2026-08-19</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Critical Hotfix: Resolved a fatal app crash on startup (blank UI) introduced in v1.3.1.</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Critical Hotfix: Resolved a fatal app crash on startup (blank UI) introduced in v1.3.1.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v132-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.2/Calendar-On-Demand-Setup-1.3.2.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v132-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.2/Calendar-On-Demand-Mac-1.3.2.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.1</span>
-                        <span class="cl-date">2026-08-19</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Hotfix: Fixed an issue where checking a task and clicking outside the modal would sometimes revert the task status. Additionally, added scroll functionality to the settings modal for smaller screens and Mac devices.</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Hotfix: Fixed an issue where checking a task and clicking outside the modal would sometimes revert the task status. Additionally, added scroll functionality to the settings modal for smaller screens and Mac devices.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v131-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.1/Calendar-On-Demand-Setup-1.3.1.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v131-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.1/Calendar-On-Demand-Mac-1.3.1.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.3.0</span>
-                        <span class="cl-date">2026-08-19</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Added Multi-Calendar support (Settings -> Calendars) to display all your Google Calendars (Holidays, Work, etc) cleanly.</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Added Multi-Calendar support (Settings -> Calendars) to display all your Google Calendars (Holidays, Work, etc) cleanly.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v130-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.0/Calendar-On-Demand-Setup-1.3.0.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v130-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.0/Calendar-On-Demand-Mac-1.3.0.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.2.6</span>
-                        <span class="cl-date">2026-08-16</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Added 10 pastel colorways for calendar events to improve text readability and customization options.</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Added 10 pastel colorways for calendar events to improve text readability and customization options.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v126-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.6/Calendar-On-Demand-Setup-1.2.6.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v126-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.6/Calendar-On-Demand-Mac-1.2.6.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.2.5</span>
-                        <span class="cl-date">2026-08-09</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Fix bug where a blank white window appears upon waking the PC from sleep mode (improved error handling for temporary network disconnections)</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fix bug where a blank white window appears upon waking the PC from sleep mode (improved error handling for temporary network disconnections)</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v125-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.5/Calendar-On-Demand-Setup-1.2.5.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v125-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.5/Calendar-On-Demand-Mac-1.2.5.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.2.4</span>
-                        <span class="cl-date">2026-08-06</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>True Logout & Account Switching</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Added a true "Logout / Switch Account" button in settings.</li>
-                            <li class="fix">Completely wipes embedded browser cookies to allow switching Google Accounts properly.</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v124-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.4/Calendar-On-Demand-Setup-1.2.4.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v124-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.6/Calendar-On-Demand-Mac-1.2.6.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.2.3</span>
-                        <span class="cl-date">2026-08-06</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Cross-Platform: Mac Support 🍏</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Calendar-On-Demand is now officially available for macOS!</li>
-                            <li class="fix">Fixed an issue where the app would crash immediately upon launch on macOS</li>
-                            <li class="new">Automated cross-platform builds via GitHub Actions</li>
-                        </ul>
-                    </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a id="dl-v123-win" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.3/Calendar-On-Demand-Setup-1.2.3.exe" class="cl-download old">&#x2b07; Windows</a>
-                        <a id="dl-v123-mac" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.3/Calendar-On-Demand-Mac-1.2.3.dmg" class="cl-download old">&#x2b07; Mac</a>
-                    </div>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.1.0</span>
-                        <span class="cl-date">2026-07-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Meeting Join button: events with Google Meet now show a Join button directly in the calendar widget</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Meeting Join button: events with Google Meet now show a Join button directly in the calendar widget</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v110" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.1.0/Calendar-On-Demand-Setup-1.1.0.exe" class="cl-download old">&#x2b07; Download</a>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.11</span>
-                        <span class="cl-date">2026-07-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Auto-update check now runs every 24 hours while the app is open</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Auto-update check now runs every 24 hours while the app is open</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v1011" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.11/Calendar-On-Demand-Setup-1.0.11.exe" class="cl-download old">&#x2b07; Download</a>
-                </li>
-
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.10</span>
-                        <span class="cl-date">2026-07-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Bug Fix: Event Deletion</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Deleting an event via the X button no longer recreates it when clicking outside the popup</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v1010" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.10/Calendar-On-Demand-Setup-1.0.10.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.9</span>
-                        <span class="cl-date">2026-07-25</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>In-App Update Indicators</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Added in-app update notification indicators inside the calendar widget UI</li>
-                            <li class="new">Implemented clickable updates to trigger instant quit-and-install from the widget</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v109" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.9/Calendar-On-Demand-Setup-1.0.9.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.8</span>
-                        <span class="cl-date">2026-07-25</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Sync Optimization & Reliability</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Increased background sync interval to 15 minutes to reduce API usage</li>
-                            <li class="new">Added window focus event listener to trigger synchronization after 1 minute has elapsed</li>
-                            <li class="improve">Implemented exponential backoff retry mechanism (1m ➔ 2m ➔ 4m ➔ 15m) for API errors</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v108" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.8/Calendar-On-Demand-Setup-1.0.8.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.7</span>
-                        <span class="cl-date">2026-06-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Auto-Update & Startup Flow</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Enabled automatic update checks on application startup</li>
-                            <li class="fix">Updated release script to package and upload update metadata files (latest.yml, blockmap) to GitHub</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v107" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.7/Calendar-On-Demand-Setup-1.0.7.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.6</span>
-                        <span class="cl-date">2026-06-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Build Directory & Output Standardizing</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Standardized installer filename to strictly match web download URLs</li>
-                            <li class="fix">Cleaned dist directory before packaging to prevent uploading old release artifacts</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v106" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.6/Calendar-On-Demand-Setup-1.0.6.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.5</span>
-                        <span class="cl-date">2026-06-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Installer & Release Fixes</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fixed official website download links resulting in 404 errors by standardizing build file naming</li>
-                            <li class="improve">Cleaned up release log output to strictly use English, preventing encoding issues</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v105" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.5/Calendar-On-Demand-Setup-1.0.5.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.4</span>
-                        <span class="cl-date">2026-06-27</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Position Lock & Wakeup Auth Fixes</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fixed window resizing bug when position is locked</li>
-                            <li class="fix">Fixed blank white auth window flashing on sleep wakeup</li>
-                            <li class="new">Added app version display in the settings panel</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v104" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.4/Calendar-On-Demand-Setup-1.0.4.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.2</span>
-                        <span class="cl-date">2026-06-20</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Sound Feedback & Layout Improvements</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Task completion now plays a satisfying chime sound via Web Audio API</li>
-                            <li class="new">Clicking any event or blank area now opens a unified edit/add panel</li>
-                            <li class="improve">Long event titles now wrap instead of overflowing into adjacent day cells</li>
-                            <li class="improve">Optimistic UI updates — checkboxes respond instantly without waiting for server</li>
-                            <li class="fix">Removed unused scrollbar that appeared on calendar event hover</li>
-                            <li class="fix">Removed broken "More Options" button from event editor</li>
-                            <li class="fix">Event color filter now correctly updates text contrast</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v102" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.2/Calendar-On-Demand.Setup.1.0.2.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.1</span>
-                        <span class="cl-date">2026-05-15</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Bug Fixes & Auth Stability</h3>
-                        <ul class="cl-notes">
-                            <li class="fix">Fixed multiple login windows appearing on startup</li>
-                            <li class="fix">Improved Google auth token persistence</li>
-                            <li class="improve">Landing page and docs updated with Ko-fi support links</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v101" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.1/Calendar-On-Demand-Setup-1.0.1.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-                <li class="changelog-item">
-                    <div class="cl-version-block">
-                        <span class="cl-version" style="color:var(--text-dim);background:rgba(255,255,255,0.05);">v1.0.0</span>
-                        <span class="cl-date">2026-04-01</span>
-                    </div>
-                    <div class="cl-body">
-                        <h3>Initial Public Release 🎉</h3>
-                        <ul class="cl-notes">
-                            <li class="new">Google Calendar two-way sync</li>
-                            <li class="new">Aero glass desktop widget</li>
-                            <li class="new">Click-to-add scheduling with timezone support</li>
-                            <li class="new">Magic URL detection for Meet/Zoom</li>
-                            <li class="new">System tray integration & auto-launch</li>
-                        </ul>
-                    </div>
-                    <a id="dl-v100" href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.0.0/Calendar-On-Demand-Setup-1.0.0.exe" class="cl-download old">⬇ Download</a>
-                </li>
-
-            </ul>
-        </section>
-    </main>
-
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to reclaim your desktop?</h2>
-            <p>Get Calendar-On-Demand for free. No ads, no telemetry.</p>
-            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.3.13/Calendar-On-Demand-Setup-1.3.13.exe" class="btn-primary" style="margin-right: 10px;">
-                ⬇ Download for Windows <span style="font-size: 0.8em; opacity: 0.8;">(v1.3.13)</span>
-            </a>
-            <a href="https://github.com/kidiksentrik/Calendar-On-Demand/releases/download/v1.2.6/Calendar-On-Demand-Mac-1.2.6.dmg" class="btn-primary" style="background: rgba(255, 255, 255, 0.1); color: var(--text-color); margin-right: 10px;">
-                ⬇ Download for Mac <span style="font-size: 0.8em; opacity: 0.8;">(v1.3.13)</span>
-            </a>
-            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim);">
-                Supports Windows 10 &amp; 11, and macOS<br><br>
-                <a href="#" id="open-mac-guide-footer" style="color: var(--text-dim); text-decoration: underline;">macOS Installation Guide</a>
             </div>
         </div>
     </section>
 
-    <!-- macOS Guide Modal -->
-    <div class="mac-guide-modal" id="mac-guide-modal">
-        <div class="mac-guide-content">
-            <button class="mac-guide-close" id="mac-guide-close">&times;</button>
-            <h3 style="margin-bottom: 25px; font-size: 1.5rem; text-align: left;">macOS Installation Guide 🍎</h3>
-            
-            <div class="guide-step">
-                <h4>1. Install the App</h4>
-                <p>Double-click the downloaded <strong>.dmg</strong> file, and drag the <strong>Calendar-On-Demand</strong> icon into your <strong>Applications</strong> folder.</p>
+    <section class="preview">
+        <div class="container">
+            <div class="preview-header">
+                <span class="section-label">In Action</span>
+                <h2 class="section-title">Real data, live on your desktop</h2>
+                <p class="section-sub">Syncs directly with your Google Calendar. What you see here is what you've got.</p>
             </div>
-            
-            <div class="guide-step">
-                <h4>2. Unlock the App (First time only)</h4>
-                <p>Because this app is free and not signed through Apple's paid developer program, macOS will initially block it. To unlock it safely, open the <strong>Terminal</strong> app and run this command:</p>
-                <div class="code-snippet">
-                    <code id="mac-command">xattr -cr /Applications/Calendar-On-Demand.app</code>
-                    <button class="copy-btn" id="copy-mac-command">Copy</button>
+            <img src="./screenshot.png" alt="Calendar-On-Demand in use on a Windows desktop" class="preview-img">
+            <p class="preview-caption">Real Google Calendar data — always on your desktop.</p>
+        </div>
+    </section>
+
+    <section class="quote-section">
+        <div class="container">
+            <div class="quote-card">
+                <div class="quote-mark">"</div>
+                <p class="quote-text">Aero Glass Google Calendar widget for Windows desktop is a clever idea.</p>
+                <div class="quote-author">
+                    <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=1a2e1a&color=7ec47e" alt="Zvonimir Sabljic">
+                    <div>
+                        <div class="author-name">Zvonimir Sabljic</div>
+                        <div class="author-role">Founder of Pazi</div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="guide-step">
-                <h4>3. Future Updates</h4>
-                <p>Since auto-updates are disabled for unsigned Mac apps, you can check back here occasionally. Download the new version, overwrite the old one in Applications, and run the command above one more time.</p>
+        </div>
+    </section>
+
+    <!-- CHANGELOG -->
+    <section id="changelog" class="changelog-section">
+        <div class="container">
+            <span class="section-label">Changelog</span>
+            <h2 class="section-title">What's New</h2>
+            <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
+
+            <div class="changelog-list" id="changelog-list">
+                <div class="cl-item">
+                    <div class="cl-version">v1.3.13 <span class="cl-date">Aug 22, 2026</span></div>
+                    <div class="cl-body">Fix: Removed forced account chooser screen during automatic Google login.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.3.10 <span class="cl-date">Aug 21, 2026</span></div>
+                    <div class="cl-body">Fix: Crash on consecutive requests to OAuth server.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.3.6 <span class="cl-date">Aug 21, 2026</span> <span class="cl-tag">Security</span></div>
+                    <div class="cl-body">Migrated Google OAuth flow from embedded popup to the System Default Browser. Complies with Google's latest security policies blocking OAuth in embedded webviews.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.0.9 <span class="cl-date">Jul 25, 2026</span></div>
+                    <div class="cl-body">Added in-app update notification indicators. Implemented clickable updates to trigger instant quit-and-install from the widget.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.0.8 <span class="cl-date">Jul 25, 2026</span></div>
+                    <div class="cl-body">Optimized background sync interval to 15 minutes. Added exponential backoff retry (1m → 2m → 4m → 15m) for API errors.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.0.7 <span class="cl-date">Jun 27, 2026</span></div>
+                    <div class="cl-body">Enabled automatic update checks on startup. Updated release script to upload metadata to GitHub.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.0.4 <span class="cl-date">Jun 27, 2026</span></div>
+                    <div class="cl-body">Fixed window sizing bug with position locking. Resolved blank white auth window flashing on sleep-wakeup.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.0.2 <span class="cl-date">Jun 20, 2026</span></div>
+                    <div class="cl-body">Added sound feedback on task completion. Updated UI to glass-morphism with micro-animations.</div>
+                </div>
+                <div class="cl-item">
+                    <div class="cl-version">v1.0.0 <span class="cl-date">Apr 1, 2026</span></div>
+                    <div class="cl-body">Initial public release.</div>
+                </div>
+            </div>
+
+            <button class="changelog-toggle" id="changelog-toggle" onclick="toggleChangelog()">
+                Show all versions
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to reclaim your desktop?</h2>
+            <p>Get Calendar-On-Demand — free, no account needed.</p>
+            <div class="hero-cta" style="justify-content:center;margin-bottom:16px;">
+                <a href="#" id="cta-win-btn" class="btn-primary" onclick="triggerDownload('win');return false;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                    Download for Windows
+                </a>
+                <a href="#" id="cta-mac-btn" class="btn-secondary" onclick="triggerDownload('mac');return false;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+                    Download for Mac
+                </a>
+            </div>
+            <div class="cta-meta">Windows 10 &amp; 11 · macOS</div>
+            <div style="margin-top:28px;">
+                <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener" style="color:var(--text-dim);font-size:0.875rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">
+                    It's free. But if it saved you 5 minutes today, buy me a coffee ☕
+                </a>
             </div>
         </div>
-    </div>
+    </section>
 
     <footer>
         <div class="container">
             <p>&copy; 2026 Built with ❤️ by a solo developer.</p>
-            <div class="footer-kofi">
-                <div style="margin-bottom: 8px; opacity: 0.8;">Constantly improving based on your feedback.</div>
-                Enjoying the app? <a href="https://ko-fi.com/kidiksentrik" target="_blank">Support development on Ko-fi ☕</a>
-            </div>
-            <div style="margin-top: 24px; font-size: 0.85rem; display: flex; gap: 16px; justify-content: center; align-items: center;">
-                <a href="privacy.html" style="color: var(--text-dim); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Privacy Policy</a>
-                <span style="color: rgba(255,255,255,0.2);">|</span>
-                <a href="terms.html" style="color: var(--text-dim); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Terms of Service</a>
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a>
+                <span class="footer-sep">|</span>
+                <a href="terms.html">Terms of Service</a>
+                <span class="footer-sep">|</span>
+                <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener">Support on Ko-fi ☕</a>
             </div>
         </div>
     </footer>
 
     <script>
-        // macOS Guide Modal Logic
-        const modal = document.getElementById('mac-guide-modal');
-        const openBtnHero = document.getElementById('open-mac-guide');
-        const openBtnFooter = document.getElementById('open-mac-guide-footer');
-        const closeBtn = document.getElementById('mac-guide-close');
-        const copyBtn = document.getElementById('copy-mac-command');
-        const codeText = document.getElementById('mac-command').innerText;
+        // Nav scroll effect
+        const nav = document.getElementById('main-nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 20);
+        }, { passive: true });
 
-        function openModal(e) {
-            e.preventDefault();
-            modal.classList.add('show');
-        }
-
-        function closeModal() {
-            modal.classList.remove('show');
-        }
-
-        if (openBtnHero) openBtnHero.addEventListener('click', openModal);
-        if (openBtnFooter) openBtnFooter.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-        // Close on outside click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        // Copy to clipboard
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(codeText).then(() => {
-                    copyBtn.innerText = 'Copied!';
-                    copyBtn.classList.add('copied');
-                    setTimeout(() => {
-                        copyBtn.innerText = 'Copy';
-                        copyBtn.classList.remove('copied');
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
-            });
-        }
-    </script>
-    <script>
-        // OS Preview Toggle Logic
-        document.querySelectorAll('.os-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.os-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.preview-pane').forEach(p => p.classList.remove('active'));
-                
-                this.classList.add('active');
-                document.getElementById(this.getAttribute('data-target')).classList.add('active');
-            });
-        });
-
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+        // Smooth scroll for # anchors only (not onclick handlers)
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            if (a.getAttribute('onclick')) return;
+            a.addEventListener('click', e => {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                const t = document.querySelector(a.getAttribute('href'));
+                if (t) t.scrollIntoView({ behavior: 'smooth' });
             });
         });
+
+        // Download URLs fetched from GitHub API
+        let winUrl = 'https://github.com/kidiksentrik/Calendar-On-Demand/releases/latest';
+        let macUrl = 'https://github.com/kidiksentrik/Calendar-On-Demand/releases';
+
+        async function fetchDownloadUrls() {
+            try {
+                const res = await fetch('https://api.github.com/repos/kidiksentrik/Calendar-On-Demand/releases?per_page=30');
+                const releases = await res.json();
+                let winFound = false, macFound = false;
+                for (const release of releases) {
+                    for (const asset of (release.assets || [])) {
+                        if (!winFound && asset.name.endsWith('.exe') && !asset.name.endsWith('.blockmap')) {
+                            winUrl = asset.browser_download_url;
+                            winFound = true;
+                        }
+                        if (!macFound && asset.name.endsWith('.dmg') && !asset.name.endsWith('.blockmap')) {
+                            macUrl = asset.browser_download_url;
+                            macFound = true;
+                        }
+                    }
+                    if (winFound && macFound) break;
+                }
+            } catch(e) { /* fallback to default urls */ }
+        }
+        fetchDownloadUrls();
+
+        function triggerDownload(platform) {
+            const url = platform === 'mac' ? macUrl : winUrl;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Initialize changelog (hide items after first 3)
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = document.querySelectorAll('.changelog-list .cl-item');
+            items.forEach((item, idx) => {
+                if (idx >= 3) item.classList.add('cl-hidden');
+            });
+        });
+
+        // Changelog toggle
+        function toggleChangelog() {
+            const btn = document.getElementById('changelog-toggle');
+            const hidden = document.querySelectorAll('.changelog-list .cl-item:nth-child(n+4)');
+            const isOpen = btn.classList.contains('open');
+            hidden.forEach(el => {
+                if (isOpen) {
+                    el.classList.add('cl-hidden');
+                    el.style.display = '';
+                } else {
+                    el.classList.remove('cl-hidden');
+                    el.style.display = 'flex';
+                }
+            });
+            btn.classList.toggle('open', !isOpen);
+            btn.innerHTML = isOpen
+                ? 'Show all versions <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>'
+                : 'Show less <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        }
     </script>
 </body>
 </html>
