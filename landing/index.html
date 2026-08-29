@@ -198,22 +198,31 @@
         .preview-caption { margin-top:16px; color:var(--text-mute); font-size:0.85rem; font-style:italic; }
 
         /* Quote */
-        .quote-section { padding:80px 0; border-top:1px solid var(--border); }
+        .quote-section { padding:80px 0 100px; border-top:1px solid var(--border); }
+        .quotes-grid {
+            display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+            gap:24px;
+        }
         .quote-card {
             background:var(--bg-card); border:1px solid var(--border);
-            border-radius:20px; padding:36px 40px; max-width:560px; position:relative;
+            border-radius:20px; padding:32px 36px; position:relative;
+            display:flex; flex-direction:column; justify-content:space-between;
+            transition:transform 0.2s, border-color 0.2s;
+        }
+        .quote-card:hover {
+            transform:translateY(-3px); border-color:rgba(126,196,126,0.3);
         }
         .quote-mark {
             position:absolute; top:12px; left:20px; font-size:4rem;
             color:rgba(58,107,58,0.15); font-family:Georgia,serif; line-height:1;
         }
         .quote-text {
-            font-size:1.05rem; font-style:italic; color:var(--text);
+            font-size:1rem; font-style:italic; color:var(--text);
             margin-bottom:20px; position:relative; z-index:1; line-height:1.6;
         }
         .quote-author {
             display:flex; align-items:center; gap:12px;
-            border-top:1px solid var(--border); padding-top:18px;
+            border-top:1px solid var(--border); padding-top:16px;
         }
         .quote-author img { width:40px; height:40px; border-radius:50%; border:1px solid var(--border); }
         .author-name { font-size:0.9rem; font-weight:600; }
@@ -412,14 +421,43 @@
 
     <section class="quote-section">
         <div class="container">
-            <div class="quote-card">
-                <div class="quote-mark">"</div>
-                <p class="quote-text">Aero Glass Google Calendar widget for Windows desktop is a clever idea.</p>
-                <div class="quote-author">
-                    <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=1a2e1a&color=7ec47e" alt="Zvonimir Sabljic">
-                    <div>
-                        <div class="author-name">Zvonimir Sabljic</div>
-                        <div class="author-role">Founder of Pazi</div>
+            <div class="features-header" style="margin-bottom:48px;">
+                <span class="section-label">Community</span>
+                <h2 class="section-title">Loved by Desktop Minimalists</h2>
+                <p class="section-sub">Real feedback from users who keep Calendar-On-Demand pinned all day.</p>
+            </div>
+            <div class="quotes-grid">
+                <div class="quote-card">
+                    <div class="quote-mark">"</div>
+                    <p class="quote-text">Customizability, local storage, not bloated, transparency with the creator and process, openness to user feedback.</p>
+                    <div class="quote-author">
+                        <img src="https://ui-avatars.com/api/?name=Desktop+User&background=1a2e1a&color=7ec47e" alt="User Review">
+                        <div>
+                            <div class="author-name">Desktop Power User</div>
+                            <div class="author-role">Productivity Enthusiast</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="quote-card">
+                    <div class="quote-mark">"</div>
+                    <p class="quote-text">Aero Glass Google Calendar widget for Windows desktop is a clever idea.</p>
+                    <div class="quote-author">
+                        <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=1a2e1a&color=7ec47e" alt="Zvonimir Sabljic">
+                        <div>
+                            <div class="author-name">Zvonimir Sabljic</div>
+                            <div class="author-role">Founder of Pazi</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="quote-card">
+                    <div class="quote-mark">"</div>
+                    <p class="quote-text">The program is very useful and user-friendly. Beautiful, fast, and stays completely out of the way!</p>
+                    <div class="quote-author">
+                        <img src="https://ui-avatars.com/api/?name=Community+Review&background=1a2e1a&color=7ec47e" alt="Community Review">
+                        <div>
+                            <div class="author-name">Community Review</div>
+                            <div class="author-role">Verified User</div>
+                        </div>
                     </div>
                 </div>
             </div>
