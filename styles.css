@@ -20,10 +20,9 @@ body {
     color: var(--text-color);
     overflow: hidden;
     user-select: none;
-    -webkit-app-region: drag;
 }
 
-body.locked-mode {
+body.locked-mode header {
     -webkit-app-region: no-drag !important;
 }
 
@@ -96,6 +95,15 @@ header {
     justify-content: space-between;
     align-items: flex-end;
     margin-bottom: 24px;
+    -webkit-app-region: drag;
+}
+
+/* All interactive elements inside header must be explicitly no-drag */
+header button,
+.header-left,
+.header-right,
+.nav-btns,
+header h2 {
     -webkit-app-region: no-drag;
 }
 
@@ -514,8 +522,9 @@ input[type="color"]::-webkit-color-swatch {
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
     background: rgba(255, 255, 255, 0.05);
-    flex: 1;
-    overflow: visible; /* CRITICAL: Allow glowing border to spill outside */
+    flex: 1 1 0;
+    min-height: 0; /* CRITICAL: allows flexbox to shrink this grid when window is small */
+    overflow: hidden;
 }
 
 .day-cell {
@@ -523,13 +532,14 @@ input[type="color"]::-webkit-color-swatch {
     border: 1px solid rgba(255, 255, 255, 0.03);
     border-radius: 4px;
     padding: 4px;
-    min-height: 40px;
+    min-height: 0; /* Let flexbox control height dynamically */
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s;
     -webkit-app-region: no-drag;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .day-cell:hover {

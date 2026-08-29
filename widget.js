@@ -8,6 +8,7 @@ try {
     let editingEvent = null;
     let allCalendars = [];
     let selectedCalendarIds = null;
+    let soundEnabled = true; // default ON, loaded from settings
 
     // selectedCalendarIds will be loaded from ipcRenderer 'get-settings'
 
@@ -26,6 +27,7 @@ try {
 
     // Synthesize clean audio chimes programmatically
     function playChimeSound(isCompleted) {
+        if (!soundEnabled) return; // Muted — skip
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -122,6 +124,7 @@ try {
     const closePopupBtn = document.getElementById('close-popup');
     const reauthBtn = document.getElementById('reauth-btn');
     const appVersionLabel = document.getElementById('settings-app-version');
+    const soundEnabledCheck = document.getElementById('sound-enabled-check');
 
     // New Todo list container
     const todoListContainer = document.getElementById('todo-list-container');
@@ -781,6 +784,7 @@ try {
                 if (lockPositionCheck) lockPositionCheck.checked = settings.lockPosition || false;
                 if (desktopModeCheck) desktopModeCheck.checked = settings.desktopMode || false;
                 if (startOfWeekSelect) startOfWeekSelect.value = settings.startOfWeek || 0;
+                if (soundEnabledCheck) soundEnabledCheck.checked = (typeof settings.soundEnabled === 'boolean') ? settings.soundEnabled : true;
                 
                 // Fetch and render calendars
                 try {
@@ -863,6 +867,12 @@ try {
         };
     }
     if (startOfWeekSelect) startOfWeekSelect.onchange = (e) => { startOfWeek = parseInt(e.target.value); ipcRenderer.send('set-start-of-week', startOfWeek); renderCalendar(); };
+    if (soundEnabledCheck) {
+        soundEnabledCheck.onchange = (e) => {
+            soundEnabled = e.target.checked;
+            ipcRenderer.send('set-theme-prop', { key: 'soundEnabled', value: soundEnabled });
+        };
+    }
     
     [bgColorPicker, textColorPicker, accentColorPicker, opacitySlider].forEach(el => {
         if (!el) return;
@@ -887,6 +897,12 @@ try {
             startOfWeek = s.startOfWeek || 0;
             if (s.selectedCalendarIds !== undefined && s.selectedCalendarIds !== null) selectedCalendarIds = s.selectedCalendarIds;
             if (s.lockPosition) updateLockUI(true);
+            if (typeof s.soundEnabled === 'boolean') {
+                soundEnabled = s.soundEnabled;
+                if (soundEnabledCheck) soundEnabledCheck.checked = s.soundEnabled;
+            } else {
+                if (soundEnabledCheck) soundEnabledCheck.checked = true;
+            }
             applyTheme({ 'bg-base': s['bg-base'], 'text-color': s['text-color'], 'accent-color': s['accent-color'], 'bg-opacity': s['bg-opacity'] });
             if (s.version && appVersionLabel) {
                 appVersionLabel.textContent = `v${s.version}`;

@@ -39,6 +39,7 @@ async function createWindow() {
         height,
         x,
         y,
+        useContentSize: true,
         frame: false,
         transparent: true,
         alwaysOnTop: alwaysOnTop,
@@ -338,6 +339,7 @@ ipcMain.handle('get-settings', () => {
         'bg-opacity': store.get('bg-opacity', 0.92),
         startOfWeek: store.get('startOfWeek', 0),
         selectedCalendarIds: store.get('selectedCalendarIds', null),
+        soundEnabled: store.get('soundEnabled', true),
         version: app.getVersion()
     };
 });
