@@ -3,6 +3,7 @@
     --bg-opacity: 0.92;
     --text-color: #e8e8e8;
     --accent-color: #4f8ef7;
+    --today-color: #ffcc00;
     --border-color: rgba(255, 255, 255, 0.08);
     --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -198,7 +199,7 @@ header button:hover {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     padding: 24px;
-    width: 320px;
+    width: 390px;
     max-height: 85vh;
     overflow-y: auto;
 }
@@ -244,11 +245,11 @@ header button:hover {
 }
 
 .calendars-list {
-    max-height: 150px;
+    max-height: 250px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     padding-right: 4px;
     margin-bottom: 12px;
 }
@@ -269,6 +270,103 @@ header button:hover {
     display: inline-block;
     margin-right: 8px;
     vertical-align: middle;
+}
+
+/* Account item row in settings */
+.account-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.account-item:last-child { border-bottom: none; }
+
+.account-item-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.account-email {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.85);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.todo-account-tag {
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    display: inline-block;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
+}
+
+.account-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.account-item-actions .switch {
+    width: auto;
+    flex-shrink: 0;
+}
+
+.account-action-btn {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    -webkit-app-region: no-drag;
+}
+
+.account-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Calendar grouping header */
+.cal-account-header {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    background: rgba(79, 142, 247, 0.08);
+    border-left: 3px solid var(--accent-color);
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cal-account-header:first-child {
+    margin-top: 0;
+}
+
+.calendars-list .setting-item {
+    flex-shrink: 0;
+    margin-bottom: 4px;
 }
 
 
@@ -567,19 +665,18 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .day-cell.today {
-    border: 3px solid #ffcc00 !important; /* Thick gold border */
-    /* Multi-layered glow for high intensity neon feel */
+    border: 4px solid var(--today-color, #ffcc00) !important;
+    /* Clean, punchy 4px neon border with subtle glass inset glow */
     box-shadow: 
-        inset 0 0 15px rgba(255, 204, 0, 0.6), 
-        0 0 20px rgba(255, 204, 0, 0.7),
-        0 0 35px rgba(255, 204, 0, 0.3);
-    z-index: 100 !important; /* On top of everything */
+        inset 0 0 10px color-mix(in srgb, var(--today-color, #ffcc00) 25%, transparent), 
+        0 0 10px color-mix(in srgb, var(--today-color, #ffcc00) 50%, transparent);
+    z-index: 100 !important;
     position: relative;
 }
 
 .day-cell.today .day-number {
-    color: #ffcc00;
-    text-shadow: 0 0 8px rgba(255, 204, 0, 0.8);
+    color: var(--today-color, #ffcc00);
+    text-shadow: 0 0 8px var(--today-color, #ffcc00);
     font-weight: 800;
     font-size: 1.1em;
 }

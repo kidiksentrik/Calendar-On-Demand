@@ -138,4 +138,62 @@ async function _authenticateInternal(force = false) {
     });
 }
 
-module.exports = { authenticate, getOAuthClient };
+
+async function authenticateNewAccount() {
+    const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json')));
+    const { client_id, client_secret } = credentials.installed;
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret);
+
+    return new Promise((resolve, reject) => {
+        let server;
+
+        server = http.createServer(async (req, res) => {
+            try {
+                if (!server) return;
+                const parsedUrl = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`);
+                const code = parsedUrl.searchParams.get('code');
+                const error = parsedUrl.searchParams.get('error');
+
+                if (code) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><head><style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;background:#0a0a0c;color:#fff;text-align:center;}</style></head><body><h2>Account Added!</h2><p>You can close this tab and return to Calendar-On-Demand.</p></body></html>');
+                    server.close(); server = null;
+
+                    const { tokens } = await oAuth2Client.getToken(code);
+                    oAuth2Client.setCredentials(tokens);
+
+                    const oauth2Api = google.oauth2({ version: 'v2', auth: oAuth2Client });
+                    const userInfo = await oauth2Api.userinfo.get();
+                    const email = userInfo.data.email;
+
+                    resolve({ email, token: tokens, client: oAuth2Client });
+                } else if (error) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><body><h2>Authentication Failed</h2><p>You can close this tab.</p></body></html>');
+                    server.close(); server = null;
+                    reject(new Error('Authentication rejected by user.'));
+                } else {
+                    res.writeHead(404); res.end();
+                }
+            } catch (e) {
+                if (server) { server.close(); server = null; }
+                reject(e);
+            }
+        });
+
+        server.listen(0, '127.0.0.1', () => {
+            const port = server.address().port;
+            oAuth2Client.redirectUri = `http://127.0.0.1:${port}`;
+            const authUrl = oAuth2Client.generateAuthUrl({
+                access_type: 'offline',
+                scope: [...SCOPES, 'openid', 'email'],  // openid+email needed for userinfo
+                prompt: 'select_account'
+            });
+            shell.openExternal(authUrl);
+        });
+
+        server.on('error', reject);
+    });
+}
+
+module.exports = { authenticate, getOAuthClient, authenticateNewAccount };

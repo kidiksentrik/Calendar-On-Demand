@@ -119,12 +119,15 @@ try {
     const bgColorPicker = document.getElementById('bg-color-picker');
     const textColorPicker = document.getElementById('text-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
+    const todayColorPicker = document.getElementById('today-color-picker');
     const resetSettingsBtn = document.getElementById('reset-settings');
     const closeSettings = document.getElementById('close-settings');
     const closePopupBtn = document.getElementById('close-popup');
     const reauthBtn = document.getElementById('reauth-btn');
     const appVersionLabel = document.getElementById('settings-app-version');
     const soundEnabledCheck = document.getElementById('sound-enabled-check');
+    const addAccountBtn = document.getElementById('add-account-btn');
+    const accountsList = document.getElementById('accounts-list');
 
     // New Todo list container
     const todoListContainer = document.getElementById('todo-list-container');
@@ -147,6 +150,7 @@ try {
         'bg-base': '#0f0f14',
         'text-color': '#e8e8e8',
         'accent-color': '#4f8ef7',
+        'today-color': '#ffcc00',
         'bg-opacity': 0.92
     };
 
@@ -261,6 +265,7 @@ try {
             }
             
             ev.innerText = stripTags(displaySummary);
+            ev.title = `${stripTags(displaySummary)} • ${e.accountEmail || e.calendarName || ''}`;
             ev.style.borderLeft = `3px solid ${e.backgroundColor || 'var(--accent-color)'}`;
             ev.onclick = (event) => { 
                 event.stopPropagation(); 
@@ -435,6 +440,19 @@ try {
 
             itemLeft.appendChild(title);
 
+            // Account badge tag
+            if (e.accountEmail || e.calendarName) {
+                const accountTag = document.createElement('span');
+                accountTag.className = 'todo-account-tag';
+                const shortAccount = e.accountEmail ? e.accountEmail.split('@')[0] : (e.calendarName || '');
+                accountTag.innerText = shortAccount;
+                accountTag.title = `${e.accountEmail || ''} (${e.calendarName || ''})`;
+                accountTag.style.background = `${e.backgroundColor || 'var(--accent-color)'}26`;
+                accountTag.style.color = e.backgroundColor || 'var(--accent-color)';
+                accountTag.style.border = `1px solid ${e.backgroundColor || 'var(--accent-color)'}40`;
+                itemLeft.appendChild(accountTag);
+            }
+
             // Meeting join button (Google Meet or other conference link)
             const meetUrl = e.hangoutLink ||
                 e.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri;
@@ -463,7 +481,7 @@ try {
                 // after deletion does NOT trigger saveCurrentEvent() and recreate the entry.
                 if (quickAddInput) quickAddInput.value = '';
                 editingEvent = null;
-                await ipcRenderer.invoke('delete-event', { calendarId: e.calendarId, eventId: e.id });
+                await ipcRenderer.invoke('delete-event', { calendarId: e.calendarId, eventId: e.id, accountEmail: e.accountEmail });
                 fetchEvents();
             };
             item.appendChild(deleteBtn);
@@ -501,7 +519,8 @@ try {
             await ipcRenderer.invoke('update-event', { 
                 calendarId: eventItem.calendarId, 
                 eventId: eventItem.id, 
-                eventData 
+                eventData,
+                accountEmail: eventItem.accountEmail
             });
             fetchEvents(); // Background sync to ensure data is correct
         } catch (err) {
@@ -586,7 +605,8 @@ try {
                 await ipcRenderer.invoke('update-event', { 
                     calendarId: currentEditEvent.calendarId, 
                     eventId: currentEditEvent.id, 
-                    eventData 
+                    eventData,
+                    accountEmail: currentEditEvent.accountEmail
                 });
             } else {
                 await ipcRenderer.invoke('create-event', eventData);
@@ -786,6 +806,9 @@ try {
                 if (startOfWeekSelect) startOfWeekSelect.value = settings.startOfWeek || 0;
                 if (soundEnabledCheck) soundEnabledCheck.checked = (typeof settings.soundEnabled === 'boolean') ? settings.soundEnabled : true;
                 
+                // Render accounts
+                await renderAccountsList();
+                
                 // Fetch and render calendars
                 try {
                     const cList = document.getElementById('calendars-list');
@@ -799,28 +822,32 @@ try {
                             ipcRenderer.send('set-selected-calendars', selectedCalendarIds);
                         }
 
+                        // Group calendars by account
+                        const grouped = {};
                         allCalendars.forEach(cal => {
+                            const key = cal.accountEmail || 'Unknown';
+                            if (!grouped[key]) grouped[key] = [];
+                            grouped[key].push(cal);
+                        });
+
+                        const renderCalItem = (cal, container) => {
                             const item = document.createElement('div');
                             item.className = 'setting-item';
-                            item.style.marginBottom = '8px';
-                            
+                            item.style.marginBottom = '6px';
                             const isChecked = selectedCalendarIds ? selectedCalendarIds.includes(cal.id) : true;
-                            
                             item.innerHTML = `
                                 <label class="switch">
-                                    <span style="display:flex; align-items:center; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                        <span class="calendar-item-color" style="background-color: ${cal.backgroundColor}"></span>
-                                        ${cal.summary}
+                                    <span style="display:flex; align-items:center; min-width:0; overflow:hidden;">
+                                        <span class="calendar-item-color" style="background-color: ${cal.backgroundColor}; flex-shrink:0;"></span>
+                                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cal.summary}</span>
                                     </span>
                                     <input type="checkbox" value="${cal.id}" ${isChecked ? 'checked' : ''}>
                                     <span class="slider-toggle"></span>
                                 </label>
                             `;
-                            
                             const checkbox = item.querySelector('input');
                             checkbox.onchange = (e) => {
                                 if (!selectedCalendarIds) selectedCalendarIds = allCalendars.map(c => c.id);
-                                
                                 if (e.target.checked) {
                                     if (!selectedCalendarIds.includes(cal.id)) selectedCalendarIds.push(cal.id);
                                 } else {
@@ -829,7 +856,18 @@ try {
                                 ipcRenderer.send('set-selected-calendars', selectedCalendarIds);
                                 fetchEvents();
                             };
-                            cList.appendChild(item);
+                            container.appendChild(item);
+                        };
+
+                        Object.entries(grouped).forEach(([email, cals]) => {
+                            // Account header
+                            const header = document.createElement('div');
+                            header.className = 'cal-account-header';
+                            header.innerHTML = `<span style="opacity: 0.7;">👤</span> <span>${email}</span>`;
+                            header.title = email;
+                            cList.appendChild(header);
+                            // Calendar items under this account
+                            cals.forEach(cal => renderCalItem(cal, cList));
                         });
                     }
                 } catch(err) {
@@ -873,8 +911,104 @@ try {
             ipcRenderer.send('set-theme-prop', { key: 'soundEnabled', value: soundEnabled });
         };
     }
+
+    // ── Accounts management ─────────────────────────────────────────────────
+
+    async function renderAccountsList() {
+        if (!accountsList) return;
+        accountsList.innerHTML = '';
+
+        let accounts;
+        try {
+            accounts = await ipcRenderer.invoke('get-accounts');
+        } catch (e) {
+            accountsList.innerHTML = '<div style="font-size:0.8rem;opacity:0.4;">Could not load accounts.</div>';
+            return;
+        }
+
+        const allAccounts = [
+            { email: accounts.primary.email, enabled: accounts.primary.enabled, isPrimary: true },
+            ...accounts.additional.map(a => ({ ...a, isPrimary: false }))
+        ];
+
+        allAccounts.forEach(acc => {
+            const row = document.createElement('div');
+            row.className = 'account-item';
+
+            const left = document.createElement('div');
+            left.className = 'account-item-left';
+
+            const label = document.createElement('span');
+            label.className = 'account-email';
+            label.textContent = acc.email;
+            label.title = acc.email;
+
+            // Toggle
+            const toggleLabel = document.createElement('label');
+            toggleLabel.className = 'switch';
+            const toggleInput = document.createElement('input');
+            toggleInput.type = 'checkbox';
+            toggleInput.checked = acc.enabled;
+            toggleInput.onchange = (e) => {
+                ipcRenderer.send('toggle-account', { email: acc.email, enabled: e.target.checked });
+            };
+            const toggleSlider = document.createElement('span');
+            toggleSlider.className = 'slider-toggle';
+            toggleLabel.appendChild(toggleInput);
+            toggleLabel.appendChild(toggleSlider);
+
+            left.appendChild(label);
+            row.appendChild(left);
+
+            const actionsWrapper = document.createElement('div');
+            actionsWrapper.className = 'account-item-actions';
+            actionsWrapper.appendChild(toggleLabel);
+
+            // Action button
+            const actionBtn = document.createElement('button');
+            actionBtn.className = 'account-action-btn';
+            if (acc.isPrimary) {
+                actionBtn.textContent = 'Logout';
+                actionBtn.title = 'Log out of this account';
+                actionBtn.onclick = () => ipcRenderer.invoke('reset-auth');
+            } else {
+                actionBtn.textContent = 'Remove';
+                actionBtn.title = 'Remove this account';
+                actionBtn.style.borderColor = 'rgba(244,67,54,0.4)';
+                actionBtn.style.color = 'rgba(244,67,54,0.8)';
+                actionBtn.onclick = async () => {
+                    row.style.opacity = '0.4';
+                    await ipcRenderer.invoke('remove-account', acc.email);
+                    renderAccountsList();
+                };
+            }
+            actionsWrapper.appendChild(actionBtn);
+            row.appendChild(actionsWrapper);
+            accountsList.appendChild(row);
+        });
+    }
+
+    if (addAccountBtn) {
+        addAccountBtn.onclick = async () => {
+            addAccountBtn.textContent = 'Opening browser...';
+            addAccountBtn.disabled = true;
+            try {
+                const result = await ipcRenderer.invoke('add-account');
+                if (result.success) {
+                    await renderAccountsList();
+                } else {
+                    alert(result.error || 'Failed to add account.');
+                }
+            } catch (e) {
+                alert('Error adding account: ' + e.message);
+            } finally {
+                addAccountBtn.textContent = '+ Add Account';
+                addAccountBtn.disabled = false;
+            }
+        };
+    }
     
-    [bgColorPicker, textColorPicker, accentColorPicker, opacitySlider].forEach(el => {
+    [bgColorPicker, textColorPicker, accentColorPicker, todayColorPicker, opacitySlider].forEach(el => {
         if (!el) return;
         el.oninput = (e) => {
             let key = el.id.replace('-picker', '').replace('-slider', '');
@@ -903,7 +1037,7 @@ try {
             } else {
                 if (soundEnabledCheck) soundEnabledCheck.checked = true;
             }
-            applyTheme({ 'bg-base': s['bg-base'], 'text-color': s['text-color'], 'accent-color': s['accent-color'], 'bg-opacity': s['bg-opacity'] });
+            applyTheme({ 'bg-base': s['bg-base'], 'text-color': s['text-color'], 'accent-color': s['accent-color'], 'today-color': s['today-color'], 'bg-opacity': s['bg-opacity'] });
             if (s.version && appVersionLabel) {
                 appVersionLabel.textContent = `v${s.version}`;
             }

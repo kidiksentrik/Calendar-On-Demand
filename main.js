@@ -2,7 +2,7 @@ const { app, BrowserWindow, Tray, Menu, ipcMain, globalShortcut, screen, Notific
 const path = require('path');
 const Store = require('electron-store');
 const { autoUpdater } = require('electron-updater');
-const { authenticate } = require('./auth');
+const { authenticate, authenticateNewAccount } = require('./auth');
 const { getCalendars, listEvents, createEvent, updateEvent, deleteEvent } = require('./calendar');
 
 const store = new Store();
@@ -10,6 +10,45 @@ let tray = null;
 let mainWindow = null;
 let authClient = null;
 let isQuitting = false;
+
+// ── Multi-account helpers ──────────────────────────────────────────────────
+
+function createAuthClientForAccount(account) {
+    const { google } = require('googleapis');
+    const fs = require('fs');
+    const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json')));
+    const { client_id, client_secret } = credentials.installed;
+    const client = new google.auth.OAuth2(client_id, client_secret);
+    client.setCredentials(account.token);
+    client.on('tokens', (newTokens) => {
+        const accounts = store.get('additionalAccounts', []);
+        const idx = accounts.findIndex(a => a.email === account.email);
+        if (idx !== -1) {
+            accounts[idx].token = { ...accounts[idx].token, ...newTokens };
+            store.set('additionalAccounts', accounts);
+        }
+    });
+    return client;
+}
+
+async function fetchAndStorePrimaryEmail() {
+    const current = store.get('primaryEmail');
+    if (current && current !== 'Primary Account') return current;
+    try {
+        if (!authClient) authClient = await authenticate();
+        const cals = await getCalendars(authClient);
+        const primaryCal = cals.find(c => c.primary) || cals.find(c => c.id && c.id.includes('@'));
+        if (primaryCal) {
+            const email = primaryCal.id.includes('@') ? primaryCal.id : (primaryCal.summary || 'Primary Account');
+            store.set('primaryEmail', email);
+            console.log('Primary account email stored from calendar:', email);
+            return email;
+        }
+    } catch (e) {
+        console.warn('Could not fetch primary email:', e.message);
+    }
+    return store.get('primaryEmail', 'Primary Account');
+}
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -154,6 +193,7 @@ app.whenReady().then(async () => {
     try {
         authClient = await authenticate();
         console.log('Authentication successful!');
+        fetchAndStorePrimaryEmail().catch(e => console.warn('Email fetch skipped:', e.message));
         
         createWindow();
         console.log('Window created.');
@@ -200,10 +240,25 @@ app.on('window-all-closed', () => {
 
 // IPC Handlers
 ipcMain.handle('get-calendars', async () => {
-    if (!authClient) {
-        authClient = await authenticate();
-    }
-    return await getCalendars(authClient);
+    if (!authClient) authClient = await authenticate();
+    const primaryEmail = store.get('primaryEmail', 'Primary');
+    const primaryCals = (await getCalendars(authClient)).map(cal => ({ ...cal, accountEmail: primaryEmail, isPrimary: true }));
+
+    const additionalAccounts = store.get('additionalAccounts', []).filter(a => a.enabled !== false);
+    const additionalCals = (await Promise.all(
+        additionalAccounts.map(async acc => {
+            try {
+                const client = createAuthClientForAccount(acc);
+                const cals = await getCalendars(client);
+                return cals.map(cal => ({ ...cal, accountEmail: acc.email, isPrimary: false }));
+            } catch (e) {
+                console.error(`Could not get calendars for ${acc.email}:`, e.message);
+                return [];
+            }
+        })
+    )).flat();
+
+    return [...primaryCals, ...additionalCals];
 });
 
 ipcMain.handle('get-events', async (event, { timeMin, timeMax, selectedCalendarIds }) => {
@@ -224,8 +279,32 @@ ipcMain.handle('get-events', async (event, { timeMin, timeMax, selectedCalendarI
         console.log('Fetching events via listEvents...');
         const timeMinDate = new Date(timeMin);
         const timeMaxDate = new Date(timeMax);
-        const events = await withTimeout(listEvents(authClient, timeMinDate, timeMaxDate, selectedCalendarIds), 10000);
-        return events;
+
+        // Primary account
+        const primaryEnabled = store.get('primaryAccountEnabled', true);
+        const primaryEmail = store.get('primaryEmail', 'Primary');
+        let primaryEvents = [];
+        if (primaryEnabled) {
+            primaryEvents = (await withTimeout(listEvents(authClient, timeMinDate, timeMaxDate, selectedCalendarIds), 10000))
+                .map(ev => ({ ...ev, accountEmail: primaryEmail }));
+        }
+
+        // Additional accounts (silent fail — never break primary)
+        const additionalAccounts = store.get('additionalAccounts', []).filter(a => a.enabled !== false);
+        const additionalResults = await Promise.all(
+            additionalAccounts.map(async acc => {
+                try {
+                    const client = createAuthClientForAccount(acc);
+                    const evs = await withTimeout(listEvents(client, timeMinDate, timeMaxDate, selectedCalendarIds), 10000);
+                    return evs.map(ev => ({ ...ev, accountEmail: acc.email }));
+                } catch (e) {
+                    console.warn(`Additional account ${acc.email} failed:`, e.message);
+                    return [];
+                }
+            })
+        );
+
+        return [...primaryEvents, ...additionalResults.flat()];
     } catch (err) {
         console.error('API Error in get-events:', err.message);
         
@@ -258,6 +337,8 @@ ipcMain.handle('reset-auth', async () => {
     console.log('Manual auth reset requested from UI...');
     try {
         authClient = await authenticate(true);
+        store.delete('primaryEmail');
+        fetchAndStorePrimaryEmail().catch(() => {});
         console.log('Manual re-authentication successful.');
         if (mainWindow) mainWindow.webContents.send('sync-now');
         return { success: true };
@@ -265,6 +346,72 @@ ipcMain.handle('reset-auth', async () => {
         console.error('Manual re-authentication failed:', err.message);
         throw err;
     }
+});
+
+// ── Multi-account IPC handlers ────────────────────────────────────────────
+
+ipcMain.handle('get-accounts', async () => {
+    // Eagerly fetch primary email if not stored yet
+    if (!store.get('primaryEmail')) {
+        await fetchAndStorePrimaryEmail();
+    }
+    const primaryEmail = store.get('primaryEmail', 'Primary Account');
+    const primaryEnabled = store.get('primaryAccountEnabled', true);
+    const additionalAccounts = store.get('additionalAccounts', []);
+    return {
+        primary: { email: primaryEmail, enabled: primaryEnabled },
+        additional: additionalAccounts.map(({ email, enabled }) => ({ email, enabled: enabled !== false }))
+    };
+});
+
+ipcMain.handle('add-account', async () => {
+    try {
+        const { email, token, client } = await authenticateNewAccount();
+        const primaryEmail = store.get('primaryEmail');
+        if (email === primaryEmail) {
+            return { success: false, error: 'This account is already connected as the primary account.' };
+        }
+        const accounts = store.get('additionalAccounts', []);
+        if (accounts.find(a => a.email === email)) {
+            return { success: false, error: 'This account is already added.' };
+        }
+        // Auto-add new account's calendars to selectedCalendarIds
+        try {
+            const newCals = await getCalendars(client);
+            const currentSelected = store.get('selectedCalendarIds');
+            if (currentSelected !== null && Array.isArray(currentSelected)) {
+                store.set('selectedCalendarIds', [...currentSelected, ...newCals.map(c => c.id)]);
+            }
+        } catch (e) { console.warn('Could not auto-select calendars for new account:', e.message); }
+
+        accounts.push({ email, token, enabled: true });
+        store.set('additionalAccounts', accounts);
+        if (mainWindow) mainWindow.webContents.send('sync-now');
+        return { success: true, email };
+    } catch (e) {
+        console.error('add-account failed:', e.message);
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('remove-account', async (event, email) => {
+    const accounts = store.get('additionalAccounts', []);
+    store.set('additionalAccounts', accounts.filter(a => a.email !== email));
+    if (mainWindow) mainWindow.webContents.send('sync-now');
+    return { success: true };
+});
+
+ipcMain.on('toggle-account', (event, { email, enabled }) => {
+    if (!email) return;
+    const primaryEmail = store.get('primaryEmail', '');
+    if (email === primaryEmail) {
+        store.set('primaryAccountEnabled', enabled);
+    } else {
+        const accounts = store.get('additionalAccounts', []);
+        const idx = accounts.findIndex(a => a.email === email);
+        if (idx !== -1) { accounts[idx].enabled = enabled; store.set('additionalAccounts', accounts); }
+    }
+    if (mainWindow) mainWindow.webContents.send('sync-now');
 });
 
 ipcMain.handle('install-update', () => {
@@ -279,16 +426,27 @@ ipcMain.handle('install-update', () => {
     }, 1500);
 });
 
+function getAuthClientForAccountEmail(email) {
+    const primaryEmail = store.get('primaryEmail');
+    if (!email || email === primaryEmail) return authClient;
+    const accounts = store.get('additionalAccounts', []);
+    const acc = accounts.find(a => a.email === email);
+    if (acc) return createAuthClientForAccount(acc);
+    return authClient;
+}
+
 ipcMain.handle('create-event', async (event, eventData) => {
     return await createEvent(authClient, eventData);
 });
 
-ipcMain.handle('update-event', async (event, { calendarId, eventId, eventData }) => {
-    return await updateEvent(authClient, calendarId, eventId, eventData);
+ipcMain.handle('update-event', async (event, { calendarId, eventId, eventData, accountEmail }) => {
+    const client = getAuthClientForAccountEmail(accountEmail);
+    return await updateEvent(client, calendarId, eventId, eventData);
 });
 
-ipcMain.handle('delete-event', async (event, { calendarId, eventId }) => {
-    return await deleteEvent(authClient, calendarId, eventId);
+ipcMain.handle('delete-event', async (event, { calendarId, eventId, accountEmail }) => {
+    const client = getAuthClientForAccountEmail(accountEmail);
+    return await deleteEvent(client, calendarId, eventId);
 });
 
 ipcMain.on('set-always-on-top', (event, value) => {
@@ -336,6 +494,7 @@ ipcMain.handle('get-settings', () => {
         'bg-base': store.get('bg-base', '#0f0f14'),
         'text-color': store.get('text-color', '#e8e8e8'),
         'accent-color': store.get('accent-color', '#4f8ef7'),
+        'today-color': store.get('today-color', '#ffcc00'),
         'bg-opacity': store.get('bg-opacity', 0.92),
         startOfWeek: store.get('startOfWeek', 0),
         selectedCalendarIds: store.get('selectedCalendarIds', null),

@@ -77,9 +77,14 @@
                             <option value="1">Monday</option>
                         </select>
                     </div>
-                    <div class="setting-item">
-                        <button id="reauth-btn" style="width: 100%; border-color: var(--accent-color); color: var(--accent-color); margin-top: 10px;">Logout / Switch Account</button>
+                </div>
+
+                <div class="setting-group">
+                    <h4>Accounts</h4>
+                    <div id="accounts-list">
+                        <!-- Populated by JS -->
                     </div>
+                    <button id="add-account-btn" style="width:100%; margin-top:8px; border-color: var(--accent-color); color: var(--accent-color);">+ Add Account</button>
                 </div>
 
                 <div class="setting-group">
@@ -106,6 +111,10 @@
                     <div class="setting-item row">
                         <label>Accent Color</label>
                         <input type="color" id="accent-color-picker" value="#4f8ef7">
+                    </div>
+                    <div class="setting-item row">
+                        <label>Today Highlight</label>
+                        <input type="color" id="today-color-picker" value="#ffcc00">
                     </div>
                 </div>
 
