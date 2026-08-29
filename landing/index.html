@@ -120,6 +120,24 @@
         }
         .btn-changelog:hover { color:var(--text-dim); }
 
+        /* Update Announcement Banner Pill */
+        .update-banner {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(126,196,126,0.08); border:1px solid rgba(126,196,126,0.25);
+            border-radius:9999px; padding:6px 14px 6px 8px; font-size:0.82rem;
+            color:var(--text); text-decoration:none; margin-bottom:20px;
+            transition:all 0.2s ease;
+        }
+        .update-banner:hover {
+            background:rgba(126,196,126,0.15); border-color:rgba(126,196,126,0.45);
+            transform:translateY(-1px);
+        }
+        .update-tag {
+            background:#2a4d33; color:#7ec47e; font-size:0.72rem; font-weight:700;
+            padding:2px 8px; border-radius:9999px; letter-spacing:0.02em;
+        }
+        .update-text { color:var(--text-dim); }
+
         /* Trust pills */
         .trust-row {
             display:flex; gap:10px; align-items:center;
@@ -316,6 +334,14 @@
         <div class="ph-wrap">
             <a href="https://www.producthunt.com/posts/calendar-on-demand" target="_blank" rel="noopener">
                 <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=474020&theme=dark" alt="Calendar-On-Demand on Product Hunt" width="220" height="48" onerror="this.style.display='none'">
+            </a>
+        </div>
+
+        <div>
+            <a href="#changelog" class="update-banner">
+                <span class="update-tag">v1.4.0 Released</span>
+                <span class="update-text">Multi-Account Sync &amp; Custom Neon Highlight</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
 
