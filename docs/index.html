@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DTN5BM6653"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-DTN5BM6653');
-    </script>
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="l8kz_CCdsv0-WJNQrLo8BenbXSz-VqNGdrOVpvBJTLM" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,7 +94,7 @@
         }
         .hero-cta {
             display:flex; gap:12px; align-items:center;
-            flex-wrap:wrap; justify-content:center; margin-bottom:56px;
+            flex-wrap:wrap; justify-content:center; margin-bottom:18px;
         }
         .btn-primary {
             display:inline-flex; align-items:center; gap:8px;
@@ -128,6 +119,101 @@
             transition:color 0.2s;
         }
         .btn-changelog:hover { color:var(--text-dim); }
+
+        /* Mac Guide Link & Subtext */
+        .mac-guide-subtext {
+            width:100%; display:flex; align-items:center;
+            justify-content:center; gap:6px; font-size:0.82rem;
+            color:var(--text-dim); margin-bottom:34px;
+        }
+        .mac-guide-link {
+            color:#7ec47e; text-decoration:none; font-weight:500;
+            display:inline-flex; align-items:center; gap:4px;
+            transition:all 0.2s; cursor:pointer; background:none;
+            border:none; font-family:inherit; padding:0; font-size:inherit;
+        }
+        .mac-guide-link:hover { color:#a3e6a3; text-decoration:underline; }
+
+        /* macOS Guide Modal */
+        .mac-modal {
+            display:none; position:fixed;
+            top:0; left:0; width:100%; height:100%;
+            background:rgba(4,7,4,0.75);
+            backdrop-filter:blur(12px);
+            -webkit-backdrop-filter:blur(12px);
+            z-index:1000; align-items:center; justify-content:center;
+            padding:20px; opacity:0;
+            transition:opacity 0.25s ease;
+        }
+        .mac-modal.show { display:flex; opacity:1; }
+        .mac-modal-dialog {
+            background:#111611; border:1px solid var(--border-green);
+            border-radius:20px; width:100%; max-width:580px;
+            padding:32px; box-shadow:0 24px 60px rgba(0,0,0,0.6),0 0 40px rgba(58,107,58,0.15);
+            position:relative; transform:translateY(20px) scale(0.98);
+            transition:transform 0.25s cubic-bezier(0.16,1,0.3,1);
+            max-height:90vh; overflow-y:auto;
+        }
+        .mac-modal.show .mac-modal-dialog { transform:translateY(0) scale(1); }
+        .mac-modal-close {
+            position:absolute; top:20px; right:20px;
+            background:rgba(255,255,255,0.05); border:1px solid var(--border);
+            color:var(--text-dim); width:32px; height:32px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; font-size:1rem; transition:all 0.2s;
+        }
+        .mac-modal-close:hover {
+            background:rgba(255,255,255,0.1); color:#fff;
+            border-color:rgba(255,255,255,0.2);
+        }
+        .mac-modal-header { margin-bottom:24px; text-align:left; }
+        .mac-modal-title {
+            font-size:1.35rem; font-weight:700; color:#fff;
+            display:flex; align-items:center; gap:10px; margin-bottom:6px;
+        }
+        .mac-modal-subtitle {
+            font-size:0.875rem; color:var(--text-dim); line-height:1.5;
+        }
+        .mac-step {
+            background:rgba(255,255,255,0.02); border:1px solid var(--border);
+            border-radius:12px; padding:16px 18px; margin-bottom:14px;
+            text-align:left;
+        }
+        .mac-step-title {
+            font-size:0.95rem; font-weight:600; color:#e8ece8;
+            margin-bottom:6px; display:flex; align-items:center; gap:8px;
+        }
+        .mac-step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:20px; height:20px; border-radius:50%;
+            background:rgba(58,107,58,0.3); border:1px solid var(--border-green);
+            color:#7ec47e; font-size:0.75rem; font-weight:700; flex-shrink:0;
+        }
+        .mac-step p {
+            font-size:0.85rem; color:var(--text-dim); line-height:1.55; margin:0;
+        }
+        .mac-code-box {
+            display:flex; align-items:center; background:#080c08;
+            border:1px solid rgba(126,196,126,0.2); border-radius:8px;
+            padding:8px 12px; margin-top:10px; gap:8px;
+        }
+        .mac-code-box code {
+            flex:1; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+            font-size:0.82rem; color:#a3e6a3; overflow-x:auto; white-space:nowrap;
+        }
+        .mac-copy-btn {
+            background:rgba(58,107,58,0.25); border:1px solid var(--border-green);
+            color:#7ec47e; font-size:0.75rem; font-weight:600; padding:5px 12px;
+            border-radius:6px; cursor:pointer; display:inline-flex;
+            align-items:center; gap:4px; transition:all 0.2s; flex-shrink:0;
+        }
+        .mac-copy-btn:hover { background:rgba(58,107,58,0.4); color:#fff; }
+        .mac-copy-btn.copied { background:#3a6b3a; color:#fff; border-color:#7ec47e; }
+        .mac-modal-footer {
+            margin-top:20px; display:flex; justify-content:space-between;
+            align-items:center; font-size:0.8rem; color:var(--text-mute);
+            padding-top:14px; border-top:1px solid var(--border);
+        }
 
         /* Update Announcement Banner Pill */
         .update-banner {
@@ -374,6 +460,14 @@
             <a href="#changelog" class="btn-changelog">Changelog</a>
         </div>
 
+        <div class="mac-guide-subtext">
+            <span>First time on macOS?</span>
+            <button type="button" class="mac-guide-link" onclick="openMacModal(event)">
+                View 1-minute install guide
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+
         <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener" style="color:var(--text-mute);font-size:0.85rem;text-decoration:none;transition:color 0.2s;margin-bottom:40px;" onmouseover="this.style.color='var(--text-dim)'" onmouseout="this.style.color='var(--text-mute)'">
             It's free. But if it saved you 5 minutes today, buy me a coffee ☕
         </a>
@@ -506,8 +600,8 @@
             <h2 class="section-title">What's New</h2>
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
-            <div class="changelog-list" id="changelog-list">
-                <div class="cl-item">
+            <div class="changelog-list">
+                <div class="cl-item cl-visible">
                     <div class="cl-version">v1.4.0 <span class="cl-date">Aug 29, 2026</span> <span class="cl-tag" style="background:#2a4d33;color:#7ec47e;">Major</span></div>
                     <div class="cl-body">
                         <strong>Multi-Account Sync &amp; Major Customization Update:</strong>
@@ -521,39 +615,39 @@
                         </ul>
                     </div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-visible">
                     <div class="cl-version">v1.3.13 <span class="cl-date">Aug 22, 2026</span></div>
                     <div class="cl-body">Fix: Removed forced account chooser screen during automatic Google login.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-visible">
                     <div class="cl-version">v1.3.10 <span class="cl-date">Aug 21, 2026</span></div>
                     <div class="cl-body">Fix: Crash on consecutive requests to OAuth server.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-visible">
                     <div class="cl-version">v1.3.6 <span class="cl-date">Aug 21, 2026</span> <span class="cl-tag">Security</span></div>
                     <div class="cl-body">Migrated Google OAuth flow from embedded popup to the System Default Browser. Complies with Google's latest security policies blocking OAuth in embedded webviews.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-hidden">
                     <div class="cl-version">v1.0.9 <span class="cl-date">Jul 25, 2026</span></div>
                     <div class="cl-body">Added in-app update notification indicators. Implemented clickable updates to trigger instant quit-and-install from the widget.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-hidden">
                     <div class="cl-version">v1.0.8 <span class="cl-date">Jul 25, 2026</span></div>
                     <div class="cl-body">Optimized background sync interval to 15 minutes. Added exponential backoff retry (1m → 2m → 4m → 15m) for API errors.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-hidden">
                     <div class="cl-version">v1.0.7 <span class="cl-date">Jun 27, 2026</span></div>
                     <div class="cl-body">Enabled automatic update checks on startup. Updated release script to upload metadata to GitHub.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-hidden">
                     <div class="cl-version">v1.0.4 <span class="cl-date">Jun 27, 2026</span></div>
                     <div class="cl-body">Fixed window sizing bug with position locking. Resolved blank white auth window flashing on sleep-wakeup.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-hidden">
                     <div class="cl-version">v1.0.2 <span class="cl-date">Jun 20, 2026</span></div>
                     <div class="cl-body">Added sound feedback on task completion. Updated UI to glass-morphism with micro-animations.</div>
                 </div>
-                <div class="cl-item">
+                <div class="cl-item cl-hidden">
                     <div class="cl-version">v1.0.0 <span class="cl-date">Apr 1, 2026</span></div>
                     <div class="cl-body">Initial public release.</div>
                 </div>
@@ -580,7 +674,11 @@
                     Download for Mac
                 </a>
             </div>
-            <div class="cta-meta">Windows 10 &amp; 11 · macOS</div>
+            <div class="cta-meta" style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+                <span>Windows 10 &amp; 11 · macOS</span>
+                <span style="opacity:0.3;">·</span>
+                <button type="button" class="mac-guide-link" onclick="openMacModal(event)" style="font-size:0.82rem;">macOS Guide 🍏</button>
+            </div>
             <div style="margin-top:28px;">
                 <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener" style="color:var(--text-dim);font-size:0.875rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">
                     It's free. But if it saved you 5 minutes today, buy me a coffee ☕
@@ -589,6 +687,59 @@
         </div>
     </section>
 
+    <!-- macOS Guide Modal -->
+    <div class="mac-modal" id="mac-modal" role="dialog" aria-modal="true" aria-labelledby="mac-modal-title">
+        <div class="mac-modal-dialog">
+            <button type="button" class="mac-modal-close" onclick="closeMacModal()" aria-label="Close modal">✕</button>
+            
+            <div class="mac-modal-header">
+                <div class="mac-modal-title" id="mac-modal-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color:#7ec47e"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+                    macOS Installation Guide
+                </div>
+                <div class="mac-modal-subtitle">Follow these quick steps to get Calendar-On-Demand running smoothly on your Mac.</div>
+            </div>
+
+            <div class="mac-step">
+                <div class="mac-step-title">
+                    <span class="mac-step-num">1</span>
+                    Drag to Applications
+                </div>
+                <p>Open the downloaded <strong>.dmg</strong> file, and drag the <strong>Calendar-On-Demand</strong> icon into your <strong>Applications</strong> folder.</p>
+            </div>
+
+            <div class="mac-step">
+                <div class="mac-step-title">
+                    <span class="mac-step-num">2</span>
+                    One-time Gatekeeper Bypass
+                </div>
+                <p>Because this app is free and not signed through Apple's paid developer program ($99/year), macOS will block it on first launch. To unlock safely, open <strong>Terminal</strong> (<code>⌘ + Space</code> &rarr; type "Terminal") and run:</p>
+                <div class="mac-code-box">
+                    <code id="mac-cmd-code">xattr -cr /Applications/Calendar-On-Demand.app</code>
+                    <button type="button" class="mac-copy-btn" id="mac-copy-btn" onclick="copyMacCommand()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="mac-step">
+                <div class="mac-step-title">
+                    <span class="mac-step-num">3</span>
+                    Ready to Launch!
+                </div>
+                <p>Launch Calendar-On-Demand from Spotlight (<code>⌘ + Space</code>) or your Applications folder. When updating to new releases in the future, simply replace the app and re-run the command once.</p>
+            </div>
+
+            <div class="mac-modal-footer">
+                <span>Free &amp; Open Source · No telemetry</span>
+                <a href="#" onclick="triggerDownload('mac');closeMacModal();return false;" class="btn-primary" style="padding:8px 16px;font-size:0.85rem;border-radius:8px;">
+                    Download .dmg
+                </a>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <p>&copy; 2026 Built with ❤️ by a solo developer.</p>
@@ -596,6 +747,8 @@
                 <a href="privacy.html">Privacy Policy</a>
                 <span class="footer-sep">|</span>
                 <a href="terms.html">Terms of Service</a>
+                <span class="footer-sep">|</span>
+                <a href="#" onclick="openMacModal(event);return false;">macOS Guide</a>
                 <span class="footer-sep">|</span>
                 <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener">Support on Ko-fi ☕</a>
             </div>
@@ -655,32 +808,84 @@
             document.body.removeChild(a);
         }
 
-        // Initialize changelog (hide items after first 3)
-        document.addEventListener('DOMContentLoaded', () => {
-            const items = document.querySelectorAll('.changelog-list .cl-item');
-            items.forEach((item, idx) => {
-                if (idx >= 3) item.classList.add('cl-hidden');
-            });
-        });
-
         // Changelog toggle
         function toggleChangelog() {
             const btn = document.getElementById('changelog-toggle');
-            const hidden = document.querySelectorAll('.changelog-list .cl-item:nth-child(n+4)');
+            const hidden = document.querySelectorAll('.cl-hidden');
             const isOpen = btn.classList.contains('open');
-            hidden.forEach(el => {
-                if (isOpen) {
-                    el.classList.add('cl-hidden');
-                    el.style.display = '';
-                } else {
-                    el.classList.remove('cl-hidden');
-                    el.style.display = 'flex';
-                }
-            });
+            hidden.forEach(el => { el.style.display = isOpen ? 'none' : 'flex'; });
             btn.classList.toggle('open', !isOpen);
             btn.innerHTML = isOpen
                 ? 'Show all versions <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>'
                 : 'Show less <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        }
+
+        // macOS Guide Modal Logic
+        const macModal = document.getElementById('mac-modal');
+
+        function openMacModal(e) {
+            if (e) e.preventDefault();
+            if (macModal) {
+                macModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeMacModal() {
+            if (macModal) {
+                macModal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (macModal) {
+            macModal.addEventListener('click', (e) => {
+                if (e.target === macModal) closeMacModal();
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && macModal && macModal.classList.contains('show')) {
+                closeMacModal();
+            }
+        });
+
+        function copyMacCommand() {
+            const cmd = document.getElementById('mac-cmd-code').innerText.trim();
+            const btn = document.getElementById('mac-copy-btn');
+            const showSuccess = () => {
+                btn.innerHTML = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(cmd).then(showSuccess).catch(() => {
+                    fallbackCopy(cmd, showSuccess);
+                });
+            } else {
+                fallbackCopy(cmd, showSuccess);
+            }
+        }
+
+        function fallbackCopy(text, callback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                if (callback) callback();
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
         }
     </script>
 </body>
