@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DTN5BM6653"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DTN5BM6653');
+    </script>
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="l8kz_CCdsv0-WJNQrLo8BenbXSz-VqNGdrOVpvBJTLM" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -799,6 +808,15 @@
         fetchDownloadUrls();
 
         function triggerDownload(platform) {
+            // Track key event in Google Analytics
+            if (typeof gtag === 'function') {
+                gtag('event', 'app_download', {
+                    event_category: 'download',
+                    event_label: platform,
+                    platform: platform
+                });
+            }
+
             const url = platform === 'mac' ? macUrl : winUrl;
             const a = document.createElement('a');
             a.href = url;
