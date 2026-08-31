@@ -152,17 +152,23 @@
 
                 <!-- Input area for adding a new todo -->
                 <div class="todo-input-row">
-                    <input type="text" id="quick-add-input" placeholder="Add a new task (e.g. Clean room 14:00)...">
+                    <input type="text" id="quick-add-input" placeholder="Add a new task (e.g. Team Sync)...">
                     <button id="save-event" class="primary-btn">+</button>
                 </div>
 
-                <div class="setting-item all-day-entry hidden">
-                    <label class="switch">
-                        <span>All Day Event</span>
+                <!-- Time selector row (All-day toggle + Time Pickers) -->
+                <div class="todo-time-row">
+                    <label class="time-toggle-label" title="Toggle all-day event">
                         <input type="checkbox" id="all-day-check">
-                        <span class="slider-toggle"></span>
+                        <span class="custom-pill">All-day</span>
                     </label>
+                    <div class="time-inputs-container" id="time-inputs-container">
+                        <input type="time" id="event-start-time" class="time-picker-input" title="Start Time">
+                        <span class="time-sep">~</span>
+                        <input type="time" id="event-end-time" class="time-picker-input" title="End Time">
+                    </div>
                 </div>
+
                 <div id="extra-fields">
                     <input type="text" id="event-location" placeholder="Location (optional)">
                     <textarea id="event-description" placeholder="Description (optional)"></textarea>

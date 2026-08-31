@@ -310,6 +310,21 @@ header button:hover {
     opacity: 0.85;
 }
 
+.todo-time-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 6px;
+    display: inline-block;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
 .account-item-actions {
     display: flex;
     align-items: center;
@@ -1002,6 +1017,94 @@ input[type="color"]::-webkit-color-swatch {
 .primary-btn:hover {
     transform: scale(1.05);
     opacity: 0.9;
+}
+
+/* Time Selector Row */
+.todo-time-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    -webkit-app-region: no-drag;
+}
+
+.time-toggle-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.time-toggle-label input {
+    display: none;
+}
+
+.custom-pill {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.time-toggle-label input:checked + .custom-pill {
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 40%, transparent);
+}
+
+.time-inputs-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.time-inputs-container.disabled {
+    opacity: 0.25;
+    pointer-events: none;
+    filter: grayscale(1);
+}
+
+.time-picker-input {
+    background: #2a2a32 !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    color: var(--text-color) !important;
+    font-family: inherit;
+    font-size: 0.78rem !important;
+    padding: 4px 6px !important;
+    outline: none;
+    width: 86px !important;
+    margin-bottom: 0 !important;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.time-picker-input:focus {
+    border-color: var(--accent-color) !important;
+}
+
+.time-picker-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.85);
+    cursor: pointer;
+    opacity: 0.6;
+    margin-left: 2px;
+}
+
+.time-sep {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
 }
 
 /* Event Item inside main calendar grid */

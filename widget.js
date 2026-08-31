@@ -89,6 +89,19 @@ try {
             .trim();
     }
 
+    function cleanDisplaySummary(summary, hasTime = false) {
+        let cleaned = stripTags(summary);
+        if (!hasTime || !cleaned) return cleaned;
+
+        // Strip leading time patterns: e.g. "1000 ", "10:00 ", "10:00-11:00 ", "1000-1100 "
+        let withoutTime = cleaned.replace(/^(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9])\s*(?:[-~to]\s*(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9]))?\s*/i, '');
+        // Strip trailing time patterns: e.g. " 1000", " 10:00"
+        withoutTime = withoutTime.replace(/\s*(?:[-~to]\s*)?(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9])$/i, '');
+
+        withoutTime = withoutTime.trim();
+        return withoutTime.length > 0 ? withoutTime : cleaned;
+    }
+
     // DOM Elements
     const calendarDays = document.getElementById('calendar-days');
     const calendarHeader = document.querySelector('.calendar-grid-header');
@@ -101,6 +114,9 @@ try {
     const quickAddModal = document.getElementById('quick-add-modal');
     const quickAddInput = document.getElementById('quick-add-input');
     const allDayCheck = document.getElementById('all-day-check');
+    const eventStartTime = document.getElementById('event-start-time');
+    const eventEndTime = document.getElementById('event-end-time');
+    const timeInputsContainer = document.getElementById('time-inputs-container');
     const eventLocationInput = document.getElementById('event-location');
     const eventDescriptionInput = document.getElementById('event-description');
     const extraFields = document.getElementById('extra-fields');
@@ -132,6 +148,89 @@ try {
     // New Todo list container
     const todoListContainer = document.getElementById('todo-list-container');
     const todoDateTitle = document.getElementById('todo-date-title');
+
+    function updateAllDayUI() {
+        if (!allDayCheck || !timeInputsContainer) return;
+        if (allDayCheck.checked) {
+            timeInputsContainer.classList.add('disabled');
+        } else {
+            timeInputsContainer.classList.remove('disabled');
+            if (eventStartTime && !eventStartTime.value) {
+                const now = new Date();
+                const nextH = (now.getHours() + 1) % 24;
+                const endH = (nextH + 1) % 24;
+                eventStartTime.value = `${nextH.toString().padStart(2, '0')}:00`;
+                if (eventEndTime) eventEndTime.value = `${endH.toString().padStart(2, '0')}:00`;
+            }
+        }
+    }
+
+    if (allDayCheck) {
+        allDayCheck.addEventListener('change', updateAllDayUI);
+    }
+
+    if (eventStartTime) {
+        eventStartTime.addEventListener('change', () => {
+            if (allDayCheck && allDayCheck.checked) {
+                allDayCheck.checked = false;
+                updateAllDayUI();
+            }
+            if (eventStartTime.value && eventEndTime) {
+                const [h, m] = eventStartTime.value.split(':').map(Number);
+                const nextH = (h + 1) % 24;
+                eventEndTime.value = `${nextH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+            }
+        });
+    }
+
+    if (eventEndTime) {
+        eventEndTime.addEventListener('change', () => {
+            if (allDayCheck && allDayCheck.checked) {
+                allDayCheck.checked = false;
+                updateAllDayUI();
+            }
+        });
+    }
+
+    if (quickAddInput) {
+        quickAddInput.addEventListener('input', () => {
+            const val = quickAddInput.value;
+            const durationMatch = val.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/i);
+            const singleTimeMatch = val.match(/(\d{1,2}:?\d{2})/);
+
+            function formatPart(t) {
+                if (t.includes(':')) return t.padStart(5, '0');
+                if (t.length === 3) return `0${t[0]}:${t.slice(1)}`;
+                if (t.length === 4) return `${t.slice(0, 2)}:${t.slice(2)}`;
+                return t;
+            }
+
+            if (durationMatch) {
+                const s = formatPart(durationMatch[1]);
+                const e = formatPart(durationMatch[2]);
+                if (s && e) {
+                    if (eventStartTime) eventStartTime.value = s;
+                    if (eventEndTime) eventEndTime.value = e;
+                    if (allDayCheck) {
+                        allDayCheck.checked = false;
+                        updateAllDayUI();
+                    }
+                }
+            } else if (singleTimeMatch) {
+                const s = formatPart(singleTimeMatch[0]);
+                if (s && s.length === 5) {
+                    if (eventStartTime) eventStartTime.value = s;
+                    const [h, m] = s.split(':').map(Number);
+                    const nextH = (h + 1) % 24;
+                    if (eventEndTime) eventEndTime.value = `${nextH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    if (allDayCheck) {
+                        allDayCheck.checked = false;
+                        updateAllDayUI();
+                    }
+                }
+            }
+        });
+    }
 
     if (reauthBtn) reauthBtn.onclick = () => ipcRenderer.invoke('reset-auth');
 
@@ -264,8 +363,18 @@ try {
                 displaySummary = displaySummary.replace(colorMatch[0], '');
             }
             
-            ev.innerText = stripTags(displaySummary);
-            ev.title = `${stripTags(displaySummary)} • ${e.accountEmail || e.calendarName || ''}`;
+            const hasTime = !!(e.start && e.start.dateTime);
+            let timePrefix = '';
+            if (hasTime) {
+                const startDt = new Date(e.start.dateTime);
+                const sH = startDt.getHours().toString().padStart(2, '0');
+                const sM = startDt.getMinutes().toString().padStart(2, '0');
+                timePrefix = `${sH}:${sM} `;
+            }
+            
+            const cleanText = cleanDisplaySummary(displaySummary, hasTime);
+            ev.innerText = timePrefix + cleanText;
+            ev.title = `${timePrefix}${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
             ev.style.borderLeft = `3px solid ${e.backgroundColor || 'var(--accent-color)'}`;
             ev.onclick = (event) => { 
                 event.stopPropagation(); 
@@ -360,7 +469,10 @@ try {
         updateTodoListUI();
 
         if (quickAddInput) { quickAddInput.value = ''; quickAddInput.focus(); }
-        if (allDayCheck) allDayCheck.checked = false;
+        if (allDayCheck) {
+            allDayCheck.checked = false;
+            updateAllDayUI();
+        }
         if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
         if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
@@ -388,6 +500,8 @@ try {
 
         dayEvents.forEach(e => {
             const isCompleted = e.summary.startsWith('[x]');
+            const hasTime = !!(e.start && e.start.dateTime);
+            const cleanText = cleanDisplaySummary(e.summary, hasTime);
             
             const item = document.createElement('div');
             item.classList.add('todo-item');
@@ -405,7 +519,7 @@ try {
 
             const title = document.createElement('span');
             title.className = `todo-title ${isCompleted ? 'completed' : ''}`;
-            title.innerText = stripTags(e.summary);
+            title.innerText = cleanText;
             title.title = e.summary;
             
             title.onclick = (event) => {
@@ -414,14 +528,38 @@ try {
                 
                 // Populate text input
                 if (quickAddInput) {
-                    quickAddInput.value = stripTags(e.summary);
+                    quickAddInput.value = cleanText;
                     quickAddInput.focus();
+                }
+
+                // Populate time / all-day status
+                const isAllDay = !e.start.dateTime;
+                if (allDayCheck) {
+                    allDayCheck.checked = isAllDay;
+                    updateAllDayUI();
+                }
+                if (!isAllDay && e.start.dateTime) {
+                    const startDt = new Date(e.start.dateTime);
+                    const sH = startDt.getHours().toString().padStart(2, '0');
+                    const sM = startDt.getMinutes().toString().padStart(2, '0');
+                    if (eventStartTime) eventStartTime.value = `${sH}:${sM}`;
+
+                    if (e.end && e.end.dateTime) {
+                        const endDt = new Date(e.end.dateTime);
+                        const eH = endDt.getHours().toString().padStart(2, '0');
+                        const eM = endDt.getMinutes().toString().padStart(2, '0');
+                        if (eventEndTime) eventEndTime.value = `${eH}:${eM}`;
+                    } else if (eventEndTime) {
+                        eventEndTime.value = '';
+                    }
+                } else {
+                    if (eventStartTime) eventStartTime.value = '';
+                    if (eventEndTime) eventEndTime.value = '';
                 }
                 
                 // Populate extra options
                 if (eventLocationInput) eventLocationInput.value = e.location || '';
                 if (eventDescriptionInput) eventDescriptionInput.value = e.description || '';
-                if (allDayCheck) allDayCheck.checked = !!e.start.date;
                 if (document.getElementById('important-check')) document.getElementById('important-check').checked = e.summary.includes('[IMPORTANT]');
                 if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = e.summary.includes('[HIGHLIGHT]');
                 
@@ -439,6 +577,26 @@ try {
             };
 
             itemLeft.appendChild(title);
+
+            // Time badge tag if event has start time
+            if (e.start && e.start.dateTime) {
+                const timeTag = document.createElement('span');
+                timeTag.className = 'todo-time-tag';
+                const startDt = new Date(e.start.dateTime);
+                const sH = startDt.getHours().toString().padStart(2, '0');
+                const sM = startDt.getMinutes().toString().padStart(2, '0');
+                let timeText = `${sH}:${sM}`;
+                if (e.end && e.end.dateTime) {
+                    const endDt = new Date(e.end.dateTime);
+                    const eH = endDt.getHours().toString().padStart(2, '0');
+                    const eM = endDt.getMinutes().toString().padStart(2, '0');
+                    if (`${sH}:${sM}` !== `${eH}:${eM}`) {
+                        timeText += ` - ${eH}:${eM}`;
+                    }
+                }
+                timeTag.innerText = timeText;
+                itemLeft.appendChild(timeTag);
+            }
 
             // Account badge tag
             if (e.accountEmail || e.calendarName) {
@@ -535,17 +693,22 @@ try {
         const summary = quickAddInput ? stripTags(quickAddInput.value) : '';
         if (!summary) return;
         
-        let startStr = null, endStr = null;
-        const durationMatch = summary.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/);
-        const singleTimeMatch = summary.match(/(\d{1,2}:?\d{2})/);
-        function formatPart(t) {
-            if (t.includes(':')) return t;
-            if (t.length === 3) return `0${t[0]}:${t.slice(1)}`;
-            if (t.length === 4) return `${t.slice(0, 2)}:${t.slice(2)}`;
-            return t;
+        let startStr = eventStartTime && eventStartTime.value ? eventStartTime.value : null;
+        let endStr = eventEndTime && eventEndTime.value ? eventEndTime.value : null;
+
+        // Fallback: parse from input text if not explicitly set in picker
+        if (!startStr) {
+            const durationMatch = summary.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/i);
+            const singleTimeMatch = summary.match(/(\d{1,2}:?\d{2})/);
+            function formatPart(t) {
+                if (t.includes(':')) return t.padStart(5, '0');
+                if (t.length === 3) return `0${t[0]}:${t.slice(1)}`;
+                if (t.length === 4) return `${t.slice(0, 2)}:${t.slice(2)}`;
+                return t;
+            }
+            if (durationMatch) { startStr = formatPart(durationMatch[1]); endStr = formatPart(durationMatch[2]); }
+            else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[0]); }
         }
-        if (durationMatch) { startStr = formatPart(durationMatch[1]); endStr = formatPart(durationMatch[2]); }
-        else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[0]); }
 
         const offset = getLocalTZOffset();
         let start = { date: selectedDay }, end = { date: selectedDay };
@@ -553,10 +716,16 @@ try {
 
         if (!isAllDayState && startStr) {
             start = { dateTime: `${selectedDay}T${startStr}:00${offset}` };
-            if (endStr) end = { dateTime: `${selectedDay}T${endStr}:00${offset}` };
-            else { const [h, m] = startStr.split(':').map(Number); const endHour = (h + 1).toString().padStart(2, '0'); end = { dateTime: `${selectedDay}T${endHour}:${m.toString().padStart(2, '0')}:00${offset}` }; }
+            if (endStr) {
+                end = { dateTime: `${selectedDay}T${endStr}:00${offset}` };
+            } else {
+                const [h, m] = startStr.split(':').map(Number);
+                const endHour = ((h + 1) % 24).toString().padStart(2, '0');
+                end = { dateTime: `${selectedDay}T${endHour}:${m.toString().padStart(2, '0')}:00${offset}` };
+            }
         } else {
-            const nextDay = new Date(selectedDay); nextDay.setDate(nextDay.getDate() + 1);
+            const nextDay = new Date(selectedDay);
+            nextDay.setDate(nextDay.getDate() + 1);
             end = { date: `${nextDay.getFullYear()}-${(nextDay.getMonth() + 1).toString().padStart(2, '0')}-${nextDay.getDate().toString().padStart(2, '0')}` };
         }
 
@@ -567,6 +736,9 @@ try {
         const entryColor = document.getElementById('selected-entry-color')?.value;
         
         let finalSummary = summary;
+        if (!isAllDayState && startStr) {
+            finalSummary = cleanDisplaySummary(summary, true);
+        }
         
         // Preserve [x] prefix if it was previously completed
         if (editingEvent && editingEvent.summary.startsWith('[x]')) {
@@ -592,7 +764,12 @@ try {
         quickAddInput.value = '';
         if (eventLocationInput) eventLocationInput.value = '';
         if (eventDescriptionInput) eventDescriptionInput.value = '';
-        if (allDayCheck) allDayCheck.checked = false;
+        if (allDayCheck) {
+            allDayCheck.checked = false;
+            if (eventStartTime) eventStartTime.value = '';
+            if (eventEndTime) eventEndTime.value = '';
+            updateAllDayUI();
+        }
         if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
         if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
