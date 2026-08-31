@@ -2,7 +2,10 @@ name: Release
 on:
   push:
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -31,7 +34,20 @@ jobs:
           CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS }}
         shell: bash
 
-      - name: Publish Release
+      - name: Publish Artifacts to Release
         run: npx electron-builder --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Publish Draft Release and Auto-generate Notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ github.ref_name }}" --draft=false --generate-notes
