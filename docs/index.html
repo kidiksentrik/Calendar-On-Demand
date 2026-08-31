@@ -226,21 +226,42 @@
 
         /* Update Announcement Banner Pill */
         .update-banner {
-            display:inline-flex; align-items:center; gap:8px;
-            background:rgba(126,196,126,0.08); border:1px solid rgba(126,196,126,0.25);
-            border-radius:9999px; padding:6px 14px 6px 8px; font-size:0.82rem;
-            color:var(--text); text-decoration:none; margin-bottom:20px;
-            transition:all 0.2s ease;
+            display:inline-flex; align-items:center; gap:10px;
+            background:linear-gradient(135deg, rgba(58, 107, 58, 0.3) 0%, rgba(17, 26, 17, 0.85) 100%);
+            border:1px solid rgba(126, 196, 126, 0.4);
+            border-radius:9999px; padding:6px 16px 6px 8px; font-size:0.86rem;
+            color:#ffffff; text-decoration:none; margin-bottom:24px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.35), 0 0 22px rgba(58,107,58,0.22), inset 0 1px 0 rgba(255,255,255,0.15);
+            backdrop-filter:blur(8px);
+            -webkit-backdrop-filter:blur(8px);
+            transition:all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position:relative;
         }
         .update-banner:hover {
-            background:rgba(126,196,126,0.15); border-color:rgba(126,196,126,0.45);
-            transform:translateY(-1px);
+            background:linear-gradient(135deg, rgba(58, 107, 58, 0.45) 0%, rgba(24, 38, 24, 0.95) 100%);
+            border-color:rgba(126, 196, 126, 0.7);
+            box-shadow:0 6px 28px rgba(0,0,0,0.5), 0 0 32px rgba(58,107,58,0.38), inset 0 1px 0 rgba(255,255,255,0.25);
+            transform:translateY(-2px);
+            color:#ffffff;
         }
         .update-tag {
-            background:#2a4d33; color:#7ec47e; font-size:0.72rem; font-weight:700;
-            padding:2px 8px; border-radius:9999px; letter-spacing:0.02em;
+            background:#34c759; color:#041404; font-size:0.74rem; font-weight:800;
+            padding:3px 10px; border-radius:9999px; letter-spacing:0.02em;
+            display:inline-flex; align-items:center; gap:6px;
+            box-shadow:0 0 12px rgba(52,199,89,0.4);
         }
-        .update-text { color:var(--text-dim); }
+        .pulse-dot {
+            width:6px; height:6px; border-radius:50%; background:#041404;
+            display:inline-block;
+            animation:pulse-dot-anim 2s infinite ease-in-out;
+        }
+        @keyframes pulse-dot-anim {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.75); }
+        }
+        .update-text { color:#e8ece8; font-weight:500; }
+        .update-arrow { color:#7ec47e; transition:transform 0.2s ease; }
+        .update-banner:hover .update-arrow { transform:translateX(3px); color:#a3e6a3; }
 
         /* Trust pills */
         .trust-row {
@@ -443,9 +464,9 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag">v1.4.1 Released</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.4.1 Released</span>
                 <span class="update-text">Direct Time Picker &amp; Smart Time Sync</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
 
