@@ -67,7 +67,9 @@ if (!gotTheLock) {
     });
 
 async function createWindow() {
-    const { width, height, x, y } = store.get('windowBounds') || { width: 350, height: 450, x: undefined, y: undefined };
+    let { width, height, x, y } = store.get('windowBounds') || { width: 380, height: 460, x: undefined, y: undefined };
+    width = Math.max(370, width || 380);
+    height = Math.max(430, height || 460);
 
     const alwaysOnTop = store.get('alwaysOnTop', false);
     const desktopMode = store.get('desktopMode', false);
@@ -76,6 +78,8 @@ async function createWindow() {
     mainWindow = new BrowserWindow({
         width,
         height,
+        minWidth: 370,
+        minHeight: 430,
         x,
         y,
         useContentSize: true,
@@ -119,7 +123,23 @@ async function createWindow() {
         }
     }
 
-    mainWindow.on('resize', saveBounds);
+    mainWindow.setMinimumSize(370, 430);
+
+    mainWindow.on('will-resize', (event, newBounds) => {
+        if (newBounds.width < 370 || newBounds.height < 430) {
+            event.preventDefault();
+        }
+    });
+
+    mainWindow.on('resize', () => {
+        if (!mainWindow) return;
+        const [w, h] = mainWindow.getSize();
+        if (w < 370 || h < 430) {
+            mainWindow.setSize(Math.max(370, w), Math.max(430, h));
+            return;
+        }
+        saveBounds();
+    });
     mainWindow.on('move', saveBounds);
 
     mainWindow.on('close', (event) => {
@@ -137,6 +157,8 @@ async function createWindow() {
 function saveBounds() {
     if (!mainWindow) return;
     const bounds = mainWindow.getBounds();
+    bounds.width = Math.max(370, bounds.width);
+    bounds.height = Math.max(430, bounds.height);
     store.set('windowBounds', bounds);
 }
 
@@ -497,10 +519,20 @@ ipcMain.handle('get-settings', () => {
         'today-color': store.get('today-color', '#ffcc00'),
         'bg-opacity': store.get('bg-opacity', 0.92),
         startOfWeek: store.get('startOfWeek', 0),
+        defaultViewMode: store.get('defaultViewMode', 'month'),
+        timeDisplayStyle: store.get('timeDisplayStyle', 'badge'),
         selectedCalendarIds: store.get('selectedCalendarIds', null),
         soundEnabled: store.get('soundEnabled', true),
         version: app.getVersion()
     };
+});
+
+ipcMain.on('set-default-view-mode', (event, value) => {
+    store.set('defaultViewMode', value);
+});
+
+ipcMain.on('set-time-display-style', (event, value) => {
+    store.set('timeDisplayStyle', value);
 });
 
 ipcMain.on('set-start-of-week', (event, value) => {

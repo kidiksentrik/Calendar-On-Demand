@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.4.1)
+- **Product**: **Calendar on Demand** (v1.5.0)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.4.1` (Direct Time Picker, Smart Time Sync, Event Time Display, Time De-duplication)
+- **Current Version**: `v1.5.0` (Weekly Timeline View, Micro-time Display, End Time Fix, Window Min-size & Responsive Grid)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 
 ---
@@ -79,6 +79,35 @@
 - **데스크톱 알림 (Notification)**: 다가오는 일정 10분/15분 전 윈도우/맥 네이티브 알림 알림음 발송.
 - **반복 일정(Recurrence) 생성 & 표시**: 주간/월간 반복 룰 지원.
 - **시간 직접 입력 UI 추가 고도화**: 분 단위 15분/30분 스냅 버튼 등 편의성 강화 (필요 시).
+
+### 2. 📝 User Feedback Backlog
+- [x] **일정 종료 시간(End Time) 커스텀 입력값 유지 (1시간 강제 리셋 버그 수정)**:
+  - 사용자가 종료 시간(`eventEndTime`)을 수동으로 변경한 경우 플래그(`isEndTimeUserModified`)로 기억하여 불필요한 자동 덮어쓰기 방지.
+  - 시작 시간 변경 시 기존 설정된 커스텀 duration 유지.
+  - 자연어 파싱 시에도 단일 시간 감지가 기존에 설정된 커스텀 종료 시간을 임의로 초기화하지 않도록 예외 처리 완료.
+- [x] **일정 시간/Duration 표시 개선 (설정 옵션화)**:
+  - 설정(Settings) > Appearance에서 `Event Time Style` 선택 지원:
+    - **옵션 1 (Start time only)**: 기존 심플 시작 시간만 표시 (`10:00 미팅`).
+    - **옵션 2 (Duration 축약 표기)**: 글자 수를 대폭 절약하는 `10:00 (1h)` / `10:00 (+1.5h)` 형태의 간결한 소요 시간 표기.
+    - **옵션 3 (상단 마이크로 뱃지)**: 제목 윗줄에 0.65rem의 작은 폰트로 `10:00 - 11:00` 분리 노출하여 제목 가독성 유지.
+- [x] **주간 뷰(Weekly View) 구글 캘린더 스타일 세로 타임라인 그리드 고도화**:
+  - 헤더 우측 미니멀 32px 아이콘 버튼(`📅` ↔ `📆`) 추가 및 툴팁 제공.
+  - 단축키 `W` (주간 뷰) / `M` (월간 뷰) 전환 지원.
+  - 00:00~23:00 세로 타임라인 그리드, 실제 일정 시작/종료 시간에 비례한 블록 배치 및 클러스터 중복(Overlap) 컬럼 자동 분할.
+  - 상단 종일(All-day) 일정 전용 섹션 제공.
+  - 현재 시각 실시간 레드 인디케이터 라인 & 자동 스마트 스크롤 지원.
+  - 빈 타임라인 슬롯 클릭 시 해당 날짜/시간으로 일정 추가 모달 자동 팝업.
+  - 설정(Settings) > Behavior에서 `Default View` (Month / Week) 영구 저장 지원.
+- [x] **일정 시간 표시 스타일 (Micro-time 11:30 ~ 13:40 상단 배치)**:
+  - 설정(Settings) > Appearance에서 `Event Time Style` 지원 (Micro time on top / Start time only / Compact duration).
+  - 카드 상단에 0.62rem `11:30 ~ 13:40` 마이크로 타임 배치로 긴 텍스트 침해 없이 시각적 정보성 극대화.
+- [x] **최소 창 크기 제한(Min-size) 및 소형 창 반응형 레이아웃 강화**:
+  - Windows Frameless Transparent 창에서 OS가 `minWidth`를 무시하고 마우스 드래그 축소를 허용하는 문제를 해결하기 위해 Electron `will-resize` 이벤트에서 `newBounds.width < 370 || newBounds.height < 430` 감지 시 `event.preventDefault()`로 마우스 축소 차단.
+  - `resize` 이벤트에서도 `mainWindow.setSize(Math.max(370, w), Math.max(430, h))`로 강제 스냅 보정 및 `saveBounds` 저장 시 클램핑 적용.
+  - CSS 그리드 5개 영역(`calendar-grid-header`, `calendar-days`, `week-header-days`, `week-allday-days`, `week-days-columns`)을 `repeat(7, minmax(0, 1fr))`로 변경하여 내부 콘텐츠로 인한 주말 컬럼 잘림 방지.
+  - 헤더 우측 버튼 그룹(`📅 📌 🔄 ⚙️`)에 `flex-shrink: 0; gap: 6px;` 적용 및 월 제목 `clamp` 폰트 적용.
+- [ ] **커스텀 디자인 옵션 추가**: '오늘' 및 '주말' 하이라이트 색상 커스텀, 이모지 대신 텍스트 색상과 어울리는 모노톤(단색) 심플 아이콘 옵션.
+- [x] *(참고)* **다중 계정 연동**: 피드백에 요청되었으나 v1.4.0에서 이미 구현 완료된 기능.
 
 ---
 

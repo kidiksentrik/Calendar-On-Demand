@@ -5,6 +5,9 @@ try {
     let events = [];
     let selectedDay = null;
     let startOfWeek = 0;
+    let currentViewMode = 'month';
+    let timeDisplayStyle = 'badge';
+    let isEndTimeUserModified = false;
     let editingEvent = null;
     let allCalendars = [];
     let selectedCalendarIds = null;
@@ -144,6 +147,20 @@ try {
     const soundEnabledCheck = document.getElementById('sound-enabled-check');
     const addAccountBtn = document.getElementById('add-account-btn');
     const accountsList = document.getElementById('accounts-list');
+    const viewToggleBtn = document.getElementById('view-toggle-btn');
+    const defaultViewSelect = document.getElementById('default-view-select');
+    const timeStyleSelect = document.getElementById('time-style-select');
+
+    // Containers for Month & Week Timeline Views
+    const monthViewContainer = document.getElementById('month-view-container');
+    const weekViewContainer = document.getElementById('week-view-container');
+    const weekHeaderRow = document.getElementById('week-header-row');
+    const weekAlldayRow = document.getElementById('week-allday-row');
+    const weekScrollContainer = document.getElementById('week-scroll-container');
+    const weekTimeGutter = document.getElementById('week-time-gutter');
+    const weekDaysColumns = document.getElementById('week-days-columns');
+    const HOUR_HEIGHT = 48;
+    let hasScrolledWeekTimeline = false;
 
     // New Todo list container
     const todoListContainer = document.getElementById('todo-list-container');
@@ -160,7 +177,7 @@ try {
                 const nextH = (now.getHours() + 1) % 24;
                 const endH = (nextH + 1) % 24;
                 eventStartTime.value = `${nextH.toString().padStart(2, '0')}:00`;
-                if (eventEndTime) eventEndTime.value = `${endH.toString().padStart(2, '0')}:00`;
+                if (eventEndTime && !isEndTimeUserModified) eventEndTime.value = `${endH.toString().padStart(2, '0')}:00`;
             }
         }
     }
@@ -177,14 +194,26 @@ try {
             }
             if (eventStartTime.value && eventEndTime) {
                 const [h, m] = eventStartTime.value.split(':').map(Number);
-                const nextH = (h + 1) % 24;
-                eventEndTime.value = `${nextH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                if (isEndTimeUserModified && eventEndTime.value) {
+                    const [oldEH, oldEM] = eventEndTime.value.split(':').map(Number);
+                    const startMins = h * 60 + m;
+                    let durationMins = (oldEH * 60 + oldEM) - startMins;
+                    if (durationMins <= 0) durationMins = 60;
+                    const newEndMins = (startMins + durationMins) % (24 * 60);
+                    const endH = Math.floor(newEndMins / 60);
+                    const endM = newEndMins % 60;
+                    eventEndTime.value = `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
+                } else {
+                    const nextH = (h + 1) % 24;
+                    eventEndTime.value = `${nextH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                }
             }
         });
     }
 
     if (eventEndTime) {
         eventEndTime.addEventListener('change', () => {
+            isEndTimeUserModified = true;
             if (allDayCheck && allDayCheck.checked) {
                 allDayCheck.checked = false;
                 updateAllDayUI();
@@ -211,6 +240,7 @@ try {
                 if (s && e) {
                     if (eventStartTime) eventStartTime.value = s;
                     if (eventEndTime) eventEndTime.value = e;
+                    isEndTimeUserModified = true;
                     if (allDayCheck) {
                         allDayCheck.checked = false;
                         updateAllDayUI();
@@ -220,9 +250,11 @@ try {
                 const s = formatPart(singleTimeMatch[0]);
                 if (s && s.length === 5) {
                     if (eventStartTime) eventStartTime.value = s;
-                    const [h, m] = s.split(':').map(Number);
-                    const nextH = (h + 1) % 24;
-                    if (eventEndTime) eventEndTime.value = `${nextH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    if (!isEndTimeUserModified && eventEndTime) {
+                        const [h, m] = s.split(':').map(Number);
+                        const nextH = (h + 1) % 24;
+                        eventEndTime.value = `${nextH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    }
                     if (allDayCheck) {
                         allDayCheck.checked = false;
                         updateAllDayUI();
@@ -274,7 +306,35 @@ try {
         return diff + pad(Math.floor(Math.abs(tzOffset) / 60)) + ':' + pad(Math.abs(tzOffset) % 60);
     }
 
+    function toggleViewMode(mode) {
+        if (mode) {
+            currentViewMode = mode;
+        } else {
+            currentViewMode = currentViewMode === 'month' ? 'week' : 'month';
+        }
+        hasScrolledWeekTimeline = false;
+        renderCalendar();
+        fetchEvents();
+    }
+
     function renderCalendar() {
+        if (viewToggleBtn) {
+            viewToggleBtn.innerText = currentViewMode === 'month' ? '📅' : '📆';
+            viewToggleBtn.title = currentViewMode === 'month' ? 'Switch to Week view (W)' : 'Switch to Month view (M)';
+        }
+
+        if (currentViewMode === 'week') {
+            if (monthViewContainer) monthViewContainer.classList.add('hidden');
+            if (weekViewContainer) weekViewContainer.classList.remove('hidden');
+            renderWeekTimeline();
+        } else {
+            if (weekViewContainer) weekViewContainer.classList.add('hidden');
+            if (monthViewContainer) monthViewContainer.classList.remove('hidden');
+            renderMonthGrid();
+        }
+    }
+
+    function renderMonthGrid() {
         if (!calendarDays || !calendarHeader) return;
         calendarDays.innerHTML = '';
         const year = currentViewDate.getFullYear();
@@ -299,7 +359,314 @@ try {
         for (let d = 1; d <= remainingCells; d++) addDayCell(year, month + 1, d, true);
     }
 
-    function addDayCell(year, month, day, isOtherMonth, isToday) {
+    function layoutDayTimedEvents(dayEvents, hourHeight) {
+        const items = dayEvents.map(e => {
+            const s = new Date(e.start.dateTime);
+            const eD = (e.end && e.end.dateTime) ? new Date(e.end.dateTime) : new Date(s.getTime() + 3600000);
+            const startMins = s.getHours() * 60 + s.getMinutes();
+            let endMins = eD.getHours() * 60 + eD.getMinutes();
+            if (endMins <= startMins) endMins = startMins + 30;
+            const durationMins = Math.max(15, endMins - startMins);
+            return {
+                event: e,
+                startMins,
+                endMins,
+                durationMins,
+                top: (startMins / 60) * hourHeight,
+                height: Math.max(22, (durationMins / 60) * hourHeight),
+                colIndex: 0,
+                totalCols: 1
+            };
+        });
+
+        items.sort((a, b) => a.startMins - b.startMins || b.durationMins - a.durationMins);
+
+        const clusters = [];
+        let currentCluster = [];
+        let clusterEnd = -1;
+
+        for (const item of items) {
+            if (currentCluster.length === 0 || item.startMins < clusterEnd) {
+                currentCluster.push(item);
+                clusterEnd = Math.max(clusterEnd, item.endMins);
+            } else {
+                clusters.push(currentCluster);
+                currentCluster = [item];
+                clusterEnd = item.endMins;
+            }
+        }
+        if (currentCluster.length > 0) clusters.push(currentCluster);
+
+        for (const cluster of clusters) {
+            const colEnds = [];
+            for (const item of cluster) {
+                let placed = false;
+                for (let i = 0; i < colEnds.length; i++) {
+                    if (item.startMins >= colEnds[i]) {
+                        item.colIndex = i;
+                        colEnds[i] = item.endMins;
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    item.colIndex = colEnds.length;
+                    colEnds.push(item.endMins);
+                }
+            }
+            const totalCols = colEnds.length;
+            for (const item of cluster) {
+                item.totalCols = totalCols;
+            }
+        }
+
+        return items;
+    }
+
+    function scrollToSmartHour(force = false) {
+        if (!hasScrolledWeekTimeline || force) {
+            setTimeout(() => {
+                if (weekScrollContainer) {
+                    const now = new Date();
+                    const curH = now.getHours();
+                    const focusH = Math.max(0, Math.min(18, curH > 6 ? curH - 1 : 8));
+                    weekScrollContainer.scrollTop = focusH * HOUR_HEIGHT;
+                    hasScrolledWeekTimeline = true;
+                }
+            }, 30);
+        }
+    }
+
+    function renderWeekTimeline() {
+        if (!weekHeaderRow || !weekAlldayRow || !weekTimeGutter || !weekDaysColumns) return;
+
+        const curr = new Date(currentViewDate);
+        const dayOfWeek = curr.getDay();
+        let diffToStart = dayOfWeek - (startOfWeek === 0 ? 0 : 1);
+        if (diffToStart < 0) diffToStart += 7;
+
+        const weekStart = new Date(curr);
+        weekStart.setDate(curr.getDate() - diffToStart);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+
+        if (currentMonthYear) {
+            const startMonth = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(weekStart);
+            const endMonth = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(weekEnd);
+            if (weekStart.getFullYear() === weekEnd.getFullYear()) {
+                if (weekStart.getMonth() === weekEnd.getMonth()) {
+                    currentMonthYear.innerText = `${startMonth} ${weekStart.getDate()} – ${weekEnd.getDate()}, ${weekStart.getFullYear()}`;
+                } else {
+                    currentMonthYear.innerText = `${startMonth} ${weekStart.getDate()} – ${endMonth} ${weekEnd.getDate()}, ${weekStart.getFullYear()}`;
+                }
+            } else {
+                currentMonthYear.innerText = `${startMonth} ${weekStart.getDate()}, ${weekStart.getFullYear()} – ${endMonth} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`;
+            }
+        }
+
+        // 1. Time Gutter Labels (01:00 to 23:00)
+        weekTimeGutter.innerHTML = '';
+        for (let h = 1; h < 24; h++) {
+            const label = document.createElement('div');
+            label.className = 'week-time-label';
+            label.style.top = `${h * HOUR_HEIGHT}px`;
+            label.innerText = `${h.toString().padStart(2, '0')}:00`;
+            weekTimeGutter.appendChild(label);
+        }
+
+        // 2. Day Header Row
+        weekHeaderRow.innerHTML = '<div class="week-header-gutter"></div><div class="week-header-days" id="week-header-days"></div>';
+        const weekHeaderDays = document.getElementById('week-header-days');
+
+        // 3. All-Day Row
+        weekAlldayRow.innerHTML = '<div class="week-allday-gutter">All-day</div><div class="week-allday-days" id="week-allday-days"></div>';
+        const weekAlldayDays = document.getElementById('week-allday-days');
+
+        // 4. Day Columns in Timeline Grid
+        weekDaysColumns.innerHTML = '';
+
+        const today = new Date();
+        let hasAnyAllDayEvents = false;
+
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(weekStart);
+            dayDate.setDate(weekStart.getDate() + i);
+
+            const y = dayDate.getFullYear();
+            const m = (dayDate.getMonth() + 1).toString().padStart(2, '0');
+            const d = dayDate.getDate().toString().padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
+            const isToday = (today.getDate() === dayDate.getDate() && today.getMonth() === dayDate.getMonth() && today.getFullYear() === dayDate.getFullYear());
+            const dOfWeek = dayDate.getDay();
+
+            // Header Cell
+            const headerCell = document.createElement('div');
+            headerCell.className = `week-header-day-cell ${isToday ? 'today' : ''} ${dOfWeek === 0 ? 'sunday' : ''} ${dOfWeek === 6 ? 'saturday' : ''}`;
+            headerCell.innerHTML = `
+                <span class="week-header-day-name">${dayNames[dOfWeek]}</span>
+                <span class="week-header-day-num">${dayDate.getDate()}</span>
+            `;
+            headerCell.onclick = () => {
+                editingEvent = null;
+                selectedDay = dateStr;
+                openQuickAdd();
+            };
+            if (weekHeaderDays) weekHeaderDays.appendChild(headerCell);
+
+            // Filter events for this day
+            const dayEvents = events.filter(e => {
+                const start = e.start.dateTime || e.start.date;
+                return start.startsWith(dateStr);
+            });
+
+            const allDayEvents = dayEvents.filter(e => !e.start.dateTime);
+            const timedEvents = dayEvents.filter(e => !!e.start.dateTime);
+
+            // All-Day Cell
+            const alldayCell = document.createElement('div');
+            alldayCell.className = 'week-allday-cell';
+            allDayEvents.forEach(e => {
+                hasAnyAllDayEvents = true;
+                const pill = document.createElement('div');
+                pill.className = `week-allday-pill ${e.summary.startsWith('[x]') ? 'completed' : ''}`;
+                const cleanText = cleanDisplaySummary(e.summary, false);
+                pill.innerText = cleanText;
+                pill.title = `${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
+                pill.style.borderLeftColor = e.backgroundColor || 'var(--accent-color)';
+                pill.onclick = (ev) => {
+                    ev.stopPropagation();
+                    editingEvent = null;
+                    selectedDay = dateStr;
+                    openQuickAdd();
+                    document.querySelectorAll('.todo-title').forEach(item => {
+                        if (item.title === e.summary) item.click();
+                    });
+                };
+                alldayCell.appendChild(pill);
+            });
+            alldayCell.onclick = () => {
+                editingEvent = null;
+                selectedDay = dateStr;
+                openQuickAdd();
+                if (allDayCheck) { allDayCheck.checked = true; updateAllDayUI(); }
+            };
+            if (weekAlldayDays) weekAlldayDays.appendChild(alldayCell);
+
+            // Timeline Column
+            const col = document.createElement('div');
+            col.className = `week-day-column ${isToday ? 'today' : ''} ${(dOfWeek === 0 || dOfWeek === 6) ? 'weekend' : ''}`;
+
+            // Current Time Indicator on today's column
+            if (isToday) {
+                const nowMins = today.getHours() * 60 + today.getMinutes();
+                const indicatorTop = (nowMins / 60) * HOUR_HEIGHT;
+                const line = document.createElement('div');
+                line.className = 'week-current-time-line';
+                line.style.top = `${indicatorTop}px`;
+                const dot = document.createElement('div');
+                dot.className = 'week-current-time-dot';
+                line.appendChild(dot);
+                col.appendChild(line);
+            }
+
+            // Layout overlapping timed events
+            const laidOut = layoutDayTimedEvents(timedEvents, HOUR_HEIGHT);
+
+            laidOut.forEach(item => {
+                const e = item.event;
+                const card = document.createElement('div');
+                const isCompleted = e.summary.startsWith('[x]');
+                const isShort = item.height < 32;
+                card.className = `week-event-card ${isCompleted ? 'completed' : ''} ${isShort ? 'short-event' : ''}`;
+
+                let eventColor = e.backgroundColor || 'var(--accent-color)';
+                const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+                if (colorMatch) eventColor = colorMatch[1];
+
+                card.style.borderLeft = `3px solid ${eventColor}`;
+                card.style.background = `color-mix(in srgb, ${eventColor} 22%, rgba(26, 26, 36, 0.88))`;
+                card.style.borderColor = `color-mix(in srgb, ${eventColor} 45%, rgba(255,255,255,0.08))`;
+
+                card.style.top = `${item.top}px`;
+                card.style.height = `${item.height}px`;
+
+                const leftPct = (item.colIndex / item.totalCols) * 100;
+                const widthPct = (1 / item.totalCols) * 100;
+                card.style.left = `calc(${leftPct}% + 1px)`;
+                card.style.width = `calc(${widthPct}% - 2px)`;
+
+                const sDt = new Date(e.start.dateTime);
+                const sH = sDt.getHours().toString().padStart(2, '0');
+                const sM = sDt.getMinutes().toString().padStart(2, '0');
+                let timeStr = `${sH}:${sM}`;
+                if (e.end && e.end.dateTime) {
+                    const eDt = new Date(e.end.dateTime);
+                    const eH = eDt.getHours().toString().padStart(2, '0');
+                    const eM = eDt.getMinutes().toString().padStart(2, '0');
+                    timeStr += ` - ${eH}:${eM}`;
+                }
+                const cleanText = cleanDisplaySummary(e.summary, true);
+
+                card.innerHTML = `
+                    <span class="week-event-time">${timeStr}</span>
+                    <span class="week-event-title">${cleanText}</span>
+                `;
+                card.title = `${timeStr} ${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
+
+                card.onclick = (ev) => {
+                    ev.stopPropagation();
+                    editingEvent = null;
+                    selectedDay = dateStr;
+                    openQuickAdd();
+                    document.querySelectorAll('.todo-title').forEach(t => {
+                        if (t.title === e.summary) t.click();
+                    });
+                };
+
+                col.appendChild(card);
+            });
+
+            // Click empty space on column to add new event
+            col.onclick = (ev) => {
+                const rect = col.getBoundingClientRect();
+                const offsetY = ev.clientY - rect.top;
+                const clickedMins = (offsetY / HOUR_HEIGHT) * 60;
+                const snapMins = Math.floor(clickedMins / 30) * 30;
+                const clampedMins = Math.max(0, Math.min(23 * 60 + 30, snapMins));
+                const startH = Math.floor(clampedMins / 60);
+                const startM = clampedMins % 60;
+                const endH = (startH + 1) % 24;
+
+                const sTime = `${startH.toString().padStart(2, '0')}:${startM.toString().padStart(2, '0')}`;
+                const eTime = `${endH.toString().padStart(2, '0')}:${startM.toString().padStart(2, '0')}`;
+
+                editingEvent = null;
+                selectedDay = dateStr;
+                openQuickAdd();
+
+                if (eventStartTime) eventStartTime.value = sTime;
+                if (eventEndTime) eventEndTime.value = eTime;
+                if (allDayCheck) {
+                    allDayCheck.checked = false;
+                    updateAllDayUI();
+                }
+            };
+
+            weekDaysColumns.appendChild(col);
+        }
+
+        if (!hasAnyAllDayEvents) {
+            weekAlldayRow.style.display = 'none';
+        } else {
+            weekAlldayRow.style.display = 'flex';
+        }
+
+        scrollToSmartHour();
+    }
+
+    function addDayCell(year, month, day, isOtherMonth, isToday, isWeekView = false) {
         const dateObj = new Date(year, month, day);
         const dayOfWeek = dateObj.getDay();
         const y = dateObj.getFullYear(), m = (dateObj.getMonth() + 1).toString().padStart(2, '0'), d = dateObj.getDate().toString().padStart(2, '0');
@@ -333,7 +700,8 @@ try {
             }
         });
 
-        dayEvents.slice(0, 3).forEach(e => {
+        const maxEvents = isWeekView ? 25 : 3;
+        dayEvents.slice(0, maxEvents).forEach(e => {
             const ev = document.createElement('div');
             ev.classList.add('event-item');
             
@@ -365,16 +733,46 @@ try {
             
             const hasTime = !!(e.start && e.start.dateTime);
             let timePrefix = '';
+            let timeInfo = null;
             if (hasTime) {
                 const startDt = new Date(e.start.dateTime);
                 const sH = startDt.getHours().toString().padStart(2, '0');
                 const sM = startDt.getMinutes().toString().padStart(2, '0');
-                timePrefix = `${sH}:${sM} `;
+                const startTimeStr = `${sH}:${sM}`;
+                timePrefix = `${startTimeStr} `;
+
+                let endTimeStr = null;
+                let durationStr = null;
+                if (e.end && e.end.dateTime) {
+                    const endDt = new Date(e.end.dateTime);
+                    const eH = endDt.getHours().toString().padStart(2, '0');
+                    const eM = endDt.getMinutes().toString().padStart(2, '0');
+                    endTimeStr = `${eH}:${eM}`;
+
+                    const diffMin = Math.round((endDt - startDt) / 60000);
+                    if (diffMin > 0) {
+                        if (diffMin < 60) durationStr = `${diffMin}m`;
+                        else if (diffMin % 60 === 0) durationStr = `${diffMin / 60}h`;
+                        else durationStr = `${(diffMin / 60).toFixed(1).replace(/\.0$/, '')}h`;
+                    }
+                }
+                timeInfo = { startTimeStr, endTimeStr, durationStr };
             }
             
             const cleanText = cleanDisplaySummary(displaySummary, hasTime);
-            ev.innerText = timePrefix + cleanText;
-            ev.title = `${timePrefix}${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
+
+            if (timeDisplayStyle === 'badge' && timeInfo) {
+                const rangeText = timeInfo.endTimeStr ? `${timeInfo.startTimeStr} ~ ${timeInfo.endTimeStr}` : timeInfo.startTimeStr;
+                ev.innerHTML = `<div class="event-time-micro">${rangeText}</div><div class="event-title-text">${cleanText}</div>`;
+            } else if (timeDisplayStyle === 'duration' && timeInfo) {
+                const durTag = timeInfo.durationStr ? `<span class="event-duration-tag">(${timeInfo.durationStr})</span>` : '';
+                ev.innerHTML = `<div class="event-title-text"><span class="event-time-str">${timeInfo.startTimeStr} </span>${durTag}${cleanText}</div>`;
+            } else {
+                ev.innerHTML = `<div class="event-title-text">${timePrefix}${cleanText}</div>`;
+            }
+
+            const tooltipTime = timeInfo ? (timeInfo.endTimeStr ? `${timeInfo.startTimeStr} - ${timeInfo.endTimeStr} ` : `${timeInfo.startTimeStr} `) : '';
+            ev.title = `${tooltipTime}${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
             ev.style.borderLeft = `3px solid ${e.backgroundColor || 'var(--accent-color)'}`;
             ev.onclick = (event) => { 
                 event.stopPropagation(); 
@@ -458,6 +856,7 @@ try {
     }
 
     function openQuickAdd() {
+        isEndTimeUserModified = false;
         if (quickAddModal) quickAddModal.classList.remove('hidden');
         if (todoDateTitle) {
             const dateParts = selectedDay.split('-');
@@ -549,12 +948,15 @@ try {
                         const eH = endDt.getHours().toString().padStart(2, '0');
                         const eM = endDt.getMinutes().toString().padStart(2, '0');
                         if (eventEndTime) eventEndTime.value = `${eH}:${eM}`;
+                        isEndTimeUserModified = true;
                     } else if (eventEndTime) {
                         eventEndTime.value = '';
+                        isEndTimeUserModified = false;
                     }
                 } else {
                     if (eventStartTime) eventStartTime.value = '';
                     if (eventEndTime) eventEndTime.value = '';
+                    isEndTimeUserModified = false;
                 }
                 
                 // Populate extra options
@@ -775,6 +1177,7 @@ try {
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
         document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
         document.querySelector('.color-opt[data-color="default"]')?.classList.add('active');
+        isEndTimeUserModified = false;
         editingEvent = null;
 
         try {
@@ -947,11 +1350,40 @@ try {
             await handleAutoSaveAndClose(); 
         }
     };
+    if (viewToggleBtn) viewToggleBtn.onclick = () => toggleViewMode();
     if (closePopupBtn) closePopupBtn.onclick = async () => await handleAutoSaveAndClose();
-    if (prevMonthBtn) prevMonthBtn.onclick = () => { currentViewDate.setMonth(currentViewDate.getMonth() - 1); fetchEvents(); };
-    if (nextMonthBtn) nextMonthBtn.onclick = () => { currentViewDate.setMonth(currentViewDate.getMonth() + 1); fetchEvents(); };
+    if (prevMonthBtn) prevMonthBtn.onclick = () => {
+        if (currentViewMode === 'week') {
+            currentViewDate.setDate(currentViewDate.getDate() - 7);
+        } else {
+            currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+        }
+        fetchEvents();
+    };
+    if (nextMonthBtn) nextMonthBtn.onclick = () => {
+        if (currentViewMode === 'week') {
+            currentViewDate.setDate(currentViewDate.getDate() + 7);
+        } else {
+            currentViewDate.setMonth(currentViewDate.getMonth() + 1);
+        }
+        fetchEvents();
+    };
     if (homeBtn) homeBtn.onclick = () => { currentViewDate = new Date(); fetchEvents(); };
     if (syncBtn) syncBtn.onclick = () => fetchEvents();
+
+    window.addEventListener('keydown', (e) => {
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+        const quickAddOpen = quickAddModal && !quickAddModal.classList.contains('hidden');
+        const settingsOpen = settingsOverlay && !settingsOverlay.classList.contains('hidden');
+        if (quickAddOpen || settingsOpen) return;
+
+        if (e.key === 'w' || e.key === 'W') {
+            if (currentViewMode !== 'week') toggleViewMode('week');
+        } else if (e.key === 'm' || e.key === 'M') {
+            if (currentViewMode !== 'month') toggleViewMode('month');
+        }
+    });
 
     function updateLockUI(isLocked) {
         if (lockBtn) {
@@ -981,6 +1413,8 @@ try {
                 if (lockPositionCheck) lockPositionCheck.checked = settings.lockPosition || false;
                 if (desktopModeCheck) desktopModeCheck.checked = settings.desktopMode || false;
                 if (startOfWeekSelect) startOfWeekSelect.value = settings.startOfWeek || 0;
+                if (defaultViewSelect) defaultViewSelect.value = settings.defaultViewMode || 'month';
+                if (timeStyleSelect) timeStyleSelect.value = settings.timeDisplayStyle || 'start-only';
                 if (soundEnabledCheck) soundEnabledCheck.checked = (typeof settings.soundEnabled === 'boolean') ? settings.soundEnabled : true;
                 
                 // Render accounts
@@ -1082,6 +1516,18 @@ try {
         };
     }
     if (startOfWeekSelect) startOfWeekSelect.onchange = (e) => { startOfWeek = parseInt(e.target.value); ipcRenderer.send('set-start-of-week', startOfWeek); renderCalendar(); };
+    if (defaultViewSelect) {
+        defaultViewSelect.onchange = (e) => {
+            ipcRenderer.send('set-default-view-mode', e.target.value);
+        };
+    }
+    if (timeStyleSelect) {
+        timeStyleSelect.onchange = (e) => {
+            timeDisplayStyle = e.target.value;
+            ipcRenderer.send('set-time-display-style', timeDisplayStyle);
+            renderCalendar();
+        };
+    }
     if (soundEnabledCheck) {
         soundEnabledCheck.onchange = (e) => {
             soundEnabled = e.target.checked;
@@ -1206,6 +1652,12 @@ try {
     ipcRenderer.invoke('get-settings').then(s => {
         if (s) {
             startOfWeek = s.startOfWeek || 0;
+            if (s.defaultViewMode) {
+                currentViewMode = s.defaultViewMode;
+                if (defaultViewSelect) defaultViewSelect.value = s.defaultViewMode;
+            }
+            timeDisplayStyle = s.timeDisplayStyle || 'badge';
+            if (timeStyleSelect) timeStyleSelect.value = timeDisplayStyle;
             if (s.selectedCalendarIds !== undefined && s.selectedCalendarIds !== null) selectedCalendarIds = s.selectedCalendarIds;
             if (s.lockPosition) updateLockUI(true);
             if (typeof s.soundEnabled === 'boolean') {

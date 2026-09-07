@@ -22,6 +22,7 @@
                 </div>
             </div>
             <div class="header-right">
+                <button id="view-toggle-btn" class="icon-btn" title="Switch to Week view (W)">📅</button>
                 <button id="lock-btn" class="icon-btn" title="Lock/Unlock Position" style="opacity: 0.6; font-size: 0.9rem !important;">📌</button>
                 <button id="sync-btn" class="icon-btn" title="Sync Now">🔄</button>
                 <button id="settings-toggle" class="icon-btn" title="Settings">⚙️</button>
@@ -77,6 +78,13 @@
                             <option value="1">Monday</option>
                         </select>
                     </div>
+                    <div class="setting-item">
+                        <label>Default View</label>
+                        <select id="default-view-select">
+                            <option value="month">Month</option>
+                            <option value="week">Week</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="setting-group">
@@ -116,6 +124,14 @@
                         <label>Today Highlight</label>
                         <input type="color" id="today-color-picker" value="#ffcc00">
                     </div>
+                    <div class="setting-item">
+                        <label>Event Time Style</label>
+                        <select id="time-style-select">
+                            <option value="badge">Micro time on top (10:00 ~ 11:00)</option>
+                            <option value="start-only">Start time only (10:00)</option>
+                            <option value="duration">Compact duration (10:00 (1h))</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="modal-actions">
@@ -127,12 +143,32 @@
         </div>
 
 
-        <div class="calendar-grid-header">
-            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        <!-- Month View Container -->
+        <div id="month-view-container" class="month-view-container">
+            <div class="calendar-grid-header">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            
+            <div id="calendar-days" class="calendar-grid">
+                <!-- Days injected here -->
+            </div>
         </div>
-        
-        <div id="calendar-days" class="calendar-grid">
-            <!-- Days injected here -->
+
+        <!-- Week Timeline View Container -->
+        <div id="week-view-container" class="week-timeline-container hidden">
+            <!-- Week Header (Day names & numbers) -->
+            <div class="week-header-row" id="week-header-row"></div>
+            
+            <!-- All-day Row -->
+            <div class="week-allday-row" id="week-allday-row"></div>
+
+            <!-- Scrollable Hourly Timeline Area -->
+            <div class="week-scroll-container" id="week-scroll-container">
+                <div class="week-grid-body" id="week-grid-body">
+                    <div class="week-time-gutter" id="week-time-gutter"></div>
+                    <div class="week-days-columns" id="week-days-columns"></div>
+                </div>
+            </div>
         </div>
 
         <div id="sync-indicator" class="sync-indicator hidden">Syncing...</div>
