@@ -67,8 +67,8 @@
 ### 3. 랜딩 페이지 & 인프라
 - [x] GitHub Pages 배포 (`docs/` 및 `landing/` 동기화).
 - [x] Google Analytics GA4 태그 (`G-DTN5BM6653`) 및 앱 다운로드 이벤트 로깅.
-- [x] macOS 설치 가이드 모달 (Gatekeeper bypass 안내).
-- [x] v1.4.0 업데이트 안내 배너 & 커뮤니티 리뷰 그리드.
+- [x] v1.5.0 업데이트 안내 배너 & What's New 체인지로그.
+- [x] 월간 뷰(Month View) & 주간 타임라인(Weekly Timeline) 듀얼 뷰(Dual View) 나란히 보기 및 인터랙티브 뷰 스위처 쇼케이스.
 
 ---
 
