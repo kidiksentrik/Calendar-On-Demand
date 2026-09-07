@@ -411,6 +411,11 @@
             border: 1px solid var(--border);
             box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 30px 60px rgba(0,0,0,0.7), 0 0 40px rgba(58,107,58,0.06);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            aspect-ratio: 16 / 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d120d;
         }
         .hero-screenshot-frame::before {
             content:''; position:absolute; inset:-1px; border-radius:17px;
@@ -424,7 +429,8 @@
         }
         .hero-screenshot-frame img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: fill;
             border-radius: 15px;
             display: block;
             position: relative;
