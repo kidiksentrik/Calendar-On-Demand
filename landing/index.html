@@ -286,17 +286,157 @@
         .scope-notice svg { flex-shrink:0; margin-top:1px; }
         .scope-notice p { font-size:0.82rem; color:var(--text-dim); line-height:1.55; margin:0; }
 
-        /* Hero screenshot */
-        .hero-screenshot { width:100%; max-width:920px; margin:0 auto; position:relative; }
-        .hero-screenshot::before {
+        /* Hero screenshot & Dual-View Showcase */
+        .view-tab-control {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(18, 24, 18, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 26px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+        }
+        .view-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .view-tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .view-tab-btn.active {
+            background: rgba(58, 107, 58, 0.45);
+            color: #fff;
+            border-color: var(--border-green);
+            box-shadow: 0 2px 12px rgba(126, 196, 126, 0.2);
+        }
+        .tab-highlight {
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: #2a4d33;
+            color: #7ec47e;
+            padding: 2px 7px;
+            border-radius: 100px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .hero-views-wrapper {
+            width: 100%;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        
+        .hero-views-wrapper.mode-side-by-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        .hero-views-wrapper.mode-single {
+            display: block;
+            max-width: 920px;
+            margin: 0 auto;
+        }
+        .hero-views-wrapper.mode-single .hero-view-card {
+            display: none;
+        }
+        .hero-views-wrapper.mode-single .hero-view-card.active-single {
+            display: block;
+        }
+
+        .hero-view-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            position: relative;
+        }
+
+        .view-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+            gap: 12px;
+        }
+        .view-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .view-badge.new-badge {
+            color: #a3e6a3;
+        }
+        .badge-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: rgba(58, 107, 58, 0.5);
+            color: #7ec47e;
+            padding: 1px 7px;
+            border-radius: 6px;
+            border: 1px solid var(--border-green);
+        }
+        .view-desc {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hero-screenshot-frame {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 30px 60px rgba(0,0,0,0.7), 0 0 40px rgba(58,107,58,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .hero-screenshot-frame::before {
             content:''; position:absolute; inset:-1px; border-radius:17px;
             background:linear-gradient(135deg,rgba(58,107,58,0.3),rgba(255,255,255,0.04),transparent);
             z-index:1; pointer-events:none;
         }
-        .hero-screenshot img {
-            width:100%; border-radius:16px; border:1px solid var(--border);
-            box-shadow:0 0 0 1px rgba(0,0,0,0.5),0 40px 80px rgba(0,0,0,0.7),0 0 60px rgba(58,107,58,0.08);
-            display:block; position:relative; z-index:0;
+        .hero-screenshot-frame:hover {
+            transform: translateY(-4px);
+            border-color: rgba(126, 196, 126, 0.4);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 36px 75px rgba(0,0,0,0.85), 0 0 50px rgba(58,107,58,0.15);
+        }
+        .hero-screenshot-frame img {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            display: block;
+            position: relative;
+            z-index: 0;
+        }
+
+        @media (max-width: 880px) {
+            .hero-views-wrapper.mode-side-by-side {
+                grid-template-columns: 1fr;
+                max-width: 620px;
+            }
+            .view-desc { display: none; }
         }
 
         /* Container */
@@ -519,8 +659,45 @@
             </span>
         </div>
 
-        <div class="hero-screenshot">
-            <img src="./2026-08-26 08_51_45-Calendar-On-Demand.png" alt="Calendar-On-Demand desktop widget showing September 2026 with colorful events" loading="eager">
+        <!-- View Mode Switcher -->
+        <div class="view-tab-control">
+            <button class="view-tab-btn active" onclick="switchHeroView('side-by-side', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="18" rx="2"></rect><rect x="13" y="3" width="8" height="18" rx="2"></rect></svg>
+                Dual View
+                <span class="tab-highlight">New</span>
+            </button>
+            <button class="view-tab-btn" onclick="switchHeroView('week', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Weekly Timeline
+            </button>
+            <button class="view-tab-btn" onclick="switchHeroView('month', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="3" y1="16" x2="21" y2="16"></line><line x1="9" y1="4" x2="9" y2="22"></line><line x1="15" y1="4" x2="15" y2="22"></line></svg>
+                Monthly Calendar
+            </button>
+        </div>
+
+        <div class="hero-views-wrapper mode-side-by-side" id="hero-views-wrapper">
+            <!-- Monthly View Card -->
+            <div class="hero-view-card" id="card-month">
+                <div class="view-card-header">
+                    <span class="view-badge">📅 Monthly View</span>
+                    <span class="view-desc">Clean monthly overview with color tagging</span>
+                </div>
+                <div class="hero-screenshot-frame">
+                    <img src="./2026-08-26 08_51_45-Calendar-On-Demand.png" alt="Calendar-On-Demand desktop widget showing September 2026 Monthly View" loading="eager">
+                </div>
+            </div>
+
+            <!-- Weekly View Card -->
+            <div class="hero-view-card" id="card-week">
+                <div class="view-card-header">
+                    <span class="view-badge new-badge">📆 Weekly Timeline <span class="badge-tag">v1.5 New</span></span>
+                    <span class="view-desc">24h vertical timeline with duration blocks</span>
+                </div>
+                <div class="hero-screenshot-frame">
+                    <img src="./weekly-view.png" alt="Calendar-On-Demand Google Calendar-style Weekly Timeline View" loading="eager">
+                </div>
+            </div>
         </div>
     </header>
 
@@ -869,6 +1046,30 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        }
+
+        // Hero View Switcher
+        function switchHeroView(mode, btn) {
+            const wrapper = document.getElementById('hero-views-wrapper');
+            const cardMonth = document.getElementById('card-month');
+            const cardWeek = document.getElementById('card-week');
+            
+            document.querySelectorAll('.view-tab-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (mode === 'side-by-side') {
+                wrapper.className = 'hero-views-wrapper mode-side-by-side';
+                cardMonth.className = 'hero-view-card';
+                cardWeek.className = 'hero-view-card';
+            } else if (mode === 'week') {
+                wrapper.className = 'hero-views-wrapper mode-single';
+                cardMonth.className = 'hero-view-card';
+                cardWeek.className = 'hero-view-card active-single';
+            } else if (mode === 'month') {
+                wrapper.className = 'hero-views-wrapper mode-single';
+                cardMonth.className = 'hero-view-card active-single';
+                cardWeek.className = 'hero-view-card';
+            }
         }
 
         // Changelog toggle
