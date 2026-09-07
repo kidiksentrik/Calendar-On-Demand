@@ -69,6 +69,7 @@
 - [x] Google Analytics GA4 태그 (`G-DTN5BM6653`) 및 앱 다운로드 이벤트 로깅.
 - [x] v1.5.0 업데이트 안내 배너 & What's New 체인지로그.
 - [x] 월간 뷰(Month View) & 주간 타임라인(Weekly Timeline) 듀얼 뷰(Dual View) 나란히 보기 및 인터랙티브 뷰 스위처 쇼케이스.
+- [x] 신뢰도 뱃지 250+ Users 업데이트 (GA4 활성 사용자 기반).
 
 ---
 
