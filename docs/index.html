@@ -480,9 +480,10 @@
         /* Secondary screenshot */
         .preview { padding:80px 0 100px; border-top:1px solid var(--border); }
         .preview-header { margin-bottom:48px; }
-        .preview-img {
+        .preview-img, .preview-video {
             width:100%; border-radius:14px; border:1px solid var(--border);
             box-shadow:0 24px 60px rgba(0,0,0,0.5); display:block;
+            background: #0d120d;
         }
         .preview-caption { margin-top:16px; color:var(--text-mute); font-size:0.85rem; font-style:italic; }
 
@@ -756,7 +757,10 @@
                 <h2 class="section-title">Real data, live on your desktop</h2>
                 <p class="section-sub">Syncs directly with your Google Calendar. What you see here is what you've got.</p>
             </div>
-            <img src="./screenshot.png" alt="Calendar-On-Demand in use on a Windows desktop" class="preview-img">
+            <video autoplay loop muted playsinline class="preview-video" poster="./screenshot.png">
+                <source src="./in-action.mp4" type="video/mp4">
+                <img src="./screenshot.png" alt="Calendar-On-Demand in use on a Windows desktop" class="preview-img">
+            </video>
             <p class="preview-caption">Real Google Calendar data — always on your desktop.</p>
         </div>
     </section>
