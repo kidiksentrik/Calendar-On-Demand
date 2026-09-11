@@ -32,7 +32,10 @@
         <!-- Settings Overlay -->
         <div id="settings-overlay" class="modal hidden">
             <div class="modal-content">
-                <h3>Settings</h3>
+                <div class="settings-header">
+                    <h3>Settings</h3>
+                    <a class="kofi-header-btn" href="#" onclick="require('electron').shell.openExternal('https://ko-fi.com/kidiksentrik'); return false;" title="If this helped, consider supporting ☕"><span class="kofi-hover-text">support</span>☕</a>
+                </div>
                 
                 <div class="setting-group">
                     <h4>Behavior</h4>
@@ -70,6 +73,23 @@
                             <input type="checkbox" id="sound-enabled-check">
                             <span class="slider-toggle"></span>
                         </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <span>Event Notifications</span>
+                            <input type="checkbox" id="notifications-enabled-check">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item notify-before-row" id="notify-before-row">
+                        <label>Notify before</label>
+                        <div class="pill-group" id="notify-minutes-group">
+                            <button class="pill-btn" data-value="5">5m</button>
+                            <button class="pill-btn" data-value="10">10m</button>
+                            <button class="pill-btn active" data-value="15">15m</button>
+                            <button class="pill-btn" data-value="30">30m</button>
+                        </div>
+                        <div class="notif-hint" id="notif-hint">⚠ Requires OS notifications to be enabled in System Settings</div>
                     </div>
                     <div class="setting-item">
                         <label>Start of Week</label>

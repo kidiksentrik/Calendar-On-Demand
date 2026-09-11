@@ -955,6 +955,18 @@ input[type="color"]::-webkit-color-swatch {
     overflow: hidden;
 }
 
+/* Cross-midnight: bottom dashed border to indicate continuation */
+.week-event-card.crosses-midnight {
+    border-bottom: 2px dashed rgba(255,255,255,0.3) !important;
+    border-radius: 4px 4px 0 0;
+}
+
+/* Continuation: top dashed border + slight top rounding removed */
+.week-event-card.is-continuation {
+    border-top: 2px dashed rgba(255,255,255,0.3) !important;
+    border-radius: 0 0 4px 4px;
+}
+
 /* Custom sleek scrollbar for events container */
 .events-container::-webkit-scrollbar {
     width: 3px;
@@ -1134,6 +1146,100 @@ input[type="color"]::-webkit-color-swatch {
     opacity: 0.4;
     text-align: center;
     margin-top: 12px;
+}
+
+/* ── Notification pill buttons ─── */
+.notify-before-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+}
+
+.notify-before-row > label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.pill-group {
+    display: flex;
+    gap: 6px;
+}
+
+.pill-btn {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.pill-btn:hover {
+    opacity: 0.8;
+    border-color: var(--accent-color);
+}
+
+.pill-btn.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+    opacity: 1;
+}
+
+.notify-before-row.hidden {
+    display: none;
+}
+
+.notif-hint {
+    font-size: 0.68rem;
+    color: #f0a500;
+    opacity: 0.7;
+    line-height: 1.4;
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+}
+
+.kofi-header-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1.3rem;
+    opacity: 1;
+    text-decoration: none;
+    transition: transform 0.15s ease;
+    cursor: pointer;
+    line-height: 1;
+    position: relative;
+    top: -3px;
+}
+
+.kofi-header-btn:hover {
+    transform: scale(1.1);
+}
+
+.kofi-hover-text {
+    font-size: 0.7rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.2s ease, max-width 0.25s ease;
+}
+
+.kofi-header-btn:hover .kofi-hover-text {
+    opacity: 0.6;
+    max-width: 60px;
 }
 
 #delete-event {
@@ -1471,6 +1577,23 @@ input[type="color"]::-webkit-color-swatch {
 
 .event-item.completed-event:hover {
     opacity: 0.6;
+}
+
+/* Month View: Cross-midnight start day (flat right corners + dashed right border) */
+.event-item.crosses-midnight {
+    border-radius: 3px 0 0 3px !important;
+    border-right: 2px dashed rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Month View: Cross-midnight continuation day (flat left corners + dashed left accent bar) */
+.event-item.is-continuation {
+    border-radius: 0 3px 3px 0 !important;
+    border-left-style: dashed !important;
+    opacity: 0.92;
+}
+
+.event-item.is-continuation:hover {
+    opacity: 1;
 }
 
 .event-time-micro {

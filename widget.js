@@ -12,6 +12,9 @@ try {
     let allCalendars = [];
     let selectedCalendarIds = null;
     let soundEnabled = true; // default ON, loaded from settings
+    let notificationsEnabled = false;
+    let notifyMinutesBefore = 15;
+    const notifiedEventIds = new Set(); // track already-fired notifications
 
     // selectedCalendarIds will be loaded from ipcRenderer 'get-settings'
 
@@ -150,6 +153,9 @@ try {
     const viewToggleBtn = document.getElementById('view-toggle-btn');
     const defaultViewSelect = document.getElementById('default-view-select');
     const timeStyleSelect = document.getElementById('time-style-select');
+    const notificationsEnabledCheck = document.getElementById('notifications-enabled-check');
+    const notifyBeforeRow = document.getElementById('notify-before-row');
+    const notifyMinutesGroup = document.getElementById('notify-minutes-group');
 
     // Containers for Month & Week Timeline Views
     const monthViewContainer = document.getElementById('month-view-container');
@@ -317,6 +323,10 @@ try {
         fetchEvents();
     }
 
+    function localDateStr(d) {
+        return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+    }
+
     function renderCalendar() {
         if (viewToggleBtn) {
             viewToggleBtn.innerText = currentViewMode === 'month' ? '📅' : '📆';
@@ -359,25 +369,42 @@ try {
         for (let d = 1; d <= remainingCells; d++) addDayCell(year, month + 1, d, true);
     }
 
-    function layoutDayTimedEvents(dayEvents, hourHeight) {
+    function layoutDayTimedEvents(dayEvents, hourHeight, dateStr) {
         const items = dayEvents.map(e => {
-            const s = new Date(e.start.dateTime);
+            const s  = new Date(e.start.dateTime);
             const eD = (e.end && e.end.dateTime) ? new Date(e.end.dateTime) : new Date(s.getTime() + 3600000);
-            const startMins = s.getHours() * 60 + s.getMinutes();
-            let endMins = eD.getHours() * 60 + eD.getMinutes();
-            if (endMins <= startMins) endMins = startMins + 30;
+
+            const startDateStr    = localDateStr(s);
+            const endDateStr      = localDateStr(eD);
+            const crossesMidnight = !!(dateStr && startDateStr === dateStr && endDateStr !== dateStr);
+            const isContinuation  = !!(dateStr && startDateStr !== dateStr);
+
+            let startMins = s.getHours() * 60 + s.getMinutes();
+            let endMins   = eD.getHours() * 60 + eD.getMinutes();
+
+            if (crossesMidnight) {
+                endMins = 24 * 60;   // clip at midnight
+            } else if (isContinuation) {
+                startMins = 0;       // start from top of column
+            } else if (endMins <= startMins) {
+                endMins = startMins + 30;
+            }
+
             const durationMins = Math.max(15, endMins - startMins);
             return {
                 event: e,
                 startMins,
                 endMins,
                 durationMins,
-                top: (startMins / 60) * hourHeight,
+                top:    (startMins / 60) * hourHeight,
                 height: Math.max(22, (durationMins / 60) * hourHeight),
                 colIndex: 0,
-                totalCols: 1
+                totalCols: 1,
+                crossesMidnight,
+                isContinuation
             };
         });
+
 
         items.sort((a, b) => a.startMins - b.startMins || b.durationMins - a.durationMins);
 
@@ -515,14 +542,26 @@ try {
             };
             if (weekHeaderDays) weekHeaderDays.appendChild(headerCell);
 
-            // Filter events for this day
+            // Filter events for this day (timed + all-day)
             const dayEvents = events.filter(e => {
                 const start = e.start.dateTime || e.start.date;
                 return start.startsWith(dateStr);
             });
 
+            // Cross-midnight continuations: started on previous day, end on or after this day
+            const prevDate = new Date(dayDate);
+            prevDate.setDate(dayDate.getDate() - 1);
+            const prevDateStr = localDateStr(prevDate);
+            const continuationEvents = events.filter(e => {
+                if (!e.start.dateTime || !e.end.dateTime) return false;
+                return e.start.dateTime.startsWith(prevDateStr) && !e.end.dateTime.startsWith(prevDateStr);
+            });
+
             const allDayEvents = dayEvents.filter(e => !e.start.dateTime);
-            const timedEvents = dayEvents.filter(e => !!e.start.dateTime);
+            const timedEvents  = [
+                ...dayEvents.filter(e => !!e.start.dateTime),
+                ...continuationEvents
+            ];
 
             // All-Day Cell
             const alldayCell = document.createElement('div');
@@ -571,15 +610,15 @@ try {
                 col.appendChild(line);
             }
 
-            // Layout overlapping timed events
-            const laidOut = layoutDayTimedEvents(timedEvents, HOUR_HEIGHT);
+            // Layout overlapping timed events (pass dateStr for cross-midnight handling)
+            const laidOut = layoutDayTimedEvents(timedEvents, HOUR_HEIGHT, dateStr);
 
             laidOut.forEach(item => {
                 const e = item.event;
                 const card = document.createElement('div');
                 const isCompleted = e.summary.startsWith('[x]');
                 const isShort = item.height < 32;
-                card.className = `week-event-card ${isCompleted ? 'completed' : ''} ${isShort ? 'short-event' : ''}`;
+                card.className = `week-event-card ${isCompleted ? 'completed' : ''} ${isShort ? 'short-event' : ''} ${item.crossesMidnight ? 'crosses-midnight' : ''} ${item.isContinuation ? 'is-continuation' : ''}`;
 
                 let eventColor = e.backgroundColor || 'var(--accent-color)';
                 const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
@@ -606,14 +645,17 @@ try {
                     const eH = eDt.getHours().toString().padStart(2, '0');
                     const eM = eDt.getMinutes().toString().padStart(2, '0');
                     timeStr += ` - ${eH}:${eM}`;
+                    if (item.crossesMidnight) timeStr += ' →';
                 }
                 const cleanText = cleanDisplaySummary(e.summary, true);
+                const displayTitle = item.isContinuation ? `↩ ${cleanText}` : cleanText;
 
                 card.innerHTML = `
                     <span class="week-event-time">${timeStr}</span>
-                    <span class="week-event-title">${cleanText}</span>
+                    <span class="week-event-title">${displayTitle}</span>
                 `;
                 card.title = `${timeStr} ${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
+
 
                 card.onclick = (ev) => {
                     ev.stopPropagation();
@@ -679,21 +721,47 @@ try {
         if (dayOfWeek === 6) cell.classList.add('saturday');
         if (dayOfWeek === 0 || dayOfWeek === 6) cell.classList.add('weekend');
 
-        
         cell.innerHTML = `<span class="day-number">${day}</span><div class="events-container"></div>`;
 
-        
-        const dayEvents = events.filter(e => {
+        // 1. Events starting on this day
+        const startDayEvents = events.filter(e => {
             const start = e.start.dateTime || e.start.date;
             return start.startsWith(dateStr);
+        });
+
+        // 2. Cross-midnight continuations from previous day
+        const prevDate = new Date(dateObj);
+        prevDate.setDate(dateObj.getDate() - 1);
+        const prevDateStr = localDateStr(prevDate);
+        const continuationEvents = events.filter(e => {
+            if (!e.start?.dateTime || !e.end?.dateTime) return false;
+            return e.start.dateTime.startsWith(prevDateStr) && !e.end.dateTime.startsWith(prevDateStr);
+        });
+
+        // 3. Combine and sort: continuation events (starting at 00:00) first, then chronological
+        const combinedEvents = [
+            ...continuationEvents.map(e => ({ e, isContinuation: true })),
+            ...startDayEvents.map(e => ({ e, isContinuation: false }))
+        ];
+
+        combinedEvents.sort((a, b) => {
+            const aIsAllDay = !a.e.start.dateTime;
+            const bIsAllDay = !b.e.start.dateTime;
+            if (aIsAllDay && !bIsAllDay) return -1;
+            if (!aIsAllDay && bIsAllDay) return 1;
+            if (aIsAllDay && bIsAllDay) return 0;
+
+            const aMins = a.isContinuation ? 0 : (new Date(a.e.start.dateTime).getHours() * 60 + new Date(a.e.start.dateTime).getMinutes());
+            const bMins = b.isContinuation ? 0 : (new Date(b.e.start.dateTime).getHours() * 60 + new Date(b.e.start.dateTime).getMinutes());
+            return aMins - bMins;
         });
 
         const eventsContainer = cell.querySelector('.events-container');
         let cellHighlightColor = null;
 
-        // Pre-scan for highlight tag to determine if the whole cell should be colored
-        dayEvents.forEach(e => {
-            if (e.summary.includes('[HIGHLIGHT]')) {
+        // Pre-scan for highlight tag
+        combinedEvents.forEach(({ e }) => {
+            if (e.summary && e.summary.includes('[HIGHLIGHT]')) {
                 cellHighlightColor = e.backgroundColor || 'var(--accent-color)';
                 const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
                 if (colorMatch) cellHighlightColor = colorMatch[1];
@@ -701,17 +769,17 @@ try {
         });
 
         const maxEvents = isWeekView ? 25 : 3;
-        dayEvents.slice(0, maxEvents).forEach(e => {
+        combinedEvents.slice(0, maxEvents).forEach(({ e, isContinuation }) => {
             const ev = document.createElement('div');
             ev.classList.add('event-item');
             
             // Check if completed
-            const isCompleted = e.summary.startsWith('[x]');
+            const isCompleted = e.summary && e.summary.startsWith('[x]');
             if (isCompleted) {
                 ev.classList.add('completed-event');
             }
 
-            let displaySummary = e.summary;
+            let displaySummary = e.summary || '';
             if (displaySummary.includes('[IMPORTANT]')) {
                 ev.classList.add('important-event');
                 displaySummary = displaySummary.replace('[IMPORTANT]', '⭐');
@@ -723,7 +791,6 @@ try {
 
             const colorMatch = displaySummary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
             if (colorMatch) {
-                // If the whole cell is highlighted, we keep the event item background transparent
                 if (!cellHighlightColor) {
                     ev.style.background = colorMatch[1];
                     ev.style.color = '#000';
@@ -734,6 +801,8 @@ try {
             const hasTime = !!(e.start && e.start.dateTime);
             let timePrefix = '';
             let timeInfo = null;
+            let crossesMidnight = false;
+
             if (hasTime) {
                 const startDt = new Date(e.start.dateTime);
                 const sH = startDt.getHours().toString().padStart(2, '0');
@@ -749,6 +818,10 @@ try {
                     const eM = endDt.getMinutes().toString().padStart(2, '0');
                     endTimeStr = `${eH}:${eM}`;
 
+                    const startDayStr = localDateStr(startDt);
+                    const endDayStr   = localDateStr(endDt);
+                    crossesMidnight   = (!isContinuation && startDayStr === dateStr && endDayStr !== dateStr);
+
                     const diffMin = Math.round((endDt - startDt) / 60000);
                     if (diffMin > 0) {
                         if (diffMin < 60) durationStr = `${diffMin}m`;
@@ -761,23 +834,47 @@ try {
             
             const cleanText = cleanDisplaySummary(displaySummary, hasTime);
 
+            if (isContinuation) {
+                ev.classList.add('is-continuation');
+            } else if (crossesMidnight) {
+                ev.classList.add('crosses-midnight');
+            }
+
             if (timeDisplayStyle === 'badge' && timeInfo) {
-                const rangeText = timeInfo.endTimeStr ? `${timeInfo.startTimeStr} ~ ${timeInfo.endTimeStr}` : timeInfo.startTimeStr;
+                let rangeText = timeInfo.endTimeStr ? `${timeInfo.startTimeStr} ~ ${timeInfo.endTimeStr}` : timeInfo.startTimeStr;
+                if (crossesMidnight) {
+                    rangeText = `${timeInfo.startTimeStr} ~ ${timeInfo.endTimeStr} →`;
+                } else if (isContinuation) {
+                    rangeText = `~ ${timeInfo.endTimeStr} ↩`;
+                }
                 ev.innerHTML = `<div class="event-time-micro">${rangeText}</div><div class="event-title-text">${cleanText}</div>`;
             } else if (timeDisplayStyle === 'duration' && timeInfo) {
                 const durTag = timeInfo.durationStr ? `<span class="event-duration-tag">(${timeInfo.durationStr})</span>` : '';
-                ev.innerHTML = `<div class="event-title-text"><span class="event-time-str">${timeInfo.startTimeStr} </span>${durTag}${cleanText}</div>`;
+                let timeStr = `${timeInfo.startTimeStr} `;
+                if (crossesMidnight) timeStr = `${timeInfo.startTimeStr} → `;
+                else if (isContinuation) timeStr = `~ ${timeInfo.endTimeStr} ↩ `;
+                ev.innerHTML = `<div class="event-title-text"><span class="event-time-str">${timeStr}</span>${durTag}${cleanText}</div>`;
             } else {
-                ev.innerHTML = `<div class="event-title-text">${timePrefix}${cleanText}</div>`;
+                let prefix = timePrefix;
+                if (crossesMidnight) prefix = `${timePrefix.trim()} → `;
+                else if (isContinuation) prefix = `~ ${timeInfo?.endTimeStr || ''} ↩ `;
+                ev.innerHTML = `<div class="event-title-text">${prefix}${cleanText}</div>`;
             }
 
             const tooltipTime = timeInfo ? (timeInfo.endTimeStr ? `${timeInfo.startTimeStr} - ${timeInfo.endTimeStr} ` : `${timeInfo.startTimeStr} `) : '';
             ev.title = `${tooltipTime}${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
-            ev.style.borderLeft = `3px solid ${e.backgroundColor || 'var(--accent-color)'}`;
+
+            const eventColor = e.backgroundColor || 'var(--accent-color)';
+            if (isContinuation) {
+                ev.style.borderLeft = `3px dashed ${eventColor}`;
+            } else {
+                ev.style.borderLeft = `3px solid ${eventColor}`;
+            }
+
             ev.onclick = (event) => { 
                 event.stopPropagation(); 
                 editingEvent = null; 
-                selectedDay = dateStr; 
+                selectedDay = isContinuation ? prevDateStr : dateStr; 
                 openQuickAdd(); 
                 
                 // Automatically trigger the edit mode for this specific clicked event
@@ -1119,12 +1216,27 @@ try {
         if (!isAllDayState && startStr) {
             start = { dateTime: `${selectedDay}T${startStr}:00${offset}` };
             if (endStr) {
-                end = { dateTime: `${selectedDay}T${endStr}:00${offset}` };
+                const [sh, sm] = startStr.split(':').map(Number);
+                const [eh, em] = endStr.split(':').map(Number);
+                const crossesMidnight = (eh * 60 + em) <= (sh * 60 + sm);
+                let endDay = selectedDay;
+                if (crossesMidnight) {
+                    const d = new Date(selectedDay);
+                    d.setDate(d.getDate() + 1);
+                    endDay = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+                }
+                end = { dateTime: `${endDay}T${endStr}:00${offset}` };
             } else {
                 const [h, m] = startStr.split(':').map(Number);
-                const endHour = ((h + 1) % 24).toString().padStart(2, '0');
-                end = { dateTime: `${selectedDay}T${endHour}:${m.toString().padStart(2, '0')}:00${offset}` };
+                const endH = (h + 1) % 24;
+                const endDay = endH === 0 ? (() => {
+                    const d = new Date(selectedDay);
+                    d.setDate(d.getDate() + 1);
+                    return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+                })() : selectedDay;
+                end = { dateTime: `${endDay}T${endH.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:00${offset}` };
             }
+
         } else {
             const nextDay = new Date(selectedDay);
             nextDay.setDate(nextDay.getDate() + 1);
@@ -1416,6 +1528,14 @@ try {
                 if (defaultViewSelect) defaultViewSelect.value = settings.defaultViewMode || 'month';
                 if (timeStyleSelect) timeStyleSelect.value = settings.timeDisplayStyle || 'start-only';
                 if (soundEnabledCheck) soundEnabledCheck.checked = (typeof settings.soundEnabled === 'boolean') ? settings.soundEnabled : true;
+                if (notificationsEnabledCheck) notificationsEnabledCheck.checked = settings.notificationsEnabled || false;
+                if (notifyBeforeRow) notifyBeforeRow.classList.toggle('hidden', !settings.notificationsEnabled);
+                // Restore pill selection
+                if (notifyMinutesGroup) {
+                    notifyMinutesGroup.querySelectorAll('.pill-btn').forEach(btn => {
+                        btn.classList.toggle('active', parseInt(btn.dataset.value) === (settings.notifyMinutesBefore || 15));
+                    });
+                }
                 
                 // Render accounts
                 await renderAccountsList();
@@ -1533,6 +1653,23 @@ try {
             soundEnabled = e.target.checked;
             ipcRenderer.send('set-theme-prop', { key: 'soundEnabled', value: soundEnabled });
         };
+    }
+    if (notificationsEnabledCheck) {
+        notificationsEnabledCheck.onchange = (e) => {
+            notificationsEnabled = e.target.checked;
+            ipcRenderer.send('set-theme-prop', { key: 'notificationsEnabled', value: notificationsEnabled });
+            if (notifyBeforeRow) notifyBeforeRow.classList.toggle('hidden', !notificationsEnabled);
+        };
+    }
+    if (notifyMinutesGroup) {
+        notifyMinutesGroup.querySelectorAll('.pill-btn').forEach(btn => {
+            btn.onclick = () => {
+                notifyMinutesGroup.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                notifyMinutesBefore = parseInt(btn.dataset.value);
+                ipcRenderer.send('set-theme-prop', { key: 'notifyMinutesBefore', value: notifyMinutesBefore });
+            };
+        });
     }
 
     // ── Accounts management ─────────────────────────────────────────────────
@@ -1666,6 +1803,10 @@ try {
             } else {
                 if (soundEnabledCheck) soundEnabledCheck.checked = true;
             }
+            // Load notification settings
+            notificationsEnabled = s.notificationsEnabled || false;
+            notifyMinutesBefore = s.notifyMinutesBefore || 15;
+            if (notifyBeforeRow) notifyBeforeRow.classList.toggle('hidden', !notificationsEnabled);
             applyTheme({ 'bg-base': s['bg-base'], 'text-color': s['text-color'], 'accent-color': s['accent-color'], 'today-color': s['today-color'], 'bg-opacity': s['bg-opacity'] });
             if (s.version && appVersionLabel) {
                 appVersionLabel.textContent = `v${s.version}`;
@@ -1681,6 +1822,36 @@ try {
             fetchEvents();
         }
     });
+
+    // ── Notification Scheduler ─────────────────────────────────────────────
+    function checkUpcomingNotifications() {
+        if (!notificationsEnabled || !events || events.length === 0) return;
+        const now = new Date();
+        events.forEach(ev => {
+            const startDt = ev.start?.dateTime; // timed events only (not all-day)
+            if (!startDt) return;
+            const start = new Date(startDt);
+            const diffMs = start - now;
+            const diffMin = diffMs / 60000;
+            // Fire if within the notify window
+            if (diffMin > 0 && diffMin <= notifyMinutesBefore) {
+                const key = `${ev.id}_${start.toISOString().slice(0, 16)}`;
+                if (!notifiedEventIds.has(key)) {
+                    notifiedEventIds.add(key);
+                    const timeStr = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const minsLeft = Math.round(diffMin);
+                    ipcRenderer.send('fire-notification', {
+                        title: `📅 ${ev.summary || 'Event'}`,
+                        body: `Starting in ${minsLeft} min · ${timeStr}`
+                    });
+                }
+            }
+        });
+        // Clear stale keys daily (rough cleanup)
+        if (notifiedEventIds.size > 200) notifiedEventIds.clear();
+    }
+    setInterval(checkUpcomingNotifications, 60000); // check every minute
+
 
     const updateIndicator = document.getElementById('update-indicator');
     if (updateIndicator) {

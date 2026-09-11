@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.0)
+- **Product**: **Calendar on Demand** (v1.5.1)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.0` (Weekly Timeline View, Micro-time Display, End Time Fix, Window Min-size & Responsive Grid)
+- **Current Version**: `v1.5.1` (Cross-Midnight Event Continuity, Desktop Notifications & Ko-fi Support)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 
 ---
@@ -76,8 +76,17 @@
 ## 🎯 Next Tasks (Immediate Priorities)
 
 ### 1. 🚀 예정 개선 과제 (회사에서 진행 가능한 아이템)
+- [x] **데스크톱 알림 (Notification)**:
+  - 설정(Settings) > Notifications 토글 (`#notifications-enabled-check`) 및 알림 시간 선택 필 버튼 (`5m`, `10m`, `15m`, `30m`).
+  - Windows 네이티브 토스트 알림 및 OS 알림 꺼짐 안내 문구 제공.
+  - 1분 주기 백그라운드 스케줄러 (`checkUpcomingNotifications`).
+- [x] **자정 교차 일정(Cross-midnight) 분할 & 연속성 표시 (주간 & 월간 뷰)**:
+  - **주간 뷰(Weekly View)**: 시작일 하단 점선 테두리 + `→` 화살표, 익일 상단 점선 테두리 + `↩` 화살표로 분할 렌더링.
+  - **월간 뷰(Month View)**: 시작일 우측 점선 테두리 + 우측 flat 모서리 + `→`, 익일 좌측 점선 컬러바 + 좌측 flat 모서리 + `↩` 화살표로 퍼즐처럼 연결된 카드 렌더링.
+  - 일정 생성 시 종료 시간이 시작 시간보다 빠르면 익일 날짜로 자동 산출하여 Google API 오류 방지.
+  - 월간/주간 뷰 양쪽에서 익일 연결 카드 클릭 시에도 원본 일정 편집 모달 즉시 연동.
+- [x] **Ko-fi 후원 버튼**: 설정(Settings) 헤더에 은은한 ☕ Buy me a coffee 버튼 연동.
 - **Global Hotkey (글로벌 단축키)**: `Ctrl+Shift+C` 또는 `Alt+C` 등으로 백그라운드 상태의 위젯 즉시 포커스 / 토글.
-- **데스크톱 알림 (Notification)**: 다가오는 일정 10분/15분 전 윈도우/맥 네이티브 알림 알림음 발송.
 - **반복 일정(Recurrence) 생성 & 표시**: 주간/월간 반복 룰 지원.
 - **시간 직접 입력 UI 추가 고도화**: 분 단위 15분/30분 스냅 버튼 등 편의성 강화 (필요 시).
 

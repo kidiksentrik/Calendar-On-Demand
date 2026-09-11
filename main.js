@@ -6,6 +6,8 @@ const { authenticate, authenticateNewAccount } = require('./auth');
 const { getCalendars, listEvents, createEvent, updateEvent, deleteEvent } = require('./calendar');
 
 const store = new Store();
+app.setAppUserModelId('com.calendar.ondemand'); // Required for Windows notifications
+
 let tray = null;
 let mainWindow = null;
 let authClient = null;
@@ -523,6 +525,8 @@ ipcMain.handle('get-settings', () => {
         timeDisplayStyle: store.get('timeDisplayStyle', 'badge'),
         selectedCalendarIds: store.get('selectedCalendarIds', null),
         soundEnabled: store.get('soundEnabled', true),
+        notificationsEnabled: store.get('notificationsEnabled', false),
+        notifyMinutesBefore: store.get('notifyMinutesBefore', 15),
         version: app.getVersion()
     };
 });
@@ -530,6 +534,15 @@ ipcMain.handle('get-settings', () => {
 ipcMain.on('set-default-view-mode', (event, value) => {
     store.set('defaultViewMode', value);
 });
+
+ipcMain.on('fire-notification', (event, { title, body }) => {
+    try {
+        new Notification({ title, body }).show();
+    } catch(e) {
+        console.error('Notification failed:', e);
+    }
+});
+
 
 ipcMain.on('set-time-display-style', (event, value) => {
     store.set('timeDisplayStyle', value);

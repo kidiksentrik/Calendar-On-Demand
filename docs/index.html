@@ -611,8 +611,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.5.0 Released</span>
-                <span class="update-text">Google Calendar-style Weekly Timeline View &amp; Time Customization</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.5.1 Released</span>
+                <span class="update-text">Cross-Midnight Event Continuity, Desktop Notifications &amp; Ko-fi Support</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -818,6 +818,19 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.5.1 <span class="cl-date">Sep 11, 2026</span></div>
+                    <div class="cl-body">
+                        <strong>Cross-Midnight Event Continuity, Desktop Notifications &amp; Ko-fi Support:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Desktop Notifications:</strong> Stay on schedule with native desktop alerts. Configure reminders in Settings (5m, 10m, 15m, or 30m before upcoming events).</li>
+                            <li><strong>Cross-Midnight Event Continuity:</strong> Seamlessly visualizes overnight events across day boundaries with matching dashed borders and continuation arrows (<code>&rarr;</code> / <code>&#x21a9;</code>) in both Weekly Timeline and Month Grid views.</li>
+                            <li><strong>Overnight Event Creation Fix:</strong> Fixed Google API event creation error for events ending after midnight by automatically scheduling the end time to the next day.</li>
+                            <li><strong>Buy Me a Coffee (Ko-fi):</strong> Added a discreet support button in Settings for users wishing to support ongoing development. ☕</li>
+                            <li><strong>Reliability Polish:</strong> Timezone boundary safety improvements via localized date conversions.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.5.0 <span class="cl-date">Sep 07, 2026</span> <span class="cl-tag" style="background:#2a4d33;color:#7ec47e;">Major</span></div>
                     <div class="cl-body">
