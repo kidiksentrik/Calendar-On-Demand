@@ -1,7 +1,7 @@
 {
     "name":  "calendar-on-demand",
-    "version":  "1.5.1",
-    "description":  "Desktop widget for Google Calendar",
+    "version":  "1.5.2",
+    "description":  "Desktop Google Calendar Widget for Windows and macOS",
     "author":  "Calendar-On-Demand Team",
     "main":  "main.js",
     "scripts":  {

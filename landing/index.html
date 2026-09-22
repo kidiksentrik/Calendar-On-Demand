@@ -611,8 +611,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.5.1 Released</span>
-                <span class="update-text">Cross-Midnight Event Continuity, Desktop Notifications &amp; Ko-fi Support</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.5.2 Released</span>
+                <span class="update-text">First-Launch Window Centering, Off-Screen Display Protection &amp; Focus Reliability</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -818,6 +818,17 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.5.2 <span class="cl-date">Sep 22, 2026</span></div>
+                    <div class="cl-body">
+                        <strong>First-Launch Window Centering &amp; Off-Screen Display Protection:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>First-Launch Center &amp; Frontmost Focus:</strong> Guaranteed that the calendar widget spawns dead center on the primary display and pops in front of full-screen windows on first launch.</li>
+                            <li><strong>Off-Screen Display Protection:</strong> Added multi-monitor validation using active display bounds to detect disconnected external monitors or corrupted coordinates, automatically rescuing and resetting the window position.</li>
+                            <li><strong>Second-Instance Auto-Rescue:</strong> Re-launching the app via desktop shortcut automatically rescues any off-screen window, restores minimized states, and brings it directly into focus.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.5.1 <span class="cl-date">Sep 11, 2026</span></div>
                     <div class="cl-body">

@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.1)
+- **Product**: **Calendar on Demand** (v1.5.2)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.1` (Cross-Midnight Event Continuity, Desktop Notifications & Ko-fi Support)
+- **Current Version**: `v1.5.2` (First-Launch Window Centering, Off-Screen Display Protection & Focus Reliability)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 
 ---
