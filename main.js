@@ -59,8 +59,32 @@ if (!gotTheLock) {
     app.on('second-instance', (event, commandLine, workingDirectory) => {
         if (mainWindow) {
             if (mainWindow.isMinimized()) mainWindow.restore();
+            
+            // Rescue if window was somehow off-screen
+            const bounds = mainWindow.getBounds();
+            const displays = screen.getAllDisplays();
+            const isVisible = displays.some(display => {
+                const b = display.bounds;
+                return (
+                    bounds.x + bounds.width > b.x + 50 &&
+                    bounds.x < b.x + b.width - 50 &&
+                    bounds.y + bounds.height > b.y + 50 &&
+                    bounds.y < b.y + b.height - 50
+                );
+            });
+            if (!isVisible) {
+                mainWindow.center();
+            }
+
             mainWindow.show();
+            mainWindow.setAlwaysOnTop(true, 'screen-saver');
             mainWindow.focus();
+            setTimeout(() => {
+                if (mainWindow && !mainWindow.isDestroyed()) {
+                    const keepTop = store.get('alwaysOnTop', false);
+                    mainWindow.setAlwaysOnTop(keepTop, keepTop ? 'floating' : 'normal');
+                }
+            }, 1000);
         }
     });
     
@@ -72,6 +96,25 @@ async function createWindow() {
     let { width, height, x, y } = store.get('windowBounds') || { width: 380, height: 460, x: undefined, y: undefined };
     width = Math.max(370, width || 380);
     height = Math.max(430, height || 460);
+
+    // Validate that stored coordinates are actually visible on an active display
+    if (x !== undefined && y !== undefined) {
+        const displays = screen.getAllDisplays();
+        const isVisibleOnAnyDisplay = displays.some(display => {
+            const b = display.bounds;
+            return (
+                x + width > b.x + 50 &&
+                x < b.x + b.width - 50 &&
+                y + height > b.y + 50 &&
+                y < b.y + b.height - 50
+            );
+        });
+        if (!isVisibleOnAnyDisplay) {
+            console.log('Stored window position was off-screen, resetting to center.');
+            x = undefined;
+            y = undefined;
+        }
+    }
 
     const alwaysOnTop = store.get('alwaysOnTop', false);
     const desktopMode = store.get('desktopMode', false);
@@ -99,6 +142,11 @@ async function createWindow() {
         },
     });
 
+    // Explicitly center if coordinates are undefined or reset
+    if (x === undefined || y === undefined) {
+        mainWindow.center();
+    }
+
     if (desktopMode) {
         mainWindow.setAlwaysOnTop(false);
     } else if (alwaysOnTop) {
@@ -121,7 +169,15 @@ async function createWindow() {
             mainWindow.showInactive();
         } else {
             mainWindow.show();
-            mainWindow.focus(); // Ensure it comes to front
+            // Pop to front above any full-screen browser/window on first show
+            mainWindow.setAlwaysOnTop(true, 'screen-saver');
+            mainWindow.focus();
+            setTimeout(() => {
+                if (mainWindow && !mainWindow.isDestroyed()) {
+                    const keepTop = store.get('alwaysOnTop', false);
+                    mainWindow.setAlwaysOnTop(keepTop, keepTop ? 'floating' : 'normal');
+                }
+            }, 1000);
         }
     }
 

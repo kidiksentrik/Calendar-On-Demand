@@ -116,6 +116,10 @@
   - `resize` 이벤트에서도 `mainWindow.setSize(Math.max(370, w), Math.max(430, h))`로 강제 스냅 보정 및 `saveBounds` 저장 시 클램핑 적용.
   - CSS 그리드 5개 영역(`calendar-grid-header`, `calendar-days`, `week-header-days`, `week-allday-days`, `week-days-columns`)을 `repeat(7, minmax(0, 1fr))`로 변경하여 내부 콘텐츠로 인한 주말 컬럼 잘림 방지.
   - 헤더 우측 버튼 그룹(`📅 📌 🔄 ⚙️`)에 `flex-shrink: 0; gap: 6px;` 적용 및 월 제목 `clamp` 폰트 적용.
+- [x] **윈도우 11 첫 실행 시 화면 중앙 배치 및 최상단 포커스 강제 (오프스크린 방지)**:
+  - 초기 실행 시 저장된 좌표가 없거나(`undefined`), 다중 모니터 분리 등으로 인해 좌표가 유효 모니터 화면 밖(Off-screen)에 있을 경우 `screen.getAllDisplays()`로 검증 후 자동으로 화면 정중앙(`mainWindow.center()`)으로 리셋.
+  - 최초 실행 시 크롬 등 전체화면 프로그램 뒤에 가려지지 않도록 일시적으로 `setAlwaysOnTop(true, 'screen-saver')` 후 최상단 포커스 부여 (1초 후 유저 설정 복귀).
+  - 중복 실행(`second-instance`) 시에도 화면 밖 좌표 감지 시 즉시 중앙으로 소환 및 최상단 포커스.
 - [ ] **커스텀 디자인 옵션 추가**: '오늘' 및 '주말' 하이라이트 색상 커스텀, 이모지 대신 텍스트 색상과 어울리는 모노톤(단색) 심플 아이콘 옵션.
 - [x] *(참고)* **다중 계정 연동**: 피드백에 요청되었으나 v1.4.0에서 이미 구현 완료된 기능.
 
