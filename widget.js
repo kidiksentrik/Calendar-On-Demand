@@ -85,6 +85,137 @@ try {
         }
     }
 
+    const GOOGLE_COLORS = {
+        "1": { name: "Lavender", bg: "#7986cb", fg: "#ffffff" },
+        "2": { name: "Sage", bg: "#33b679", fg: "#ffffff" },
+        "3": { name: "Grape", bg: "#8e24aa", fg: "#ffffff" },
+        "4": { name: "Flamingo", bg: "#e67c73", fg: "#ffffff" },
+        "5": { name: "Banana", bg: "#f6bf26", fg: "#000000" },
+        "6": { name: "Tangerine", bg: "#f4511e", fg: "#ffffff" },
+        "7": { name: "Peacock", bg: "#039be5", fg: "#ffffff" },
+        "8": { name: "Graphite", bg: "#616161", fg: "#ffffff" },
+        "9": { name: "Blueberry", bg: "#3f51b5", fg: "#ffffff" },
+        "10": { name: "Basil", bg: "#0b8043", fg: "#ffffff" },
+        "11": { name: "Tomato", bg: "#d50000", fg: "#ffffff" }
+    };
+
+    const HEX_TO_COLOR_ID = {
+        // Vibrant 5 colors
+        '#f44336': '11', // Red -> Tomato
+        '#ffeb3b': '5',  // Yellow -> Banana
+        '#4caf50': '10', // Green -> Basil
+        '#2196f3': '7',  // Blue -> Peacock
+        '#9c27b0': '3',  // Purple -> Grape
+        // Pastel colors
+        '#ff9e99': '4',  // Flamingo / Coral
+        '#ffc77d': '6',  // Tangerine
+        '#fff59d': '5',  // Banana
+        '#a5d6a7': '2',  // Sage
+        '#80cbc4': '7',  // Peacock
+        '#90caf9': '9',  // Blueberry
+        '#9fa8da': '1',  // Lavender
+        '#ce93d8': '1',  // Lilac -> Lavender (light purple)
+        '#f48fb1': '4',  // Flamingo / Pink
+        '#bcaaa4': '8',  // Graphite
+        // Google colors directly
+        '#7986cb': '1',
+        '#33b679': '2',
+        '#8e24aa': '3',
+        '#e67c73': '4',
+        '#f6bf26': '5',
+        '#f4511e': '6',
+        '#039be5': '7',
+        '#616161': '8',
+        '#3f51b5': '9',
+        '#0b8043': '10',
+        '#d50000': '11'
+    };
+
+    const KNOWN_EVENT_LABELS = {
+        '#039be5': '003b140f-3012-48f7-9e7d-166cdbe16ad3',
+        '#e67c73': '0af1212c-f5f9-45ef-854a-9a531ea3dfd4',
+        '#b39ddb': '0bcafdae-61d7-4522-b4c0-f7b130d43f8d',
+        '#4285f4': '2710de0b-c115-4aab-8599-231f3922684a',
+        '#8e24aa': '3a491bdf-6fb3-4067-8637-7b5be686f258',
+        '#d50000': '3b7f84a5-dfdf-47d0-9d99-cac494622864',
+        '#009688': '4dbf541b-f23c-4334-9b1e-89d2e5f510c0',
+        '#7986cb': '5c8d8fad-a2ac-4d09-955a-2cffcde9daf7',
+        '#7cb342': '6640e517-5c28-4da6-a47a-0dc217d1552d',
+        '#3f51b5': '7319d9a3-99c6-4f35-8769-9a4922feaa1e',
+        '#a79b8e': '77cad7f2-070a-4b1c-ae0b-c0017ae47279',
+        '#ad1457': '791b9c19-7afa-4039-896d-95fd347af26b',
+        '#d81b60': '80c17efb-d8c0-434e-b2ba-73dc32c6b052',
+        '#9e69af': '81f386db-5325-43e0-9635-b14a0c8274fc',
+        '#616161': 'a9f66e6d-a7a9-4944-8b9b-681ec3992650',
+        '#f09300': 'ab668a7c-b972-468a-ae5a-fc91a3485d32',
+        '#c0ca33': 'aed1288d-ef63-4d62-8f15-d55fb5ca0478',
+        '#795548': 'b6dd2404-2a69-4d93-9928-8aba5ed808a5', // Cocoa!
+        '#0b8043': 'ca63a595-1c65-4eeb-a4e6-4ae68a97dda1',
+        '#ef6c00': 'd166a987-221d-4905-b16e-eb2a62c32e71',
+        '#f6bf26': 'd1a0a86e-afa1-49df-8cb9-327e2303f40c',
+        '#e4c441': 'd562ceab-68a4-44a7-ba69-a8ada474bad7',
+        '#f4511e': 'd904da41-4b00-4630-bc9a-a94524a66da7',
+        '#33b679': 'f97da844-2969-464c-91be-36deb8c37f7b'
+    };
+
+    const LABEL_ID_TO_HEX = {};
+    for (const [hex, id] of Object.entries(KNOWN_EVENT_LABELS)) {
+        LABEL_ID_TO_HEX[id] = hex;
+    }
+
+    function findLabelHex(labelId) {
+        if (LABEL_ID_TO_HEX[labelId]) return LABEL_ID_TO_HEX[labelId];
+        if (allCalendars) {
+            for (const cal of allCalendars) {
+                if (cal.eventLabels) {
+                    const found = cal.eventLabels.find(l => l.id === labelId);
+                    if (found) return found.backgroundColor.toLowerCase();
+                }
+            }
+        }
+        return null;
+    }
+
+    function findLabelId(hex) {
+        const lowerHex = hex.toLowerCase();
+        if (KNOWN_EVENT_LABELS[lowerHex]) return KNOWN_EVENT_LABELS[lowerHex];
+        if (allCalendars) {
+            for (const cal of allCalendars) {
+                if (cal.eventLabels) {
+                    const found = cal.eventLabels.find(l => l.backgroundColor.toLowerCase() === lowerHex);
+                    if (found) return found.id;
+                }
+            }
+        }
+        return null;
+    }
+
+    function getContrastTextColor(hex) {
+        if (!hex || hex.startsWith('var(') || hex === 'default') return '#ffffff';
+        let c = hex.replace('#', '');
+        if (c.length === 3) c = c.split('').map(x => x + x).join('');
+        const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+        if (isNaN(r) || isNaN(g) || isNaN(b)) return '#ffffff';
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return yiq >= 110 ? '#18181b' : '#ffffff';
+    }
+
+    function getEventColor(e) {
+        if (!e) return 'var(--accent-color)';
+        if (e.eventLabelId) {
+            const labelHex = findLabelHex(e.eventLabelId);
+            if (labelHex) return labelHex;
+        }
+        if (e.colorId && GOOGLE_COLORS[e.colorId]) {
+            return GOOGLE_COLORS[e.colorId].bg;
+        }
+        if (e.summary) {
+            const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+            if (colorMatch) return colorMatch[1];
+        }
+        return e.backgroundColor || 'var(--accent-color)';
+    }
+
     function stripTags(summary) {
         if (!summary) return '';
         return summary
@@ -275,12 +406,24 @@ try {
     document.querySelectorAll('.color-opt').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.color-opt').forEach(b => b.classList.remove('active'));
+            document.getElementById('default-color-btn')?.classList.remove('active');
             btn.classList.add('active');
             if (document.getElementById('selected-entry-color')) {
-                document.getElementById('selected-entry-color').value = btn.getAttribute('data-color');
+                document.getElementById('selected-entry-color').value = btn.getAttribute('data-color') || btn.getAttribute('data-color-id');
             }
         };
     });
+
+    const defaultBtn = document.getElementById('default-color-btn');
+    if (defaultBtn) {
+        defaultBtn.onclick = () => {
+            document.querySelectorAll('.color-opt').forEach(b => b.classList.remove('active'));
+            defaultBtn.classList.add('active');
+            if (document.getElementById('selected-entry-color')) {
+                document.getElementById('selected-entry-color').value = 'default';
+            }
+        };
+    }
 
 
     const defaultTheme = {
@@ -620,9 +763,7 @@ try {
                 const isShort = item.height < 32;
                 card.className = `week-event-card ${isCompleted ? 'completed' : ''} ${isShort ? 'short-event' : ''} ${item.crossesMidnight ? 'crosses-midnight' : ''} ${item.isContinuation ? 'is-continuation' : ''}`;
 
-                let eventColor = e.backgroundColor || 'var(--accent-color)';
-                const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-                if (colorMatch) eventColor = colorMatch[1];
+                let eventColor = getEventColor(e);
 
                 card.style.borderLeft = `3px solid ${eventColor}`;
                 card.style.background = `color-mix(in srgb, ${eventColor} 22%, rgba(26, 26, 36, 0.88))`;
@@ -762,9 +903,7 @@ try {
         // Pre-scan for highlight tag
         combinedEvents.forEach(({ e }) => {
             if (e.summary && e.summary.includes('[HIGHLIGHT]')) {
-                cellHighlightColor = e.backgroundColor || 'var(--accent-color)';
-                const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-                if (colorMatch) cellHighlightColor = colorMatch[1];
+                cellHighlightColor = getEventColor(e);
             }
         });
 
@@ -789,13 +928,19 @@ try {
                 displaySummary = displaySummary.replace('[HIGHLIGHT]', '');
             }
 
-            const colorMatch = displaySummary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-            if (colorMatch) {
-                if (!cellHighlightColor) {
-                    ev.style.background = colorMatch[1];
-                    ev.style.color = '#000';
+            const eventColor = getEventColor(e);
+            const hasCustomColor = !!(e.eventLabelId) || !!(e.colorId && GOOGLE_COLORS[e.colorId]) || !!(e.summary && e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/));
+            if (hasCustomColor && !cellHighlightColor) {
+                ev.style.background = eventColor;
+                const textColor = getContrastTextColor(eventColor);
+                ev.style.color = textColor;
+                ev.style.textShadow = textColor === '#ffffff' ? '0 1px 2px rgba(0, 0, 0, 0.5)' : 'none';
+                if (textColor !== '#ffffff') {
+                    ev.style.fontWeight = '600';
                 }
-                displaySummary = displaySummary.replace(colorMatch[0], '');
+            }
+            if (displaySummary.includes('[COLOR:')) {
+                displaySummary = displaySummary.replace(/\[COLOR:#[0-9a-fA-F]{3,6}\]/g, '');
             }
             
             const hasTime = !!(e.start && e.start.dateTime);
@@ -864,7 +1009,6 @@ try {
             const tooltipTime = timeInfo ? (timeInfo.endTimeStr ? `${timeInfo.startTimeStr} - ${timeInfo.endTimeStr} ` : `${timeInfo.startTimeStr} `) : '';
             ev.title = `${tooltipTime}${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
 
-            const eventColor = e.backgroundColor || 'var(--accent-color)';
             if (isContinuation) {
                 ev.style.borderLeft = `3px dashed ${eventColor}`;
             } else {
@@ -973,7 +1117,7 @@ try {
         if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
         document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
-        document.querySelector('.color-opt[data-color="default"]')?.classList.add('active');
+        document.getElementById('default-color-btn')?.classList.add('active');
         if (extraFields) extraFields.classList.add('hidden');
         if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden');
     }
@@ -1021,6 +1165,9 @@ try {
             title.onclick = (event) => {
                 event.stopPropagation();
                 editingEvent = e;
+                if (e.start && (e.start.dateTime || e.start.date)) {
+                    selectedDay = (e.start.dateTime || e.start.date).split('T')[0];
+                }
                 
                 // Populate text input
                 if (quickAddInput) {
@@ -1063,12 +1210,32 @@ try {
                 if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = e.summary.includes('[HIGHLIGHT]');
                 
                 // Populate color selection
-                const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-                const selectedColor = colorMatch ? colorMatch[1] : 'default';
-                if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = selectedColor;
-                document.querySelectorAll('.color-opt').forEach(opt => {
-                    opt.classList.toggle('active', opt.getAttribute('data-color') === selectedColor);
-                });
+                let selectedHex = 'default';
+                if (e.eventLabelId) {
+                    selectedHex = findLabelHex(e.eventLabelId) || 'default';
+                } else if (e.colorId && GOOGLE_COLORS[e.colorId]) {
+                    selectedHex = GOOGLE_COLORS[e.colorId].bg;
+                } else if (e.summary) {
+                    const colorMatch = e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+                    if (colorMatch) selectedHex = colorMatch[1].toLowerCase();
+                }
+                if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = selectedHex;
+                if (selectedHex === 'default') {
+                    document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
+                    document.getElementById('default-color-btn')?.classList.add('active');
+                } else {
+                    document.getElementById('default-color-btn')?.classList.remove('active');
+                    let matched = false;
+                    document.querySelectorAll('.color-opt').forEach(opt => {
+                        const optHex = opt.getAttribute('data-color')?.toLowerCase();
+                        if (!matched && optHex === selectedHex.toLowerCase()) {
+                            opt.classList.add('active');
+                            matched = true;
+                        } else {
+                            opt.classList.remove('active');
+                        }
+                    });
+                }
 
                 // Auto-show More Options when editing
                 if (extraFields) extraFields.classList.remove('hidden');
@@ -1248,6 +1415,17 @@ try {
         const isImportant = document.getElementById('important-check')?.checked;
         const isHighlighted = document.getElementById('highlight-cell-check')?.checked;
         const entryColor = document.getElementById('selected-entry-color')?.value;
+        let colorId = null;
+        let eventLabelId = null;
+        if (entryColor && entryColor !== 'default') {
+            if (entryColor.startsWith('#')) {
+                const hex = entryColor.toLowerCase();
+                eventLabelId = findLabelId(hex);
+                colorId = HEX_TO_COLOR_ID[hex] || null;
+            } else if (GOOGLE_COLORS[entryColor]) {
+                colorId = entryColor;
+            }
+        }
         
         let finalSummary = summary;
         if (!isAllDayState && startStr) {
@@ -1261,7 +1439,7 @@ try {
         
         if (isImportant) finalSummary += ' [IMPORTANT]';
         if (isHighlighted) finalSummary += ' [HIGHLIGHT]';
-        if (entryColor && entryColor !== 'default') finalSummary += ` [COLOR:${entryColor}]`;
+        // Note: No longer append [COLOR:...] to finalSummary so Google Calendar title stays clean!
         
         const eventData = { 
             summary: finalSummary, 
@@ -1270,6 +1448,18 @@ try {
             location, 
             description 
         };
+
+        if (eventLabelId) {
+            eventData.eventLabelId = eventLabelId;
+        } else if (editingEvent && editingEvent.eventLabelId && entryColor === 'default') {
+            eventData.eventLabelId = null;
+        }
+
+        if (colorId) {
+            eventData.colorId = colorId;
+        } else if (editingEvent && (editingEvent.colorId || editingEvent.summary?.includes('[COLOR:')) && entryColor === 'default') {
+            eventData.colorId = null;
+        }
 
         // Preserve editing event copy
         const currentEditEvent = editingEvent;
@@ -1288,7 +1478,7 @@ try {
         if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
         document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
-        document.querySelector('.color-opt[data-color="default"]')?.classList.add('active');
+        document.getElementById('default-color-btn')?.classList.add('active');
         isEndTimeUserModified = false;
         editingEvent = null;
 
@@ -1373,12 +1563,32 @@ try {
                 if (document.getElementById('important-check')) document.getElementById('important-check').checked = event.summary.includes('[IMPORTANT]');
                 if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = event.summary.includes('[HIGHLIGHT]');
                 
-                const colorMatch = event.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-                const selectedColor = colorMatch ? colorMatch[1] : 'default';
-                if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = selectedColor;
-                document.querySelectorAll('.color-opt').forEach(opt => {
-                    opt.classList.toggle('active', opt.getAttribute('data-color') === selectedColor);
-                });
+                let selectedHex = 'default';
+                if (event.eventLabelId) {
+                    selectedHex = findLabelHex(event.eventLabelId) || 'default';
+                } else if (event.colorId && GOOGLE_COLORS[event.colorId]) {
+                    selectedHex = GOOGLE_COLORS[event.colorId].bg;
+                } else if (event.summary) {
+                    const colorMatch = event.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+                    if (colorMatch) selectedHex = colorMatch[1].toLowerCase();
+                }
+                if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = selectedHex;
+                if (selectedHex === 'default') {
+                    document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
+                    document.getElementById('default-color-btn')?.classList.add('active');
+                } else {
+                    document.getElementById('default-color-btn')?.classList.remove('active');
+                    let matched = false;
+                    document.querySelectorAll('.color-opt').forEach(opt => {
+                        const optHex = opt.getAttribute('data-color')?.toLowerCase();
+                        if (!matched && optHex === selectedHex.toLowerCase()) {
+                            opt.classList.add('active');
+                            matched = true;
+                        } else {
+                            opt.classList.remove('active');
+                        }
+                    });
+                }
 
                 if (extraFields) extraFields.classList.remove('hidden');
                 if (toggleExtraBtn) toggleExtraBtn.classList.add('hidden');
@@ -1411,7 +1621,7 @@ try {
         if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
         document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
-        document.querySelector('.color-opt[data-color="default"]')?.classList.add('active');
+        document.getElementById('default-color-btn')?.classList.add('active');
         if (extraFields) extraFields.classList.add('hidden');
         if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden'); 
         editingEvent = null;
@@ -1432,20 +1642,47 @@ try {
                 const currentHighlight = document.getElementById('highlight-cell-check')?.checked || false;
                 const originalHighlight = editingEvent.summary.includes('[HIGHLIGHT]');
                 
-                const colorMatch = editingEvent.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-                const originalColor = colorMatch ? colorMatch[1] : 'default';
-                const currentColor = document.getElementById('selected-entry-color')?.value || 'default';
+                let originalHex = 'default';
+                if (editingEvent.eventLabelId) {
+                    originalHex = findLabelHex(editingEvent.eventLabelId) || 'default';
+                } else if (editingEvent.colorId && GOOGLE_COLORS[editingEvent.colorId]) {
+                    originalHex = GOOGLE_COLORS[editingEvent.colorId].bg;
+                } else if (editingEvent.summary) {
+                    const colorMatch = editingEvent.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+                    if (colorMatch) originalHex = colorMatch[1].toLowerCase();
+                }
+                const currentHex = (document.getElementById('selected-entry-color')?.value || 'default').toLowerCase();
                 
                 const currentAllDay = allDayCheck ? allDayCheck.checked : false;
-                const originalAllDay = !!editingEvent.start.date;
+                const originalAllDay = !editingEvent.start.dateTime;
+
+                let originalStartTime = '';
+                let originalEndTime = '';
+                if (editingEvent.start && editingEvent.start.dateTime) {
+                    const startDt = new Date(editingEvent.start.dateTime);
+                    const sH = startDt.getHours().toString().padStart(2, '0');
+                    const sM = startDt.getMinutes().toString().padStart(2, '0');
+                    originalStartTime = `${sH}:${sM}`;
+                }
+                if (editingEvent.end && editingEvent.end.dateTime) {
+                    const endDt = new Date(editingEvent.end.dateTime);
+                    const eH = endDt.getHours().toString().padStart(2, '0');
+                    const eM = endDt.getMinutes().toString().padStart(2, '0');
+                    originalEndTime = `${eH}:${eM}`;
+                }
+
+                const currentStartTime = (!currentAllDay && eventStartTime && eventStartTime.value) ? eventStartTime.value : '';
+                const currentEndTime = (!currentAllDay && eventEndTime && eventEndTime.value) ? eventEndTime.value : '';
 
                 if (currentText === originalText && 
                     currentLoc === originalLoc && 
                     currentDesc === originalDesc && 
                     currentImportant === originalImportant && 
                     currentHighlight === originalHighlight && 
-                    currentColor === originalColor &&
-                    currentAllDay === originalAllDay) {
+                    currentHex === originalHex &&
+                    currentAllDay === originalAllDay &&
+                    currentStartTime === originalStartTime &&
+                    currentEndTime === originalEndTime) {
                     shouldSave = false;
                 }
             }

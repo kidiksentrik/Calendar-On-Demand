@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.2)
+- **Product**: **Calendar on Demand** (v1.5.3)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.2` (First-Launch Window Centering, Off-Screen Display Protection & Focus Reliability)
+- **Current Version**: `v1.5.3` (Google Calendar 24 Official Colorways, Adaptive Contrast Typography & Time Picker Auto-Save)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 
 ---
@@ -125,6 +125,18 @@
   - 메타 설명, 키워드, OpenGraph, Twitter Card 태그를 영어 글로벌 타겟으로 보강.
   - 웹사이트 하단 및 네비게이션에 8개 핵심 질의응답(FAQ: Notion Calendar 비교, 보안/OAuth, 다중 계정, 양방향 동기화, 무료/오픈소스 등) 반응형 섹션 추가.
   - Google Search Console 색인 및 크롤러 가이드 최적화: `rel="canonical"` 대표 도메인 명시, `sitemap.xml` 및 `robots.txt` 구축.
+- [x] **구글 캘린더 공식 24종 컬러웨이 완전 연동 & 양방향 동기화 (`eventLabelVersion: 1`)**:
+  - 최신 Google Calendar 웹의 `labelProperties.eventLabels` 아키텍처 연동 (코코아 `#795548` 등 24종 전체 지원).
+  - 기존 구글 캘린더 웹/앱의 제목에 `[COLOR:#hex]` 태그가 노출되던 문제를 완전 제거하고 네이티브 라벨 ID로 깔끔하게 저장.
+  - Quick Add 모달에 12열 × 2행 미니멀 24색 스와치 및 `Default` (캘린더 기본색) 버튼 탑재.
+- [x] **배경 명도 기반 동적 텍스트 대비(Adaptive Contrast) 타이포그래피**:
+  - 배경 색상의 밝기(YIQ/Luminance)를 계산하여 바나나, 레몬, 아보카도, 피스타치오, 샌드, 플라밍고, 라벤더 등 밝거나 중간 톤 배경에는 또렷한 다크 텍스트(`#18181b`, `font-weight: 600`, 그림자 제거) 자동 적용.
+  - 토마토, 바질, 그레이프, 코발트, 코코아 등 어두운 배경에서만 가독성을 보장하기 위해 화이트 텍스트(`#ffffff`, 드롭 섀도우) 유지.
+  - 마우스 호버 시 `!important`로 인해 커스텀 배경색이 회색으로 가려지던 CSS 버그 수정 (`brightness(1.08)`로 고유 색상 유지).
+- [x] **타임 피커 UI 잘림 해소 & 모달 바깥 클릭 시 시간 자동 저장(`handleAutoSaveAndClose`)**:
+  - 타임 피커 폭을 96px로 확장하여 12시간제(`03:00 PM`) 및 24시간제에서 시계 아이콘과 텍스트가 잘리지 않도록 레이아웃 최적화.
+  - 모달 바깥 영역 클릭 시 실행되는 변경 감지 로직에 시작/종료 시간(`originalStartTime/EndTime` vs `currentStartTime/EndTime`) 비교를 추가하여, 시간만 변경하고 닫아도 구글 캘린더에 완벽하게 자동 반영되도록 수정.
+  - 일정 수정 모드 진입 시 실제 시작 날짜 동기화 보강.
 - [ ] **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
   - `winget install kidiksentrik.calendar-on-demand` 및 `brew install --cask calendar-on-demand` 등록 추진.
 - [ ] **커스텀 디자인 옵션 추가**: '오늘' 및 '주말' 하이라이트 색상 커스텀, 이모지 대신 텍스트 색상과 어울리는 모노톤(단색) 심플 아이콘 옵션.

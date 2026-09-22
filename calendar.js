@@ -3,14 +3,26 @@ const { google } = require('googleapis');
 async function getCalendars(auth) {
     const calendar = google.calendar({ version: 'v3', auth });
     const calendarList = await calendar.calendarList.list();
-    return calendarList.data.items.map(cal => ({
-        id: cal.id,
-        summary: cal.summary,
-        backgroundColor: cal.backgroundColor,
-        foregroundColor: cal.foregroundColor,
-        primary: cal.primary || false,
-        accessRole: cal.accessRole
-    }));
+    const items = [];
+    for (const cal of calendarList.data.items) {
+        let eventLabels = [];
+        try {
+            const calRes = await calendar.calendars.get({ calendarId: cal.id });
+            if (calRes.data.labelProperties?.eventLabels) {
+                eventLabels = calRes.data.labelProperties.eventLabels;
+            }
+        } catch (e) {}
+        items.push({
+            id: cal.id,
+            summary: cal.summary,
+            backgroundColor: cal.backgroundColor,
+            foregroundColor: cal.foregroundColor,
+            primary: cal.primary || false,
+            accessRole: cal.accessRole,
+            eventLabels
+        });
+    }
+    return items;
 }
 
 async function listEvents(auth, timeMin, timeMax, selectedCalendarIds = null) {
@@ -33,6 +45,7 @@ async function listEvents(auth, timeMin, timeMax, selectedCalendarIds = null) {
             timeMax: timeMax.toISOString(),
             singleEvents: true,
             orderBy: 'startTime',
+            eventLabelVersion: 1
         });
         
         const events = res.data.items.map(event => ({
@@ -55,6 +68,7 @@ async function createEvent(auth, event) {
     const res = await calendar.events.insert({
         calendarId: 'primary',
         resource: event,
+        eventLabelVersion: 1
     });
     return res.data;
 }
@@ -65,6 +79,7 @@ async function updateEvent(auth, calendarId, eventId, event) {
         calendarId: calendarId || 'primary',
         eventId: eventId,
         resource: event,
+        eventLabelVersion: 1
     });
     return res.data;
 }

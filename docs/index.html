@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.5.2",
+          "softwareVersion": "1.5.3",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -756,8 +756,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.5.2 Released</span>
-                <span class="update-text">First-Launch Window Centering, Off-Screen Display Protection &amp; Focus Reliability</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.5.3 Released</span>
+                <span class="update-text">Google Calendar 24 Official Colorways, Adaptive Contrast Typography &amp; Time Picker Auto-Save Polish</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -963,6 +963,18 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.5.3 <span class="cl-date">Sep 22, 2026</span></div>
+                    <div class="cl-body">
+                        <strong>Google Calendar 24 Official Colorways, Adaptive Contrast Typography &amp; Time Picker Auto-Save:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Google Calendar 24 Official Colorways:</strong> Integrated Google Calendar's native <code>eventLabelVersion: 1</code> API supporting all 24 official colorways (including Cocoa) with full two-way sync and clean 24-color grid selection in the Quick Add modal.</li>
+                            <li><strong>Zero Title Tag Pollution:</strong> Replaced legacy <code>[COLOR:#hex]</code> tags with native event label IDs, keeping event titles clean across Google Calendar web, mobile apps, and widget.</li>
+                            <li><strong>Adaptive Contrast Typography:</strong> Dynamic luminance calculations ensure bold dark text (<code>#18181b</code>) on bright/medium badges and crisp white text on deep dark badges for peak readability.</li>
+                            <li><strong>Time Picker Layout &amp; Auto-Save Polish:</strong> Expanded time picker inputs to eliminate 12h/24h text truncation, and fixed auto-save detection so modifying only event times reliably persists on blur.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.5.2 <span class="cl-date">Sep 22, 2026</span></div>
                     <div class="cl-body">

@@ -243,28 +243,37 @@
                         </label>
                     </div>
                     <div class="setting-item">
-                        <label>Entry Color</label>
-                        <div class="color-category-label">VIBRANT</div>
-                        <div class="color-presets">
-                            <button class="color-opt" data-color="default" style="background: #444; color: #444;"></button>
-                            <button class="color-opt" data-color="#f44336" style="background: #f44336; color: #f44336;"></button>
-                            <button class="color-opt" data-color="#ffeb3b" style="background: #ffeb3b; color: #ffeb3b;"></button>
-                            <button class="color-opt" data-color="#4caf50" style="background: #4caf50; color: #4caf50;"></button>
-                            <button class="color-opt" data-color="#2196f3" style="background: #2196f3; color: #2196f3;"></button>
-                            <button class="color-opt" data-color="#9c27b0" style="background: #9c27b0; color: #9c27b0;"></button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="margin-bottom: 0;">Entry Color</label>
+                            <button type="button" class="color-opt-default active" id="default-color-btn" data-color="default" data-color-id="default" title="Default (Calendar Color)">Default</button>
                         </div>
-                        <div class="color-category-label">PASTEL</div>
-                        <div class="color-presets">
-                            <button class="color-opt" data-color="#ff9e99" style="background: #ff9e99; color: #ff9e99;"></button>
-                            <button class="color-opt" data-color="#ffc77d" style="background: #ffc77d; color: #ffc77d;"></button>
-                            <button class="color-opt" data-color="#fff59d" style="background: #fff59d; color: #fff59d;"></button>
-                            <button class="color-opt" data-color="#a5d6a7" style="background: #a5d6a7; color: #a5d6a7;"></button>
-                            <button class="color-opt" data-color="#80cbc4" style="background: #80cbc4; color: #80cbc4;"></button>
-                            <button class="color-opt" data-color="#90caf9" style="background: #90caf9; color: #90caf9;"></button>
-                            <button class="color-opt" data-color="#9fa8da" style="background: #9fa8da; color: #9fa8da;"></button>
-                            <button class="color-opt" data-color="#ce93d8" style="background: #ce93d8; color: #ce93d8;"></button>
-                            <button class="color-opt" data-color="#f48fb1" style="background: #f48fb1; color: #f48fb1;"></button>
-                            <button class="color-opt" data-color="#bcaaa4" style="background: #bcaaa4; color: #bcaaa4;"></button>
+                        <div class="color-presets-24">
+                            <!-- Row 1 (12 colors) -->
+                            <button type="button" class="color-opt" data-color="#d50000" data-color-id="11" title="Tomato" style="background: #d50000; color: #d50000;"></button>
+                            <button type="button" class="color-opt" data-color="#e67c73" data-color-id="4" title="Flamingo" style="background: #e67c73; color: #e67c73;"></button>
+                            <button type="button" class="color-opt" data-color="#f4511e" data-color-id="6" title="Tangerine" style="background: #f4511e; color: #f4511e;"></button>
+                            <button type="button" class="color-opt" data-color="#ef6c00" data-color-id="6" title="Pumpkin" style="background: #ef6c00; color: #ef6c00;"></button>
+                            <button type="button" class="color-opt" data-color="#f09300" data-color-id="6" title="Orange" style="background: #f09300; color: #f09300;"></button>
+                            <button type="button" class="color-opt" data-color="#f6bf26" data-color-id="5" title="Banana" style="background: #f6bf26; color: #f6bf26;"></button>
+                            <button type="button" class="color-opt" data-color="#e4c441" data-color-id="5" title="Lemon" style="background: #e4c441; color: #e4c441;"></button>
+                            <button type="button" class="color-opt" data-color="#c0ca33" data-color-id="2" title="Avocado" style="background: #c0ca33; color: #c0ca33;"></button>
+                            <button type="button" class="color-opt" data-color="#7cb342" data-color-id="2" title="Pistachio" style="background: #7cb342; color: #7cb342;"></button>
+                            <button type="button" class="color-opt" data-color="#0b8043" data-color-id="10" title="Basil" style="background: #0b8043; color: #0b8043;"></button>
+                            <button type="button" class="color-opt" data-color="#33b679" data-color-id="2" title="Eucalyptus" style="background: #33b679; color: #33b679;"></button>
+                            <button type="button" class="color-opt" data-color="#009688" data-color-id="7" title="Teal" style="background: #009688; color: #009688;"></button>
+                            <!-- Row 2 (12 colors) -->
+                            <button type="button" class="color-opt" data-color="#039be5" data-color-id="7" title="Peacock" style="background: #039be5; color: #039be5;"></button>
+                            <button type="button" class="color-opt" data-color="#4285f4" data-color-id="9" title="Blue" style="background: #4285f4; color: #4285f4;"></button>
+                            <button type="button" class="color-opt" data-color="#3f51b5" data-color-id="9" title="Cobalt" style="background: #3f51b5; color: #3f51b5;"></button>
+                            <button type="button" class="color-opt" data-color="#7986cb" data-color-id="1" title="Slate" style="background: #7986cb; color: #7986cb;"></button>
+                            <button type="button" class="color-opt" data-color="#b39ddb" data-color-id="1" title="Lavender" style="background: #b39ddb; color: #b39ddb;"></button>
+                            <button type="button" class="color-opt" data-color="#9e69af" data-color-id="3" title="Amethyst" style="background: #9e69af; color: #9e69af;"></button>
+                            <button type="button" class="color-opt" data-color="#8e24aa" data-color-id="3" title="Grape" style="background: #8e24aa; color: #8e24aa;"></button>
+                            <button type="button" class="color-opt" data-color="#d81b60" data-color-id="4" title="Raspberry" style="background: #d81b60; color: #d81b60;"></button>
+                            <button type="button" class="color-opt" data-color="#ad1457" data-color-id="4" title="Berry" style="background: #ad1457; color: #ad1457;"></button>
+                            <button type="button" class="color-opt" data-color="#795548" data-color-id="8" title="Cocoa" style="background: #795548; color: #795548;"></button>
+                            <button type="button" class="color-opt" data-color="#a79b8e" data-color-id="8" title="Sand" style="background: #a79b8e; color: #a79b8e;"></button>
+                            <button type="button" class="color-opt" data-color="#616161" data-color-id="8" title="Graphite" style="background: #616161; color: #616161;"></button>
                         </div>
                         <input type="hidden" id="selected-entry-color" value="default">
                     </div>
