@@ -120,6 +120,12 @@
   - 초기 실행 시 저장된 좌표가 없거나(`undefined`), 다중 모니터 분리 등으로 인해 좌표가 유효 모니터 화면 밖(Off-screen)에 있을 경우 `screen.getAllDisplays()`로 검증 후 자동으로 화면 정중앙(`mainWindow.center()`)으로 리셋.
   - 최초 실행 시 크롬 등 전체화면 프로그램 뒤에 가려지지 않도록 일시적으로 `setAlwaysOnTop(true, 'screen-saver')` 후 최상단 포커스 부여 (1초 후 유저 설정 복귀).
   - 중복 실행(`second-instance`) 시에도 화면 밖 좌표 감지 시 즉시 중앙으로 소환 및 최상단 포커스.
+- [x] **랜딩 페이지 SEO & AI 추천 엔진(ChatGPT/Perplexity) 최적화 (Step 1)**:
+  - `docs/index.html` 및 `landing/index.html`에 Schema.org JSON-LD 구조화 데이터(`SoftwareApplication` 및 `FAQPage`) 탑재.
+  - 메타 설명, 키워드, OpenGraph, Twitter Card 태그를 영어 글로벌 타겟으로 보강.
+  - 웹사이트 하단 및 네비게이션에 8개 핵심 질의응답(FAQ: Notion Calendar 비교, 보안/OAuth, 다중 계정, 양방향 동기화, 무료/오픈소스 등) 반응형 섹션 추가.
+- [ ] **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
+  - `winget install kidiksentrik.calendar-on-demand` 및 `brew install --cask calendar-on-demand` 등록 추진.
 - [ ] **커스텀 디자인 옵션 추가**: '오늘' 및 '주말' 하이라이트 색상 커스텀, 이모지 대신 텍스트 색상과 어울리는 모노톤(단색) 심플 아이콘 옵션.
 - [x] *(참고)* **다중 계정 연동**: 피드백에 요청되었으나 v1.4.0에서 이미 구현 완료된 기능.
 
