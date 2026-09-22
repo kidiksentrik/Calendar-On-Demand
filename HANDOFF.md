@@ -124,6 +124,7 @@
   - `docs/index.html` 및 `landing/index.html`에 Schema.org JSON-LD 구조화 데이터(`SoftwareApplication` 및 `FAQPage`) 탑재.
   - 메타 설명, 키워드, OpenGraph, Twitter Card 태그를 영어 글로벌 타겟으로 보강.
   - 웹사이트 하단 및 네비게이션에 8개 핵심 질의응답(FAQ: Notion Calendar 비교, 보안/OAuth, 다중 계정, 양방향 동기화, 무료/오픈소스 등) 반응형 섹션 추가.
+  - Google Search Console 색인 및 크롤러 가이드 최적화: `rel="canonical"` 대표 도메인 명시, `sitemap.xml` 및 `robots.txt` 구축.
 - [ ] **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
   - `winget install kidiksentrik.calendar-on-demand` 및 `brew install --cask calendar-on-demand` 등록 추진.
 - [ ] **커스텀 디자인 옵션 추가**: '오늘' 및 '주말' 하이라이트 색상 커스텀, 이모지 대신 텍스트 색상과 어울리는 모노톤(단색) 심플 아이콘 옵션.
