@@ -11,7 +11,7 @@ async function getCalendars(auth) {
             if (calRes.data.labelProperties?.eventLabels) {
                 eventLabels = calRes.data.labelProperties.eventLabels;
             }
-        } catch (e) {}
+        } catch (_e) {}
         items.push({
             id: cal.id,
             summary: cal.summary,

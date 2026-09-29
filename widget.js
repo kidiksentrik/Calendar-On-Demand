@@ -256,7 +256,6 @@ try {
     const timeInputsContainer = document.getElementById('time-inputs-container');
     const eventStartDate = document.getElementById('event-start-date');
     const eventEndDate = document.getElementById('event-end-date');
-    const dateInputsContainer = document.getElementById('date-inputs-container');
     const allDayStatusText = document.getElementById('allday-status-text');
     const eventLocationInput = document.getElementById('event-location');
     const eventDescriptionInput = document.getElementById('event-description');
@@ -1139,7 +1138,7 @@ try {
             }
 
             if (spanInfo.isMultiDay) {
-                let allDayText = cleanText;
+                let allDayText;
                 if (spanInfo.isStartDay) allDayText = `${cleanText} →`;
                 else if (spanInfo.isEndDay) allDayText = `↩ ${cleanText}`;
                 else allDayText = `↩ ${cleanText} →`;
@@ -1539,7 +1538,7 @@ try {
 
     async function toggleTodoStatus(eventItem) {
         const isCompleted = eventItem.summary.startsWith('[x]');
-        let newSummary = eventItem.summary;
+        let newSummary;
         if (isCompleted) {
             newSummary = eventItem.summary.replace(/^\[x\]\s*/, '');
         } else {
@@ -1607,7 +1606,7 @@ try {
         const isMultiDay = (sDateVal !== eDateVal);
         const isAllDayState = isMultiDay || (allDayCheck ? allDayCheck.checked : (!startStr));
         const offset = getLocalTZOffset();
-        let start = { date: sDateVal }, end = { date: sDateVal };
+        let start, end;
 
         if (!isAllDayState && startStr) {
             start = { dateTime: `${sDateVal}T${startStr}:00${offset}` };
@@ -1751,7 +1750,7 @@ try {
         };
     }
 
-    function showEventDetails(event) {
+    function _showEventDetails(event) {
         editingEvent = event;
         const titleEl = document.getElementById('popup-title'), timeEl = document.getElementById('popup-time'), calEl = document.getElementById('popup-calendar'), calColorEl = document.getElementById('popup-calendar-color'), descEl = document.getElementById('popup-description');
         if (titleEl) titleEl.innerText = stripTags(event.summary);
@@ -2208,7 +2207,7 @@ try {
         let accounts;
         try {
             accounts = await ipcRenderer.invoke('get-accounts');
-        } catch (e) {
+        } catch (_e) {
             accountsList.innerHTML = '<div style="font-size:0.8rem;opacity:0.4;">Could not load accounts.</div>';
             return;
         }

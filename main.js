@@ -56,7 +56,7 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
 } else {
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
+    app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
         if (mainWindow) {
             if (mainWindow.isMinimized()) mainWindow.restore();
             
@@ -91,6 +91,48 @@ if (!gotTheLock) {
     app.on('before-quit', () => {
         isQuitting = true;
     });
+
+    app.whenReady().then(async () => {
+        console.log('App is ready, authenticating...');
+        try {
+            authClient = await authenticate();
+            console.log('Authentication successful!');
+            fetchAndStorePrimaryEmail().catch(e => console.warn('Email fetch skipped:', e.message));
+            
+            createWindow();
+            console.log('Window created.');
+            
+            createTray();
+            console.log('Tray created.');
+
+            setupAutoUpdater();
+            console.log('Auto-updater initialized.');
+
+            // Handle global shortcut separately
+            globalShortcut.register('CommandOrControl+Shift+Space', () => {
+                console.log('Global shortcut triggered.');
+                if (mainWindow) {
+                    const desktopMode = store.get('desktopMode', false);
+                    if (desktopMode) {
+                        mainWindow.showInactive();
+                    } else {
+                        mainWindow.show();
+                    }
+                    mainWindow.webContents.send('open-quick-add');
+                }
+            });
+            
+            if (process.argv.includes('--hidden')) {
+                console.log('App started in hidden mode (tray only).');
+            }
+        } catch (error) {
+            console.error('Failed in main process:', error);
+            const { dialog } = require('electron');
+            dialog.showErrorBox('Startup Error', error.message || String(error));
+            // Remove app.quit() so it doesn't just disappear silently
+        }
+    });
+} // End of gotTheLock block
 
 async function createWindow() {
     let { width, height, x, y } = store.get('windowBounds') || { width: 380, height: 460, x: undefined, y: undefined };
@@ -267,48 +309,6 @@ function toggleWindow() {
         }
     }
 }
-
-app.whenReady().then(async () => {
-    console.log('App is ready, authenticating...');
-    try {
-        authClient = await authenticate();
-        console.log('Authentication successful!');
-        fetchAndStorePrimaryEmail().catch(e => console.warn('Email fetch skipped:', e.message));
-        
-        createWindow();
-        console.log('Window created.');
-        
-        createTray();
-        console.log('Tray created.');
-
-        setupAutoUpdater();
-        console.log('Auto-updater initialized.');
-
-        // Handle global shortcut separately
-        globalShortcut.register('CommandOrControl+Shift+Space', () => {
-            console.log('Global shortcut triggered.');
-            if (mainWindow) {
-                const desktopMode = store.get('desktopMode', false);
-                if (desktopMode) {
-                    mainWindow.showInactive();
-                } else {
-                    mainWindow.show();
-                }
-                mainWindow.webContents.send('open-quick-add');
-            }
-        });
-        
-        if (process.argv.includes('--hidden')) {
-            console.log('App started in hidden mode (tray only).');
-        }
-    } catch (error) {
-        console.error('Failed in main process:', error);
-        const { dialog } = require('electron');
-        dialog.showErrorBox('Startup Error', error.message || String(error));
-        // Remove app.quit() so it doesn't just disappear silently
-    }
-});
-} // End of gotTheLock block
 
 
 app.on('window-all-closed', () => {

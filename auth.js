@@ -73,7 +73,6 @@ async function _authenticateInternal(force = false) {
     return new Promise((resolve, reject) => {
 
         let server;
-        let isResolved = false;
 
         const cleanup = () => {
             if (server) {
@@ -90,8 +89,6 @@ async function _authenticateInternal(force = false) {
                 const error = parsedUrl.searchParams.get('error');
 
                 if (code) {
-                    isResolved = true;
-                    
                     res.writeHead(200, { 'Content-Type': 'text/html' });
                     res.end('<html><head><style>body{font-family: sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background:#0a0a0c; color:#fff; text-align:center;}</style></head><body><h2>Authentication Successful!</h2><p>You can close this tab and return to Calendar-On-Demand.</p></body></html>');
                     

@@ -1,56 +1,61 @@
 {
-    "name":  "calendar-on-demand",
-    "version":  "1.5.6",
-    "description":  "Desktop Google Calendar Widget for Windows and macOS",
-    "author":  "Calendar-On-Demand Team",
-    "main":  "main.js",
-    "scripts":  {
-                    "start":  "electron .",
-                    "build":  "electron-builder",
-                    "publish":  "electron-builder build --publish always"
-                },
-    "dependencies":  {
-                         "electron-store":  "^8.1.0",
-                         "electron-updater":  "^6.1.1",
-                         "googleapis":  "^122.0.0"
-                     },
-    "devDependencies":  {
-                            "electron":  "^25.3.0",
-                            "electron-builder":  "^24.6.3"
-                        },
-    "build":  {
-                  "appId":  "com.calendar.ondemand",
-                  "productName":  "Calendar-On-Demand",
-                  "win":  {
-                              "target":  [
-                                             "nsis"
-                                         ],
-                              "icon":  "tray_icon.png",
-                              "artifactName":  "${productName}-Setup-${version}.${ext}"
-                          },
-                  "mac":  {
-                              "target":  [
-                                             "dmg"
-                                         ],
-                              "identity":  null,
-                              "artifactName":  "${productName}-Mac-${version}.${ext}"
-                          },
-                  "nsis":  {
-                               "oneClick":  true,
-                               "perMachine":  false,
-                               "allowToChangeInstallationDirectory":  false,
-                               "shortcutName":  "Calendar-On-Demand"
-                           },
-                  "publish":  [
-                                  {
-                                      "provider":  "github",
-                                      "owner":  "kidiksentrik",
-                                      "repo":  "Calendar-On-Demand"
-                                  }
-                              ],
-                  "files":  [
-                                "**/*",
-                                "!dist/*"
-                            ]
-              }
+    "name": "calendar-on-demand",
+    "version": "1.5.6",
+    "description": "Desktop Google Calendar Widget for Windows and macOS",
+    "author": "Calendar-On-Demand Team",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "lint": "eslint .",
+        "test": "npm run lint",
+        "build": "electron-builder",
+        "publish": "electron-builder build --publish always"
+    },
+    "dependencies": {
+        "electron-store": "^8.1.0",
+        "electron-updater": "^6.1.1",
+        "googleapis": "^122.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "electron": "^25.3.0",
+        "electron-builder": "^24.6.3",
+        "eslint": "^10.11.0",
+        "globals": "^17.12.0"
+    },
+    "build": {
+        "appId": "com.calendar.ondemand",
+        "productName": "Calendar-On-Demand",
+        "win": {
+            "target": [
+                "nsis"
+            ],
+            "icon": "tray_icon.png",
+            "artifactName": "${productName}-Setup-${version}.${ext}"
+        },
+        "mac": {
+            "target": [
+                "dmg"
+            ],
+            "identity": null,
+            "artifactName": "${productName}-Mac-${version}.${ext}"
+        },
+        "nsis": {
+            "oneClick": true,
+            "perMachine": false,
+            "allowToChangeInstallationDirectory": false,
+            "shortcutName": "Calendar-On-Demand"
+        },
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "kidiksentrik",
+                "repo": "Calendar-On-Demand"
+            }
+        ],
+        "files": [
+            "**/*",
+            "!dist/*"
+        ]
+    }
 }

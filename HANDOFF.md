@@ -109,6 +109,22 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
   - 시간을 지정한 일정 생성 시 `saveCurrentEvent()` 내부에서 `offset` 변수가 누락되어 `ReferenceError`가 발생하던 문제를 해결 (`const offset = getLocalTZOffset()`).
 - [x] **모달 바깥 클릭 시 자동 저장 및 닫기 방어 로직 강화**:
   - `handleAutoSaveAndClose()`를 `try...catch...finally { closeAllModals(); }` 블록으로 안전하게 감싸, 예외가 발생하더라도 모달이 닫히지 않고 먹통이 되는 현상을 원천 방지.
+- [x] **실사용 검증 완료**:
+  - 사용자 직접 테스트를 통해 일정 생성(시간 및 컬러 지정) 후 외부 클릭 시 자동 저장 및 모달 정상 종료 동작 확인 완료.
+
+### 2. 정적 코드 분석(ESLint) 도입 및 품질 보증(QA) 파이프라인 구축 [중요 🛡️]
+- [x] **ESLint v10 & Flat Config (`eslint.config.js`) 전면 도입**:
+  - 이번 `ReferenceError` 사태의 재발을 원천 차단하기 위해 엄격한 정적 분석기 도입 (`no-undef: 'error'`).
+  - 브라우저 DOM, Node.js, Electron 런타임 글로벌 완벽 바인딩.
+- [x] **코드베이스 전수 스캔 및 잠재 결함 선제 해결**:
+  - `main.js`: `createTray()`, `createWindow()`, `saveBounds()`, `toggleWindow()`가 `gotTheLock`의 `else` 블록 내부에 갇혀 있어, 파일 하단의 `updateLoginSettings()`에서 호출될 경우 터질 수 있었던 잠재적 `ReferenceError`를 모듈 스코프로 호이스팅하여 사전 완벽 차단.
+  - `widget.js`: 미사용 변수(`dateInputsContainer`), 중복 무효 할당(`start`, `end`, `allDayText`, `newSummary`), 레거시 미사용 함수(`_showEventDetails`) 전수 정비.
+  - `auth.js`, `calendar.js`: 미사용 변수 및 예외 파라미터 정비.
+  - **전체 코드베이스 ESLint 검사 통과 (0 errors, 0 warnings)**.
+- [x] **자동 검증 게이트웨이 (`npm test`, `release.ps1`, GitHub Actions) 구축**:
+  - `package.json`에 `"lint": "eslint ."` 및 `"test": "npm run lint"` 탑재.
+  - `release.ps1` 배포 스크립트에 `[0/4] Pre-Flight npm test` 검증 스텝 강제 (린트 통과 못하면 릴리즈 태그 푸시 원천 차단).
+  - `.github/workflows/release.yml`에 `npm test` 스텝 추가 (CI 빌드 서버에서도 린트 통과 필수).
 
 ### 2. v1.5.5 비주얼 & 마이크로 인터랙션 대개편 (Visual & Micro-Interactions Overhaul)
 - [x] **헤더 18px 모노크롬 SVG 벡터 아이콘 & 글래스 키캡 버튼**:
@@ -184,3 +200,10 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
    - 웹사이트를 수정할 때는 **반드시 `docs/index.html`과 `landing/index.html`을 동일하게 함께 업데이트**해야 함.
 3. **Google OAuth 보안**:
    - `credentials.json`과 `token.json`은 절대 git에 커밋하거나 외부에 노출하지 않음.
+4. **배포 전 검증 및 린팅 규칙 (Pre-Release QA Checklist)** [필수 🛡️]:
+   - 릴리즈 태그 생성 전 반드시 `npm test` (`npm run lint`)를 통과(0 errors, 0 warnings)해야 함.
+   - 릴리즈 직전 아래 4가지 핵심 유저 시나리오를 직접 수동 검증:
+     1. 시간 지정 일정 추가 ➔ 외부 클릭 오토세이브 정상 작동 확인
+     2. 종일(All-day) 일정 추가 ➔ 외부 클릭 오토세이브 정상 작동 확인
+     3. 기존 일정 수정 및 삭제 정상 작동 확인
+     4. 설정창 토글 및 닫힘 동작 확인
