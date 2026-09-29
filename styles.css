@@ -6,6 +6,9 @@
     --today-color: #ffcc00;
     --border-color: rgba(255, 255, 255, 0.08);
     --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --label-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+    --gutter-bg: rgba(0, 0, 0, 0.22);
+    --text-muted: rgba(255, 255, 255, 0.85);
 }
 
 
@@ -126,6 +129,7 @@ header h2 {
     color: var(--text-color);
     line-height: 1;
     white-space: nowrap;
+    text-shadow: var(--label-shadow);
 }
 
 
@@ -316,30 +320,33 @@ header button:hover {
 }
 
 .todo-account-tag {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 500;
-    padding: 2px 6px;
+    padding: 1px 5px;
     border-radius: 4px;
-    margin-left: 6px;
-    display: inline-block;
-    vertical-align: middle;
+    margin-left: 0;
+    display: inline-flex;
+    align-items: center;
     letter-spacing: 0.02em;
     opacity: 0.85;
+    line-height: 1.2;
+    flex-shrink: 0;
 }
 
 .todo-time-tag {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 2px 6px;
+    padding: 1px 5px;
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.08);
     color: var(--accent-color);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-left: 6px;
-    display: inline-block;
-    vertical-align: middle;
+    margin-left: 0;
+    display: inline-flex;
+    align-items: center;
     letter-spacing: 0.02em;
     flex-shrink: 0;
+    line-height: 1.2;
 }
 
 .account-item-actions {
@@ -665,11 +672,24 @@ input[type="color"]::-webkit-color-swatch {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     text-align: center;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.72rem;
+    font-weight: 700;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
     margin-bottom: 8px;
+}
+
+.calendar-grid-header span {
+    text-shadow: var(--label-shadow);
+}
+
+.calendar-grid-header span.sunday {
+    color: #ff5252;
+}
+
+.calendar-grid-header span.saturday {
+    color: #448aff;
 }
 
 
@@ -735,11 +755,12 @@ input[type="color"]::-webkit-color-swatch {
     transition: background 0.2s;
 }
 .week-header-day-name {
-    font-size: 0.65rem;
-    font-weight: 600;
+    font-size: 0.68rem;
+    font-weight: 700;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
-    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-shadow: var(--label-shadow);
 }
 .week-header-day-num {
     font-size: 0.9rem;
@@ -751,12 +772,14 @@ input[type="color"]::-webkit-color-swatch {
     justify-content: center;
     border-radius: 50%;
     color: var(--text-color);
+    text-shadow: var(--label-shadow);
     transition: all 0.2s;
 }
 .week-header-day-cell.today .week-header-day-num {
     background: var(--today-color, #ffcc00);
     color: #000;
     font-weight: 800;
+    text-shadow: none;
     box-shadow: 0 0 12px color-mix(in srgb, var(--today-color, #ffcc00) 65%, transparent);
 }
 .week-header-day-cell.sunday .week-header-day-name {
@@ -778,13 +801,16 @@ input[type="color"]::-webkit-color-swatch {
     width: 38px;
     flex-shrink: 0;
     font-size: 0.62rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.35);
+    font-weight: 700;
+    color: var(--text-muted);
     text-align: right;
     padding-right: 6px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    background: var(--gutter-bg);
+    border-radius: 4px 0 0 4px;
+    text-shadow: var(--label-shadow);
 }
 .week-allday-days {
     display: grid;
@@ -827,6 +853,25 @@ input[type="color"]::-webkit-color-swatch {
     opacity: 0.4;
 }
 
+/* Week View: Multi-day All-Day Pills continuous ribbon */
+.week-allday-pill.multi-day-start {
+    border-radius: 4px 0 0 4px !important;
+    border-right: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+}
+
+.week-allday-pill.multi-day-middle {
+    border-radius: 0 !important;
+    border-left: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+    border-right: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+}
+
+.week-allday-pill.multi-day-end {
+    border-radius: 0 4px 4px 0 !important;
+    border-left: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+    border-right: none !important;
+}
+
+
 /* Scrollable Hourly Timeline Area */
 .week-scroll-container {
     flex: 1 1 0;
@@ -862,15 +907,18 @@ input[type="color"]::-webkit-color-swatch {
     flex-shrink: 0;
     position: relative;
     user-select: none;
+    background: var(--gutter-bg);
+    border-radius: 4px 0 0 4px;
 }
 .week-time-label {
     position: absolute;
     right: 6px;
     font-size: 0.65rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.35);
+    font-weight: 600;
+    color: var(--text-muted);
     transform: translateY(-50%);
     font-variant-numeric: tabular-nums;
+    text-shadow: var(--label-shadow);
 }
 
 /* 7 Day Columns Grid */
@@ -1064,12 +1112,13 @@ input[type="color"]::-webkit-color-swatch {
     font-size: 1.1em;
 }
 .day-cell.other-month {
-    opacity: 0.3;
+    opacity: 0.42;
 }
 
 .day-number {
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 4px;
+    text-shadow: var(--label-shadow);
 }
 
 .events-container {
@@ -1108,8 +1157,9 @@ input[type="color"]::-webkit-color-swatch {
     -webkit-app-region: no-drag;
 }
 
-.modal.hidden {
-    display: none;
+.modal.hidden,
+.hidden {
+    display: none !important;
 }
 
 .modal-content {
@@ -1362,7 +1412,7 @@ input[type="color"]::-webkit-color-swatch {
 
 .todo-item-left {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     flex: 1;
     min-width: 0;
@@ -1379,6 +1429,7 @@ input[type="color"]::-webkit-color-swatch {
     justify-content: center;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    margin-top: 1px;
 }
 
 .todo-checkbox:hover {
@@ -1397,6 +1448,15 @@ input[type="color"]::-webkit-color-swatch {
     color: #000;
 }
 
+.todo-content-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
 .todo-title {
     font-size: 0.85rem;
     color: #ffffff; /* Explicit white text for contrast */
@@ -1404,12 +1464,22 @@ input[type="color"]::-webkit-color-swatch {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: block;
+    width: 100%;
+    line-height: 1.3;
     transition: all 0.2s ease;
 }
 
 .todo-title.completed {
     text-decoration: line-through;
     opacity: 0.35;
+}
+
+.todo-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 .todo-delete-btn {
@@ -1421,6 +1491,8 @@ input[type="color"]::-webkit-color-swatch {
     padding: 0 4px;
     border-radius: 4px;
     transition: all 0.2s ease;
+    align-self: center;
+    flex-shrink: 0;
 }
 
 .todo-delete-btn:hover {
@@ -1432,13 +1504,14 @@ input[type="color"]::-webkit-color-swatch {
     background: rgba(52, 199, 89, 0.15);
     border: 1px solid rgba(52, 199, 89, 0.4);
     color: #34c759;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 600;
     cursor: pointer;
-    padding: 2px 8px;
-    border-radius: 20px;
+    padding: 1px 6px;
+    border-radius: 10px;
     white-space: nowrap;
     flex-shrink: 0;
+    line-height: 1.2;
     transition: all 0.2s ease;
 }
 
@@ -1479,6 +1552,39 @@ input[type="color"]::-webkit-color-swatch {
 .primary-btn:hover {
     transform: scale(1.05);
     opacity: 0.9;
+}
+
+/* DateTime Group (Date Row + Time Row) */
+.todo-datetime-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+/* Date Selector Row */
+.todo-date-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    -webkit-app-region: no-drag;
+}
+
+.row-label-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    user-select: none;
+    flex-shrink: 0;
 }
 
 /* Time Selector Row */
@@ -1534,10 +1640,26 @@ input[type="color"]::-webkit-color-swatch {
     transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
+.time-inputs-container.hidden {
+    display: none !important;
+}
+
 .time-inputs-container.disabled {
     opacity: 0.25;
     pointer-events: none;
     filter: grayscale(1);
+}
+
+.allday-status-text {
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.45);
+    padding-right: 6px;
+    user-select: none;
+}
+
+.allday-status-text.hidden {
+    display: none !important;
 }
 
 .time-picker-input {
@@ -1572,6 +1694,47 @@ input[type="color"]::-webkit-color-swatch {
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.4);
     font-weight: 500;
+}
+
+.date-inputs-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.date-inputs-container.hidden {
+    display: none !important;
+}
+
+.date-picker-input {
+    background: #2a2a32 !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    color: var(--text-color) !important;
+    font-family: inherit;
+    font-size: 0.72rem !important;
+    padding: 4px 3px !important;
+    outline: none;
+    width: 98px !important;
+    margin-bottom: 0 !important;
+    text-align: center;
+    letter-spacing: -0.01em;
+    transition: border-color 0.2s ease;
+}
+
+.date-picker-input:focus {
+    border-color: var(--accent-color) !important;
+}
+
+.date-picker-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.85);
+    cursor: pointer;
+    opacity: 0.6;
+    margin-left: 0;
+    padding: 0;
+    transform: scale(0.85);
 }
 
 /* Event Item inside main calendar grid */
@@ -1611,21 +1774,35 @@ input[type="color"]::-webkit-color-swatch {
     opacity: 0.6;
 }
 
-/* Month View: Cross-midnight start day (flat right corners + dashed right border) */
+/* Month View: Multi-day Continuous Ribbon */
+.event-item.multi-day-start,
 .event-item.crosses-midnight {
-    border-radius: 3px 0 0 3px !important;
-    border-right: 2px dashed rgba(255, 255, 255, 0.4) !important;
+    border-radius: 4px 0 0 4px !important;
+    border-right: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
 }
 
 /* Month View: Cross-midnight continuation day (flat left corners + dashed left accent bar) */
 .event-item.is-continuation {
-    border-radius: 0 3px 3px 0 !important;
-    border-left-style: dashed !important;
-    opacity: 0.92;
+    border-radius: 0 4px 4px 0 !important;
+    border-left: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+    opacity: 0.95;
 }
 
 .event-item.is-continuation:hover {
     opacity: 1;
+}
+
+/* Month View: Multi-day middle day (flat both sides + dashed both sides) */
+.event-item.multi-day-middle {
+    border-radius: 0 !important;
+    border-left: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+    border-right: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+}
+
+.event-item.multi-day-end {
+    border-radius: 0 4px 4px 0 !important;
+    border-left: 2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65)) !important;
+    border-right: none !important;
 }
 
 .event-time-micro {

@@ -212,16 +212,30 @@
                     <button id="save-event" class="primary-btn">+</button>
                 </div>
 
-                <!-- Time selector row (All-day toggle + Time Pickers) -->
-                <div class="todo-time-row">
-                    <label class="time-toggle-label" title="Toggle all-day event">
-                        <input type="checkbox" id="all-day-check">
-                        <span class="custom-pill">All-day</span>
-                    </label>
-                    <div class="time-inputs-container" id="time-inputs-container">
-                        <input type="time" id="event-start-time" class="time-picker-input" title="Start Time">
-                        <span class="time-sep">~</span>
-                        <input type="time" id="event-end-time" class="time-picker-input" title="End Time">
+                <!-- DateTime group: Date row and Time row -->
+                <div class="todo-datetime-group">
+                    <!-- Date selector row (Always visible right below input) -->
+                    <div class="todo-date-row">
+                        <span class="row-label-pill">Date</span>
+                        <div class="date-inputs-container" id="date-inputs-container">
+                            <input type="date" id="event-start-date" class="date-picker-input" title="Start Date">
+                            <span class="time-sep">~</span>
+                            <input type="date" id="event-end-date" class="date-picker-input" title="End Date">
+                        </div>
+                    </div>
+
+                    <!-- Time selector row (All-day toggle + Time Pickers) -->
+                    <div class="todo-time-row">
+                        <label class="time-toggle-label" title="Toggle all-day event">
+                            <input type="checkbox" id="all-day-check">
+                            <span class="custom-pill">All-day</span>
+                        </label>
+                        <div class="time-inputs-container" id="time-inputs-container">
+                            <input type="time" id="event-start-time" class="time-picker-input" title="Start Time">
+                            <span class="time-sep">~</span>
+                            <input type="time" id="event-end-time" class="time-picker-input" title="End Time">
+                        </div>
+                        <span class="allday-status-text hidden" id="allday-status-text">All-day Event</span>
                     </div>
                 </div>
 

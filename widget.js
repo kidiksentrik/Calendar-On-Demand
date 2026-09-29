@@ -254,6 +254,10 @@ try {
     const eventStartTime = document.getElementById('event-start-time');
     const eventEndTime = document.getElementById('event-end-time');
     const timeInputsContainer = document.getElementById('time-inputs-container');
+    const eventStartDate = document.getElementById('event-start-date');
+    const eventEndDate = document.getElementById('event-end-date');
+    const dateInputsContainer = document.getElementById('date-inputs-container');
+    const allDayStatusText = document.getElementById('allday-status-text');
     const eventLocationInput = document.getElementById('event-location');
     const eventDescriptionInput = document.getElementById('event-description');
     const extraFields = document.getElementById('extra-fields');
@@ -304,11 +308,13 @@ try {
     const todoDateTitle = document.getElementById('todo-date-title');
 
     function updateAllDayUI() {
-        if (!allDayCheck || !timeInputsContainer) return;
+        if (!allDayCheck) return;
         if (allDayCheck.checked) {
-            timeInputsContainer.classList.add('disabled');
+            if (timeInputsContainer) timeInputsContainer.classList.add('hidden');
+            if (allDayStatusText) allDayStatusText.classList.remove('hidden');
         } else {
-            timeInputsContainer.classList.remove('disabled');
+            if (timeInputsContainer) timeInputsContainer.classList.remove('hidden', 'disabled');
+            if (allDayStatusText) allDayStatusText.classList.add('hidden');
             if (eventStartTime && !eventStartTime.value) {
                 const now = new Date();
                 const nextH = (now.getHours() + 1) % 24;
@@ -319,8 +325,46 @@ try {
         }
     }
 
+    function syncMultiDayAllDayState() {
+        if (eventStartDate && eventEndDate && eventStartDate.value && eventEndDate.value) {
+            if (eventStartDate.value !== eventEndDate.value) {
+                // Multi-day events are strictly All-day (like Google Calendar)
+                if (allDayCheck && !allDayCheck.checked) {
+                    allDayCheck.checked = true;
+                    updateAllDayUI();
+                }
+            }
+        }
+    }
+
     if (allDayCheck) {
-        allDayCheck.addEventListener('change', updateAllDayUI);
+        allDayCheck.addEventListener('change', () => {
+            if (!allDayCheck.checked) {
+                // If user unchecks all-day, timed events must be single day
+                if (eventStartDate && eventEndDate && eventStartDate.value !== eventEndDate.value) {
+                    eventEndDate.value = eventStartDate.value;
+                }
+            }
+            updateAllDayUI();
+        });
+    }
+
+    if (eventStartDate) {
+        eventStartDate.addEventListener('change', () => {
+            if (eventStartDate.value && eventEndDate && (!eventEndDate.value || eventEndDate.value < eventStartDate.value)) {
+                eventEndDate.value = eventStartDate.value;
+            }
+            syncMultiDayAllDayState();
+        });
+    }
+
+    if (eventEndDate) {
+        eventEndDate.addEventListener('change', () => {
+            if (eventEndDate.value && eventStartDate && (!eventStartDate.value || eventEndDate.value < eventStartDate.value)) {
+                eventStartDate.value = eventEndDate.value;
+            }
+            syncMultiDayAllDayState();
+        });
     }
 
     if (eventStartTime) {
@@ -445,6 +489,19 @@ try {
                 if (key === 'bg-opacity' && opacitySlider) opacitySlider.value = val;
             }
         });
+
+        // Compute adaptive contrast variables based on text-color
+        const curTextColor = theme['text-color'] || document.getElementById('text-color-picker')?.value || '#e8e8e8';
+        const isLightText = getContrastTextColor(curTextColor) === '#18181b';
+        if (isLightText) {
+            document.documentElement.style.setProperty('--label-shadow', '0 1px 2px rgba(0, 0, 0, 0.65)');
+            document.documentElement.style.setProperty('--gutter-bg', 'rgba(0, 0, 0, 0.22)');
+            document.documentElement.style.setProperty('--text-muted', 'rgba(255, 255, 255, 0.85)');
+        } else {
+            document.documentElement.style.setProperty('--label-shadow', 'none');
+            document.documentElement.style.setProperty('--gutter-bg', 'rgba(0, 0, 0, 0.05)');
+            document.documentElement.style.setProperty('--text-muted', 'color-mix(in srgb, var(--text-color) 80%, transparent)');
+        }
     }
 
 
@@ -463,11 +520,72 @@ try {
         }
         hasScrolledWeekTimeline = false;
         renderCalendar();
-        fetchEvents();
+        debouncedFetchEvents(250);
     }
 
     function localDateStr(d) {
         return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+    }
+
+    function getEventDates(e) {
+        if (!e) return { startDate: '', endDate: '', isAllDay: false };
+        if (e.start && e.start.date) {
+            const startDate = e.start.date;
+            let endDate = e.end?.date || '';
+            if (!endDate || endDate <= startDate) {
+                const sParts = startDate.split('-').map(Number);
+                const s = new Date(sParts[0], sParts[1] - 1, sParts[2]);
+                s.setDate(s.getDate() + 1);
+                endDate = localDateStr(s);
+            }
+            return { startDate, endDate, isAllDay: true };
+        } else if (e.start && e.start.dateTime) {
+            const sDt = new Date(e.start.dateTime);
+            const eDt = e.end?.dateTime ? new Date(e.end.dateTime) : sDt;
+            const startDate = localDateStr(sDt);
+            let endDate = localDateStr(eDt);
+            if (eDt.getHours() === 0 && eDt.getMinutes() === 0 && endDate > startDate) {
+                const prevD = new Date(eDt);
+                prevD.setDate(prevD.getDate() - 1);
+                endDate = localDateStr(prevD);
+            }
+            return { startDate, endDate, isAllDay: false, sDt, eDt };
+        }
+        return { startDate: '', endDate: '', isAllDay: false };
+    }
+
+    function isEventOnDate(e, dateStr) {
+        const { startDate, endDate, isAllDay } = getEventDates(e);
+        if (!startDate) return false;
+        if (isAllDay) {
+            return dateStr >= startDate && dateStr < endDate;
+        } else {
+            return dateStr >= startDate && dateStr <= endDate;
+        }
+    }
+
+    function getEventDaySpanInfo(e, dateStr) {
+        const { startDate, endDate, isAllDay } = getEventDates(e);
+        if (!startDate) return null;
+        if (isAllDay) {
+            if (dateStr < startDate || dateStr >= endDate) return null;
+            const endParts = endDate.split('-').map(Number);
+            const endD = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+            endD.setDate(endD.getDate() - 1);
+            const lastActiveDay = localDateStr(endD);
+            const isStartDay = (dateStr === startDate);
+            const isEndDay = (dateStr === lastActiveDay);
+            const isMultiDay = (startDate !== lastActiveDay);
+            const isContinuation = !isStartDay;
+            return { isAllDay: true, isStartDay, isEndDay, isMultiDay, isContinuation, startDate, lastActiveDay, endDateExclusive: endDate };
+        } else {
+            if (dateStr < startDate || dateStr > endDate) return null;
+            const isStartDay = (dateStr === startDate);
+            const isEndDay = (dateStr === endDate);
+            const isMultiDay = (startDate !== endDate);
+            const isContinuation = !isStartDay;
+            return { isAllDay: false, isStartDay, isEndDay, isMultiDay, isContinuation, startDate, lastActiveDay: endDate };
+        }
     }
 
     function renderCalendar() {
@@ -496,7 +614,10 @@ try {
 
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const displayDays = startOfWeek === 0 ? days : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        calendarHeader.innerHTML = displayDays.map(d => `<span>${d}</span>`).join('');
+        calendarHeader.innerHTML = displayDays.map(d => {
+            const cls = d === 'Sun' ? 'class="sunday"' : (d === 'Sat' ? 'class="saturday"' : '');
+            return `<span ${cls}>${d}</span>`;
+        }).join('');
 
         let firstDay = new Date(year, month, 1).getDay(); 
         if (startOfWeek === 1) firstDay = (firstDay === 0 ? 6 : firstDay - 1);
@@ -686,37 +807,63 @@ try {
             if (weekHeaderDays) weekHeaderDays.appendChild(headerCell);
 
             // Filter events for this day (timed + all-day)
-            const dayEvents = events.filter(e => {
-                const start = e.start.dateTime || e.start.date;
-                return start.startsWith(dateStr);
+            const allDayEventsWithSpan = [];
+            const dayEvents = [];
+            const continuationEvents = [];
+
+            events.forEach(e => {
+                const spanInfo = getEventDaySpanInfo(e, dateStr);
+                if (!spanInfo) return;
+                if (spanInfo.isAllDay || spanInfo.isMultiDay) {
+                    allDayEventsWithSpan.push({ e, spanInfo });
+                } else if (spanInfo.isStartDay) {
+                    dayEvents.push(e);
+                } else if (spanInfo.isContinuation) {
+                    continuationEvents.push(e);
+                }
             });
 
-            // Cross-midnight continuations: started on previous day, end on or after this day
-            const prevDate = new Date(dayDate);
-            prevDate.setDate(dayDate.getDate() - 1);
-            const prevDateStr = localDateStr(prevDate);
-            const continuationEvents = events.filter(e => {
-                if (!e.start.dateTime || !e.end.dateTime) return false;
-                return e.start.dateTime.startsWith(prevDateStr) && !e.end.dateTime.startsWith(prevDateStr);
-            });
-
-            const allDayEvents = dayEvents.filter(e => !e.start.dateTime);
-            const timedEvents  = [
-                ...dayEvents.filter(e => !!e.start.dateTime),
+            const timedEvents = [
+                ...dayEvents,
                 ...continuationEvents
             ];
 
             // All-Day Cell
             const alldayCell = document.createElement('div');
             alldayCell.className = 'week-allday-cell';
-            allDayEvents.forEach(e => {
+            allDayEventsWithSpan.forEach(({ e, spanInfo }) => {
                 hasAnyAllDayEvents = true;
                 const pill = document.createElement('div');
                 pill.className = `week-allday-pill ${e.summary.startsWith('[x]') ? 'completed' : ''}`;
+                
+                const eventColor = getEventColor(e);
+                const textColor = getContrastTextColor(eventColor);
+                const dashColor = textColor === '#18181b' ? 'rgba(0, 0, 0, 0.45)' : 'rgba(255, 255, 255, 0.7)';
+                pill.style.setProperty('--dash-color', dashColor);
+                pill.style.background = eventColor;
+                pill.style.color = textColor;
+
+                if (spanInfo.isMultiDay) {
+                    if (spanInfo.isStartDay) {
+                        pill.classList.add('multi-day-start');
+                        pill.style.borderLeft = `3px solid ${eventColor}`;
+                    } else if (spanInfo.isEndDay) {
+                        pill.classList.add('multi-day-end');
+                    } else {
+                        pill.classList.add('multi-day-middle');
+                    }
+                } else {
+                    pill.style.borderLeft = `3px solid ${eventColor}`;
+                }
                 const cleanText = cleanDisplaySummary(e.summary, false);
-                pill.innerText = cleanText;
-                pill.title = `${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
-                pill.style.borderLeftColor = e.backgroundColor || 'var(--accent-color)';
+                let displayText = cleanText;
+                if (spanInfo.isMultiDay) {
+                    if (spanInfo.isStartDay) displayText = `${cleanText} →`;
+                    else if (spanInfo.isEndDay) displayText = `↩ ${cleanText}`;
+                    else displayText = `↩ ${cleanText} →`;
+                }
+                pill.innerText = displayText;
+                pill.title = `${cleanText}${spanInfo.isMultiDay ? ` (${spanInfo.startDate} ~ ${spanInfo.lastActiveDay})` : ''} • ${e.accountEmail || e.calendarName || ''}`;
                 pill.onclick = (ev) => {
                     ev.stopPropagation();
                     editingEvent = null;
@@ -732,7 +879,12 @@ try {
                 editingEvent = null;
                 selectedDay = dateStr;
                 openQuickAdd();
-                if (allDayCheck) { allDayCheck.checked = true; updateAllDayUI(); }
+                if (allDayCheck) { 
+                    allDayCheck.checked = true; 
+                    updateAllDayUI(); 
+                    if (eventStartDate) eventStartDate.value = dateStr;
+                    if (eventEndDate) eventEndDate.value = dateStr;
+                }
             };
             if (weekAlldayDays) weekAlldayDays.appendChild(alldayCell);
 
@@ -864,30 +1016,18 @@ try {
 
         cell.innerHTML = `<span class="day-number">${day}</span><div class="events-container"></div>`;
 
-        // 1. Events starting on this day
-        const startDayEvents = events.filter(e => {
-            const start = e.start.dateTime || e.start.date;
-            return start.startsWith(dateStr);
+        // 1. Gather all events active on this date (including multi-day all-day & timed continuations)
+        const combinedEvents = [];
+        events.forEach(e => {
+            const spanInfo = getEventDaySpanInfo(e, dateStr);
+            if (!spanInfo) return;
+            combinedEvents.push({ e, spanInfo, isContinuation: spanInfo.isContinuation });
         });
 
-        // 2. Cross-midnight continuations from previous day
-        const prevDate = new Date(dateObj);
-        prevDate.setDate(dateObj.getDate() - 1);
-        const prevDateStr = localDateStr(prevDate);
-        const continuationEvents = events.filter(e => {
-            if (!e.start?.dateTime || !e.end?.dateTime) return false;
-            return e.start.dateTime.startsWith(prevDateStr) && !e.end.dateTime.startsWith(prevDateStr);
-        });
-
-        // 3. Combine and sort: continuation events (starting at 00:00) first, then chronological
-        const combinedEvents = [
-            ...continuationEvents.map(e => ({ e, isContinuation: true })),
-            ...startDayEvents.map(e => ({ e, isContinuation: false }))
-        ];
-
+        // 2. Sort: all-day first, then timed chronologically
         combinedEvents.sort((a, b) => {
-            const aIsAllDay = !a.e.start.dateTime;
-            const bIsAllDay = !b.e.start.dateTime;
+            const aIsAllDay = a.spanInfo.isAllDay;
+            const bIsAllDay = b.spanInfo.isAllDay;
             if (aIsAllDay && !bIsAllDay) return -1;
             if (!aIsAllDay && bIsAllDay) return 1;
             if (aIsAllDay && bIsAllDay) return 0;
@@ -908,7 +1048,7 @@ try {
         });
 
         const maxEvents = isWeekView ? 25 : 3;
-        combinedEvents.slice(0, maxEvents).forEach(({ e, isContinuation }) => {
+        combinedEvents.slice(0, maxEvents).forEach(({ e, spanInfo, isContinuation }) => {
             const ev = document.createElement('div');
             ev.classList.add('event-item');
             
@@ -929,10 +1069,13 @@ try {
             }
 
             const eventColor = getEventColor(e);
+            const textColor = getContrastTextColor(eventColor);
+            const dashColor = textColor === '#18181b' ? 'rgba(0, 0, 0, 0.45)' : 'rgba(255, 255, 255, 0.7)';
+            ev.style.setProperty('--dash-color', dashColor);
+
             const hasCustomColor = !!(e.eventLabelId) || !!(e.colorId && GOOGLE_COLORS[e.colorId]) || !!(e.summary && e.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/));
             if (hasCustomColor && !cellHighlightColor) {
                 ev.style.background = eventColor;
-                const textColor = getContrastTextColor(eventColor);
                 ev.style.color = textColor;
                 ev.style.textShadow = textColor === '#ffffff' ? '0 1px 2px rgba(0, 0, 0, 0.5)' : 'none';
                 if (textColor !== '#ffffff') {
@@ -979,13 +1122,27 @@ try {
             
             const cleanText = cleanDisplaySummary(displaySummary, hasTime);
 
-            if (isContinuation) {
+            if (spanInfo.isMultiDay) {
+                if (spanInfo.isStartDay) {
+                    ev.classList.add('multi-day-start');
+                } else if (spanInfo.isEndDay) {
+                    ev.classList.add('multi-day-end');
+                } else {
+                    ev.classList.add('multi-day-middle');
+                }
+            } else if (isContinuation) {
                 ev.classList.add('is-continuation');
             } else if (crossesMidnight) {
                 ev.classList.add('crosses-midnight');
             }
 
-            if (timeDisplayStyle === 'badge' && timeInfo) {
+            if (spanInfo.isMultiDay) {
+                let allDayText = cleanText;
+                if (spanInfo.isStartDay) allDayText = `${cleanText} →`;
+                else if (spanInfo.isEndDay) allDayText = `↩ ${cleanText}`;
+                else allDayText = `↩ ${cleanText} →`;
+                ev.innerHTML = `<div class="event-title-text">${allDayText}</div>`;
+            } else if (timeDisplayStyle === 'badge' && timeInfo) {
                 let rangeText = timeInfo.endTimeStr ? `${timeInfo.startTimeStr} ~ ${timeInfo.endTimeStr}` : timeInfo.startTimeStr;
                 if (crossesMidnight) {
                     rangeText = `${timeInfo.startTimeStr} ~ ${timeInfo.endTimeStr} →`;
@@ -1007,10 +1164,16 @@ try {
             }
 
             const tooltipTime = timeInfo ? (timeInfo.endTimeStr ? `${timeInfo.startTimeStr} - ${timeInfo.endTimeStr} ` : `${timeInfo.startTimeStr} `) : '';
-            ev.title = `${tooltipTime}${cleanText} • ${e.accountEmail || e.calendarName || ''}`;
+            const tooltipSpan = (spanInfo.isAllDay && spanInfo.isMultiDay) ? ` (${spanInfo.startDate} ~ ${spanInfo.lastActiveDay})` : '';
+            ev.title = `${tooltipTime}${cleanText}${tooltipSpan} • ${e.accountEmail || e.calendarName || ''}`;
 
-            if (isContinuation) {
-                ev.style.borderLeft = `3px dashed ${eventColor}`;
+            if (spanInfo.isMultiDay) {
+                if (spanInfo.isStartDay) {
+                    ev.style.borderLeft = `3px solid ${eventColor}`;
+                }
+                // Middle and End days have dashed left border applied via CSS
+            } else if (isContinuation) {
+                ev.style.borderLeft = `2.5px dashed var(--dash-color, rgba(255, 255, 255, 0.65))`;
             } else {
                 ev.style.borderLeft = `3px solid ${eventColor}`;
             }
@@ -1018,7 +1181,7 @@ try {
             ev.onclick = (event) => { 
                 event.stopPropagation(); 
                 editingEvent = null; 
-                selectedDay = isContinuation ? prevDateStr : dateStr; 
+                selectedDay = dateStr; 
                 openQuickAdd(); 
                 
                 // Automatically trigger the edit mode for this specific clicked event
@@ -1045,11 +1208,25 @@ try {
         calendarDays.appendChild(cell);
     }
 
+    let fetchRequestId = 0;
+    let fetchDebounceTimer = null;
+    function debouncedFetchEvents(delay = 250) {
+        if (fetchDebounceTimer) {
+            clearTimeout(fetchDebounceTimer);
+        }
+        fetchDebounceTimer = setTimeout(() => {
+            fetchDebounceTimer = null;
+            fetchEvents();
+        }, delay);
+    }
+
     async function fetchEvents() {
         if (syncTimer) {
             clearTimeout(syncTimer);
             syncTimer = null;
         }
+
+        const currentReqId = ++fetchRequestId;
 
         if (syncIndicator) {
             syncIndicator.innerText = 'Syncing...';
@@ -1060,11 +1237,13 @@ try {
         const timeMax = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 2, 0).toISOString();
         
         try {
-            events = await ipcRenderer.invoke('get-events', { 
+            const fetchedEvents = await ipcRenderer.invoke('get-events', { 
                 timeMin, 
                 timeMax, 
                 selectedCalendarIds 
             });
+            if (currentReqId !== fetchRequestId) return;
+            events = fetchedEvents;
             lastSyncTime = Date.now();
             errorCount = 0;
             if (syncIndicator) {
@@ -1074,6 +1253,7 @@ try {
             }
             scheduleNextSync(NORMAL_SYNC_INTERVAL);
         } catch (err) { 
+            if (currentReqId !== fetchRequestId) return;
             console.error('Fetch error:', err);
             if (syncIndicator) {
                 syncIndicator.innerText = 'Sync Failed (Click to login)';
@@ -1088,10 +1268,12 @@ try {
             console.log(`Sync failed. Retrying in ${delay / 1000} seconds...`);
             scheduleNextSync(delay);
         } finally {
-            renderCalendar();
-            // Refresh todo modal if it is currently open
-            if (quickAddModal && !quickAddModal.classList.contains('hidden')) {
-                updateTodoListUI();
+            if (currentReqId === fetchRequestId) {
+                renderCalendar();
+                // Refresh todo modal if it is currently open
+                if (quickAddModal && !quickAddModal.classList.contains('hidden')) {
+                    updateTodoListUI();
+                }
             }
         }
     }
@@ -1109,6 +1291,8 @@ try {
         updateTodoListUI();
 
         if (quickAddInput) { quickAddInput.value = ''; quickAddInput.focus(); }
+        if (eventStartDate) eventStartDate.value = selectedDay || localDateStr(new Date());
+        if (eventEndDate) eventEndDate.value = eventStartDate ? eventStartDate.value : (selectedDay || localDateStr(new Date()));
         if (allDayCheck) {
             allDayCheck.checked = false;
             updateAllDayUI();
@@ -1118,19 +1302,17 @@ try {
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
         document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
         document.getElementById('default-color-btn')?.classList.add('active');
-        if (extraFields) extraFields.classList.add('hidden');
-        if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden');
+        if (extraFields) extraFields.classList.remove('hidden');
     }
 
     function updateTodoListUI() {
         if (!todoListContainer) return;
         todoListContainer.innerHTML = '';
 
-        // Filter events for the selected day
+        // Filter events for the selected day (including multi-day events)
         const dayEvents = events.filter(e => {
-            const start = e.start.dateTime || e.start.date;
             const isReadOnly = e.accessRole === 'reader' || e.accessRole === 'freeBusyReader';
-            return start.startsWith(selectedDay) && !isReadOnly;
+            return isEventOnDate(e, selectedDay) && !isReadOnly;
         });
 
         if (dayEvents.length === 0) {
@@ -1157,15 +1339,21 @@ try {
             };
             itemLeft.appendChild(checkbox);
 
+            const contentCol = document.createElement('div');
+            contentCol.className = 'todo-content-col';
+
             const title = document.createElement('span');
             title.className = `todo-title ${isCompleted ? 'completed' : ''}`;
             title.innerText = cleanText;
             title.title = e.summary;
             
-            title.onclick = (event) => {
+            contentCol.onclick = (event) => {
                 event.stopPropagation();
                 editingEvent = e;
-                if (e.start && (e.start.dateTime || e.start.date)) {
+                const spanInfo = getEventDaySpanInfo(e, selectedDay);
+                if (spanInfo && spanInfo.startDate) {
+                    selectedDay = spanInfo.startDate;
+                } else if (e.start && (e.start.dateTime || e.start.date)) {
                     selectedDay = (e.start.dateTime || e.start.date).split('T')[0];
                 }
                 
@@ -1175,32 +1363,42 @@ try {
                     quickAddInput.focus();
                 }
 
+                // Populate date range
+                if (eventStartDate) eventStartDate.value = spanInfo ? spanInfo.startDate : selectedDay;
+                if (eventEndDate) eventEndDate.value = spanInfo ? spanInfo.lastActiveDay : selectedDay;
+
                 // Populate time / all-day status
                 const isAllDay = !e.start.dateTime;
                 if (allDayCheck) {
                     allDayCheck.checked = isAllDay;
                     updateAllDayUI();
                 }
-                if (!isAllDay && e.start.dateTime) {
-                    const startDt = new Date(e.start.dateTime);
-                    const sH = startDt.getHours().toString().padStart(2, '0');
-                    const sM = startDt.getMinutes().toString().padStart(2, '0');
-                    if (eventStartTime) eventStartTime.value = `${sH}:${sM}`;
-
-                    if (e.end && e.end.dateTime) {
-                        const endDt = new Date(e.end.dateTime);
-                        const eH = endDt.getHours().toString().padStart(2, '0');
-                        const eM = endDt.getMinutes().toString().padStart(2, '0');
-                        if (eventEndTime) eventEndTime.value = `${eH}:${eM}`;
-                        isEndTimeUserModified = true;
-                    } else if (eventEndTime) {
-                        eventEndTime.value = '';
-                        isEndTimeUserModified = false;
-                    }
-                } else {
+                if (isAllDay) {
                     if (eventStartTime) eventStartTime.value = '';
                     if (eventEndTime) eventEndTime.value = '';
                     isEndTimeUserModified = false;
+                } else {
+                    if (e.start.dateTime) {
+                        const startDt = new Date(e.start.dateTime);
+                        const sH = startDt.getHours().toString().padStart(2, '0');
+                        const sM = startDt.getMinutes().toString().padStart(2, '0');
+                        if (eventStartTime) eventStartTime.value = `${sH}:${sM}`;
+
+                        if (e.end && e.end.dateTime) {
+                            const endDt = new Date(e.end.dateTime);
+                            const eH = endDt.getHours().toString().padStart(2, '0');
+                            const eM = endDt.getMinutes().toString().padStart(2, '0');
+                            if (eventEndTime) eventEndTime.value = `${eH}:${eM}`;
+                            isEndTimeUserModified = true;
+                        } else if (eventEndTime) {
+                            eventEndTime.value = '';
+                            isEndTimeUserModified = false;
+                        }
+                    } else {
+                        if (eventStartTime) eventStartTime.value = '';
+                        if (eventEndTime) eventEndTime.value = '';
+                        isEndTimeUserModified = false;
+                    }
                 }
                 
                 // Populate extra options
@@ -1242,7 +1440,11 @@ try {
                 if (toggleExtraBtn) toggleExtraBtn.classList.add('hidden');
             };
 
-            itemLeft.appendChild(title);
+            contentCol.appendChild(title);
+
+            const metaRow = document.createElement('div');
+            metaRow.className = 'todo-meta-row';
+            let hasMeta = false;
 
             // Time badge tag if event has start time
             if (e.start && e.start.dateTime) {
@@ -1261,7 +1463,19 @@ try {
                     }
                 }
                 timeTag.innerText = timeText;
-                itemLeft.appendChild(timeTag);
+                metaRow.appendChild(timeTag);
+                hasMeta = true;
+            } else {
+                const spanInfo = getEventDaySpanInfo(e, selectedDay);
+                if (spanInfo && spanInfo.isMultiDay) {
+                    const dateTag = document.createElement('span');
+                    dateTag.className = 'todo-time-tag';
+                    const sParts = spanInfo.startDate.split('-');
+                    const eParts = spanInfo.lastActiveDay.split('-');
+                    dateTag.innerText = `${parseInt(sParts[1])}/${parseInt(sParts[2])} ~ ${parseInt(eParts[1])}/${parseInt(eParts[2])}`;
+                    metaRow.appendChild(dateTag);
+                    hasMeta = true;
+                }
             }
 
             // Account badge tag
@@ -1274,7 +1488,8 @@ try {
                 accountTag.style.background = `${e.backgroundColor || 'var(--accent-color)'}26`;
                 accountTag.style.color = e.backgroundColor || 'var(--accent-color)';
                 accountTag.style.border = `1px solid ${e.backgroundColor || 'var(--accent-color)'}40`;
-                itemLeft.appendChild(accountTag);
+                metaRow.appendChild(accountTag);
+                hasMeta = true;
             }
 
             // Meeting join button (Google Meet or other conference link)
@@ -1289,9 +1504,15 @@ try {
                     event.stopPropagation();
                     shell.openExternal(meetUrl);
                 };
-                itemLeft.appendChild(joinBtn);
+                metaRow.appendChild(joinBtn);
+                hasMeta = true;
             }
 
+            if (hasMeta) {
+                contentCol.appendChild(metaRow);
+            }
+
+            itemLeft.appendChild(contentCol);
             item.appendChild(itemLeft);
             
             const deleteBtn = document.createElement('button');
@@ -1376,38 +1597,47 @@ try {
             else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[0]); }
         }
 
-        const offset = getLocalTZOffset();
-        let start = { date: selectedDay }, end = { date: selectedDay };
-        const isAllDayState = allDayCheck ? allDayCheck.checked : (!startStr);
+        const sDateVal = (eventStartDate && eventStartDate.value) ? eventStartDate.value : selectedDay;
+        let eDateVal = (eventEndDate && eventEndDate.value) ? eventEndDate.value : sDateVal;
+        if (eDateVal < sDateVal) eDateVal = sDateVal;
+
+        // Multi-day events are strictly All-day (consistent with Google Calendar)
+        const isMultiDay = (sDateVal !== eDateVal);
+        const isAllDayState = isMultiDay || (allDayCheck ? allDayCheck.checked : (!startStr));
+        let start = { date: sDateVal }, end = { date: sDateVal };
 
         if (!isAllDayState && startStr) {
-            start = { dateTime: `${selectedDay}T${startStr}:00${offset}` };
+            start = { dateTime: `${sDateVal}T${startStr}:00${offset}` };
             if (endStr) {
                 const [sh, sm] = startStr.split(':').map(Number);
                 const [eh, em] = endStr.split(':').map(Number);
-                const crossesMidnight = (eh * 60 + em) <= (sh * 60 + sm);
-                let endDay = selectedDay;
+                const crossesMidnight = (eh * 60 + em) <= (sh * 60 + sm) && (sDateVal === eDateVal);
+                let endDay = eDateVal;
                 if (crossesMidnight) {
-                    const d = new Date(selectedDay);
+                    const d = new Date(sDateVal);
                     d.setDate(d.getDate() + 1);
-                    endDay = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+                    endDay = localDateStr(d);
                 }
                 end = { dateTime: `${endDay}T${endStr}:00${offset}` };
             } else {
                 const [h, m] = startStr.split(':').map(Number);
                 const endH = (h + 1) % 24;
-                const endDay = endH === 0 ? (() => {
-                    const d = new Date(selectedDay);
+                const endDay = (endH === 0 && sDateVal === eDateVal) ? (() => {
+                    const d = new Date(sDateVal);
                     d.setDate(d.getDate() + 1);
-                    return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-                })() : selectedDay;
+                    return localDateStr(d);
+                })() : eDateVal;
                 end = { dateTime: `${endDay}T${endH.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:00${offset}` };
             }
 
         } else {
-            const nextDay = new Date(selectedDay);
-            nextDay.setDate(nextDay.getDate() + 1);
-            end = { date: `${nextDay.getFullYear()}-${(nextDay.getMonth() + 1).toString().padStart(2, '0')}-${nextDay.getDate().toString().padStart(2, '0')}` };
+            const eParts = eDateVal.split('-').map(Number);
+            const eD = new Date(eParts[0], eParts[1] - 1, eParts[2]);
+            eD.setDate(eD.getDate() + 1);
+            const exclusiveEndDateStr = localDateStr(eD);
+
+            start = { date: sDateVal };
+            end = { date: exclusiveEndDateStr };
         }
 
         const location = eventLocationInput ? eventLocationInput.value : '';
@@ -1472,6 +1702,8 @@ try {
             allDayCheck.checked = false;
             if (eventStartTime) eventStartTime.value = '';
             if (eventEndTime) eventEndTime.value = '';
+            if (eventStartDate) eventStartDate.value = '';
+            if (eventEndDate) eventEndDate.value = '';
             updateAllDayUI();
         }
         if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
@@ -1559,7 +1791,29 @@ try {
                 if (quickAddInput) quickAddInput.value = stripTags(event.summary);
                 if (eventLocationInput) eventLocationInput.value = event.location || '';
                 if (eventDescriptionInput) eventDescriptionInput.value = event.description || '';
-                if (allDayCheck) allDayCheck.checked = !!event.start.date;
+                const isAllDay = !!event.start.date;
+                if (allDayCheck) {
+                    allDayCheck.checked = isAllDay;
+                    updateAllDayUI();
+                }
+                const dateKey = (event.start.dateTime || event.start.date).split('T')[0];
+                const span = getEventDaySpanInfo(event, dateKey);
+                if (eventStartDate) eventStartDate.value = span ? span.startDate : dateKey;
+                if (eventEndDate) eventEndDate.value = span ? span.lastActiveDay : dateKey;
+
+                if (!isAllDay && event.start.dateTime) {
+                    const startDt = new Date(event.start.dateTime);
+                    const sH = startDt.getHours().toString().padStart(2, '0');
+                    const sM = startDt.getMinutes().toString().padStart(2, '0');
+                    if (eventStartTime) eventStartTime.value = `${sH}:${sM}`;
+                    if (event.end && event.end.dateTime) {
+                        const endDt = new Date(event.end.dateTime);
+                        const eH = endDt.getHours().toString().padStart(2, '0');
+                        const eM = endDt.getMinutes().toString().padStart(2, '0');
+                        if (eventEndTime) eventEndTime.value = `${eH}:${eM}`;
+                        isEndTimeUserModified = true;
+                    }
+                }
                 if (document.getElementById('important-check')) document.getElementById('important-check').checked = event.summary.includes('[IMPORTANT]');
                 if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = event.summary.includes('[HIGHLIGHT]');
                 
@@ -1617,13 +1871,16 @@ try {
         if (eventLocationInput) eventLocationInput.value = ''; 
         if (eventDescriptionInput) eventDescriptionInput.value = '';
         if (allDayCheck) allDayCheck.checked = false;
+        if (eventStartDate) eventStartDate.value = '';
+        if (eventEndDate) eventEndDate.value = '';
+        if (timeInputsContainer) timeInputsContainer.classList.remove('hidden', 'disabled');
+        if (allDayStatusText) allDayStatusText.classList.add('hidden');
         if (document.getElementById('important-check')) document.getElementById('important-check').checked = false;
         if (document.getElementById('highlight-cell-check')) document.getElementById('highlight-cell-check').checked = false;
         if (document.getElementById('selected-entry-color')) document.getElementById('selected-entry-color').value = 'default';
         document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
         document.getElementById('default-color-btn')?.classList.add('active');
-        if (extraFields) extraFields.classList.add('hidden');
-        if (toggleExtraBtn) toggleExtraBtn.classList.remove('hidden'); 
+        if (extraFields) extraFields.classList.remove('hidden');
         editingEvent = null;
     }
 
@@ -1674,6 +1931,16 @@ try {
                 const currentStartTime = (!currentAllDay && eventStartTime && eventStartTime.value) ? eventStartTime.value : '';
                 const currentEndTime = (!currentAllDay && eventEndTime && eventEndTime.value) ? eventEndTime.value : '';
 
+                let originalStartDate = '';
+                let originalEndDate = '';
+                if (editingEvent.start && editingEvent.start.date) {
+                    const span = getEventDaySpanInfo(editingEvent, editingEvent.start.date);
+                    originalStartDate = span ? span.startDate : editingEvent.start.date;
+                    originalEndDate = span ? span.lastActiveDay : editingEvent.start.date;
+                }
+                const currentStartDate = (currentAllDay && eventStartDate && eventStartDate.value) ? eventStartDate.value : '';
+                const currentEndDate = (currentAllDay && eventEndDate && eventEndDate.value) ? eventEndDate.value : '';
+
                 if (currentText === originalText && 
                     currentLoc === originalLoc && 
                     currentDesc === originalDesc && 
@@ -1682,7 +1949,9 @@ try {
                     currentHex === originalHex &&
                     currentAllDay === originalAllDay &&
                     currentStartTime === originalStartTime &&
-                    currentEndTime === originalEndTime) {
+                    currentEndTime === originalEndTime &&
+                    currentStartDate === originalStartDate &&
+                    currentEndDate === originalEndDate) {
                     shouldSave = false;
                 }
             }
@@ -1707,7 +1976,8 @@ try {
         } else {
             currentViewDate.setMonth(currentViewDate.getMonth() - 1);
         }
-        fetchEvents();
+        renderCalendar();
+        debouncedFetchEvents(250);
     };
     if (nextMonthBtn) nextMonthBtn.onclick = () => {
         if (currentViewMode === 'week') {
@@ -1715,9 +1985,14 @@ try {
         } else {
             currentViewDate.setMonth(currentViewDate.getMonth() + 1);
         }
-        fetchEvents();
+        renderCalendar();
+        debouncedFetchEvents(250);
     };
-    if (homeBtn) homeBtn.onclick = () => { currentViewDate = new Date(); fetchEvents(); };
+    if (homeBtn) homeBtn.onclick = () => {
+        currentViewDate = new Date();
+        renderCalendar();
+        debouncedFetchEvents(250);
+    };
     if (syncBtn) syncBtn.onclick = () => fetchEvents();
 
     window.addEventListener('keydown', (e) => {

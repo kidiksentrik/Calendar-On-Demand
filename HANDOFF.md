@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.3)
+- **Product**: **Calendar on Demand** (v1.5.4)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.3` (Google Calendar 24 Official Colorways, Adaptive Contrast Typography & Time Picker Auto-Save)
+- **Current Version**: `v1.5.4` (Multi-Day All-Day Events, Bright Wallpaper Legibility, Anti-Truncation Todo Layout & Instant 0ms Navigation)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 
 ---
@@ -91,6 +91,21 @@
 - **시간 직접 입력 UI 추가 고도화**: 분 단위 15분/30분 스냅 버튼 등 편의성 강화 (필요 시).
 
 ### 2. 📝 User Feedback Backlog
+- [x] **연속 다일 종일 일정(Multi-Day All-Day Events) 연속 리본 시각화 및 날짜 범위 선택**:
+  - 구글 캘린더 네이티브 방식과 동일하게 여러 날에 걸친 연속 일정은 'All-day(종일)'로 연동 처리.
+  - 월간 뷰(Month Grid) 및 주간 뷰 상단 종일 행(Weekly All-day Row)에서 연속된 일정이 끊기지 않고 이어져 보이도록 고대비 양방향 점선 리본 클래스(`multi-day-start`, `multi-day-middle`, `multi-day-end`) 적용.
+  - 일정 추가/수정 모달에 직관적인 날짜 범위 선택기(`Date [시작일] ~ [종료일]`) 탑재. 다일 범위 지정 시 자동으로 All-day 모드 고정.
+- [x] **일정 제목 잘림 방지 2줄 투두 레이아웃(Anti-Truncation 2-Line Layout)**:
+  - 투두 모달 내 일정 행을 1열(100% 제목 전용 행) + 2열(시간 뱃지, 계정 태그, 화상회의 링크 컴팩트 서브 행)로 분리.
+  - 좁거나 중간 크기의 창에서도 제목이 길게 잘리지 않고 쾌적하게 노출.
+- [x] **새 일정 추가 시 상세 옵션(컬러 24종, 별표, 위치, 메모) 누락 버그 해결**:
+  - `clearQuickAddForm()` 및 `resetQuickAddInputs()`에서 `extraFields`가 강제로 숨겨지던 코드를 제거하여 신규 등록 및 수정 시 항상 24색 팔레트와 상세 필드 접근 가능.
+- [x] **밝은 배경화면(화이트/라이트 월페이퍼) 대비 가독성 대폭 강화**:
+  - 요일 헤더(MON, TUE, WED...)의 투명도를 40%에서 85%(`--text-muted`, 700 bold weight)로 대폭 상향, 일요일(`ff5252`), 토요일(`448aff`) 컬러 포인트 적용.
+  - 주간 뷰 세로 시간축(00:00~23:00) 뒤편에 고대비 트랙 배경(`rgba(0, 0, 0, 0.22)`) 배치 및 드롭 섀도우(`--label-shadow`) 적용으로 밝은 배경에서도 선명하게 시인.
+- [x] **0ms 즉각 반응 네비게이션(Optimistic Navigation) & 디바운스 동기화**:
+  - 이전/다음/홈 버튼 클릭 시 즉시 0ms로 캘린더 뷰를 렌더링하고, 구글 캘린더 백그라운드 API 호출은 250ms 디바운스로 지연 처리.
+  - 연타 시 이전 요청이 최신 화면을 덮어쓰지 않도록 `fetchRequestId` 시퀀스 검증 탑재.
 - [x] **일정 종료 시간(End Time) 커스텀 입력값 유지 (1시간 강제 리셋 버그 수정)**:
   - 사용자가 종료 시간(`eventEndTime`)을 수동으로 변경한 경우 플래그(`isEndTimeUserModified`)로 기억하여 불필요한 자동 덮어쓰기 방지.
   - 시작 시간 변경 시 기존 설정된 커스텀 duration 유지.

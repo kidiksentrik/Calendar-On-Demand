@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.5.3",
+          "softwareVersion": "1.5.4",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -756,8 +756,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.5.3 Released</span>
-                <span class="update-text">Google Calendar 24 Official Colorways, Adaptive Contrast Typography &amp; Time Picker Auto-Save Polish</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.5.4 Released</span>
+                <span class="update-text">Multi-Day All-Day Events, Bright Wallpaper Legibility &amp; Instant 0ms Navigation</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -963,6 +963,19 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.5.4 <span class="cl-date">Sep 29, 2026</span></div>
+                    <div class="cl-body">
+                        <strong>Multi-Day All-Day Events, Bright Wallpaper Legibility, Anti-Truncation Todo Layout &amp; Instant 0ms Navigation:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Multi-Day All-Day Events (Google Calendar Parity):</strong> Seamlessly visualizes multi-day all-day events across continuous day cells in both Month Grid and Weekly Timeline (top all-day row) with high-contrast dual dashed ribbons (<code>multi-day-start</code>, <code>multi-day-middle</code>, <code>multi-day-end</code>).</li>
+                            <li><strong>Dedicated Date Range Selector:</strong> Added a clean date range picker (<code>Date [Start] ~ [End]</code>) directly into the Add/Edit task modal with auto-enforced all-day mode for multi-day spans.</li>
+                            <li><strong>Anti-Truncation 2-Line Todo Layout:</strong> Re-architected task list items into a 2-line layout, giving event titles 100% width while placing time badges, account tags, and video meeting join buttons into a compact sub-row.</li>
+                            <li><strong>Bright Wallpaper Legibility:</strong> Upgraded day headers (MON, TUE, WED...) from 40% to 85% opacity (<code>--text-muted</code>) with 700 bold weight and weekend accents (Sun: <code>#ff5252</code>, Sat: <code>#448aff</code>). Added high-contrast backdrop tracks to the Weekly Timeline hour gutter and adaptive drop shadows (<code>--label-shadow</code>) for crisp readability over bright or white wallpapers.</li>
+                            <li><strong>Instant 0ms Optimistic Navigation:</strong> Eliminates network latency lag when browsing between weeks/months via instant 0ms DOM updates paired with debounced background synchronization and race-condition safety.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.5.3 <span class="cl-date">Sep 22, 2026</span></div>
                     <div class="cl-body">
