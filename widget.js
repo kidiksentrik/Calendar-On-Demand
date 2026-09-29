@@ -1606,6 +1606,7 @@ try {
         // Multi-day events are strictly All-day (consistent with Google Calendar)
         const isMultiDay = (sDateVal !== eDateVal);
         const isAllDayState = isMultiDay || (allDayCheck ? allDayCheck.checked : (!startStr));
+        const offset = getLocalTZOffset();
         let start = { date: sDateVal }, end = { date: sDateVal };
 
         if (!isAllDayState && startStr) {
@@ -1887,82 +1888,87 @@ try {
     }
 
     async function handleAutoSaveAndClose() {
-        if (quickAddInput && quickAddInput.value.trim() !== '') {
-            let shouldSave = true;
-            if (editingEvent) {
-                const currentText = stripTags(quickAddInput.value);
-                const originalText = stripTags(editingEvent.summary);
-                const currentLoc = eventLocationInput ? eventLocationInput.value : '';
-                const originalLoc = editingEvent.location || '';
-                const currentDesc = eventDescriptionInput ? eventDescriptionInput.value : '';
-                const originalDesc = editingEvent.description || '';
-                const currentImportant = document.getElementById('important-check')?.checked || false;
-                const originalImportant = editingEvent.summary.includes('[IMPORTANT]');
-                const currentHighlight = document.getElementById('highlight-cell-check')?.checked || false;
-                const originalHighlight = editingEvent.summary.includes('[HIGHLIGHT]');
-                
-                let originalHex = 'default';
-                if (editingEvent.eventLabelId) {
-                    originalHex = findLabelHex(editingEvent.eventLabelId) || 'default';
-                } else if (editingEvent.colorId && GOOGLE_COLORS[editingEvent.colorId]) {
-                    originalHex = GOOGLE_COLORS[editingEvent.colorId].bg;
-                } else if (editingEvent.summary) {
-                    const colorMatch = editingEvent.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
-                    if (colorMatch) originalHex = colorMatch[1].toLowerCase();
-                }
-                const currentHex = (document.getElementById('selected-entry-color')?.value || 'default').toLowerCase();
-                
-                const currentAllDay = allDayCheck ? allDayCheck.checked : false;
-                const originalAllDay = !editingEvent.start.dateTime;
+        try {
+            if (quickAddInput && quickAddInput.value.trim() !== '') {
+                let shouldSave = true;
+                if (editingEvent) {
+                    const currentText = stripTags(quickAddInput.value);
+                    const originalText = stripTags(editingEvent.summary);
+                    const currentLoc = eventLocationInput ? eventLocationInput.value : '';
+                    const originalLoc = editingEvent.location || '';
+                    const currentDesc = eventDescriptionInput ? eventDescriptionInput.value : '';
+                    const originalDesc = editingEvent.description || '';
+                    const currentImportant = document.getElementById('important-check')?.checked || false;
+                    const originalImportant = editingEvent.summary.includes('[IMPORTANT]');
+                    const currentHighlight = document.getElementById('highlight-cell-check')?.checked || false;
+                    const originalHighlight = editingEvent.summary.includes('[HIGHLIGHT]');
+                    
+                    let originalHex = 'default';
+                    if (editingEvent.eventLabelId) {
+                        originalHex = findLabelHex(editingEvent.eventLabelId) || 'default';
+                    } else if (editingEvent.colorId && GOOGLE_COLORS[editingEvent.colorId]) {
+                        originalHex = GOOGLE_COLORS[editingEvent.colorId].bg;
+                    } else if (editingEvent.summary) {
+                        const colorMatch = editingEvent.summary.match(/\[COLOR:(#[0-9a-fA-F]{3,6})\]/);
+                        if (colorMatch) originalHex = colorMatch[1].toLowerCase();
+                    }
+                    const currentHex = (document.getElementById('selected-entry-color')?.value || 'default').toLowerCase();
+                    
+                    const currentAllDay = allDayCheck ? allDayCheck.checked : false;
+                    const originalAllDay = !editingEvent.start.dateTime;
 
-                let originalStartTime = '';
-                let originalEndTime = '';
-                if (editingEvent.start && editingEvent.start.dateTime) {
-                    const startDt = new Date(editingEvent.start.dateTime);
-                    const sH = startDt.getHours().toString().padStart(2, '0');
-                    const sM = startDt.getMinutes().toString().padStart(2, '0');
-                    originalStartTime = `${sH}:${sM}`;
-                }
-                if (editingEvent.end && editingEvent.end.dateTime) {
-                    const endDt = new Date(editingEvent.end.dateTime);
-                    const eH = endDt.getHours().toString().padStart(2, '0');
-                    const eM = endDt.getMinutes().toString().padStart(2, '0');
-                    originalEndTime = `${eH}:${eM}`;
+                    let originalStartTime = '';
+                    let originalEndTime = '';
+                    if (editingEvent.start && editingEvent.start.dateTime) {
+                        const startDt = new Date(editingEvent.start.dateTime);
+                        const sH = startDt.getHours().toString().padStart(2, '0');
+                        const sM = startDt.getMinutes().toString().padStart(2, '0');
+                        originalStartTime = `${sH}:${sM}`;
+                    }
+                    if (editingEvent.end && editingEvent.end.dateTime) {
+                        const endDt = new Date(editingEvent.end.dateTime);
+                        const eH = endDt.getHours().toString().padStart(2, '0');
+                        const eM = endDt.getMinutes().toString().padStart(2, '0');
+                        originalEndTime = `${eH}:${eM}`;
+                    }
+
+                    const currentStartTime = (!currentAllDay && eventStartTime && eventStartTime.value) ? eventStartTime.value : '';
+                    const currentEndTime = (!currentAllDay && eventEndTime && eventEndTime.value) ? eventEndTime.value : '';
+
+                    let originalStartDate = '';
+                    let originalEndDate = '';
+                    if (editingEvent.start && editingEvent.start.date) {
+                        const span = getEventDaySpanInfo(editingEvent, editingEvent.start.date);
+                        originalStartDate = span ? span.startDate : editingEvent.start.date;
+                        originalEndDate = span ? span.lastActiveDay : editingEvent.start.date;
+                    }
+                    const currentStartDate = (currentAllDay && eventStartDate && eventStartDate.value) ? eventStartDate.value : '';
+                    const currentEndDate = (currentAllDay && eventEndDate && eventEndDate.value) ? eventEndDate.value : '';
+
+                    if (currentText === originalText && 
+                        currentLoc === originalLoc && 
+                        currentDesc === originalDesc && 
+                        currentImportant === originalImportant && 
+                        currentHighlight === originalHighlight && 
+                        currentHex === originalHex &&
+                        currentAllDay === originalAllDay &&
+                        currentStartTime === originalStartTime &&
+                        currentEndTime === originalEndTime &&
+                        currentStartDate === originalStartDate &&
+                        currentEndDate === originalEndDate) {
+                        shouldSave = false;
+                    }
                 }
 
-                const currentStartTime = (!currentAllDay && eventStartTime && eventStartTime.value) ? eventStartTime.value : '';
-                const currentEndTime = (!currentAllDay && eventEndTime && eventEndTime.value) ? eventEndTime.value : '';
-
-                let originalStartDate = '';
-                let originalEndDate = '';
-                if (editingEvent.start && editingEvent.start.date) {
-                    const span = getEventDaySpanInfo(editingEvent, editingEvent.start.date);
-                    originalStartDate = span ? span.startDate : editingEvent.start.date;
-                    originalEndDate = span ? span.lastActiveDay : editingEvent.start.date;
-                }
-                const currentStartDate = (currentAllDay && eventStartDate && eventStartDate.value) ? eventStartDate.value : '';
-                const currentEndDate = (currentAllDay && eventEndDate && eventEndDate.value) ? eventEndDate.value : '';
-
-                if (currentText === originalText && 
-                    currentLoc === originalLoc && 
-                    currentDesc === originalDesc && 
-                    currentImportant === originalImportant && 
-                    currentHighlight === originalHighlight && 
-                    currentHex === originalHex &&
-                    currentAllDay === originalAllDay &&
-                    currentStartTime === originalStartTime &&
-                    currentEndTime === originalEndTime &&
-                    currentStartDate === originalStartDate &&
-                    currentEndDate === originalEndDate) {
-                    shouldSave = false;
+                if (shouldSave) {
+                    await saveCurrentEvent();
                 }
             }
-
-            if (shouldSave) {
-                await saveCurrentEvent();
-            }
+        } catch (err) {
+            console.error('Error during handleAutoSaveAndClose:', err);
+        } finally {
+            closeAllModals();
         }
-        closeAllModals();
     }
 
     window.onclick = async (e) => { 

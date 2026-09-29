@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.5)
+- **Product**: **Calendar on Demand** (v1.5.6)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.5` (Visual & Micro-Interactions Overhaul — Monochrome SVG Header Icons, Glassmorphic Setting Controls & Ambient Hover Glows)
+- **Current Version**: `v1.5.6` (Hotfix: Quick Add Timezone Offset Scope & Auto-Save Event Persistence)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 - **Key URLs**:
   - Web: https://cal-ondemand.com
@@ -102,9 +102,15 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ---
 
-## ✅ Completed Features (v1.5.5 최신 현황)
+## ✅ Completed Features (v1.5.6 최신 현황)
 
-### 1. v1.5.5 비주얼 & 마이크로 인터랙션 대개편 (Visual & Micro-Interactions Overhaul)
+### 1. v1.5.6 핫픽스 (Hotfix: Quick Add Timezone Offset Scope & Auto-Save Persistence)
+- [x] **일정 등록 시 타임존 오프셋(offset) 스코프 누락 해결**:
+  - 시간을 지정한 일정 생성 시 `saveCurrentEvent()` 내부에서 `offset` 변수가 누락되어 `ReferenceError`가 발생하던 문제를 해결 (`const offset = getLocalTZOffset()`).
+- [x] **모달 바깥 클릭 시 자동 저장 및 닫기 방어 로직 강화**:
+  - `handleAutoSaveAndClose()`를 `try...catch...finally { closeAllModals(); }` 블록으로 안전하게 감싸, 예외가 발생하더라도 모달이 닫히지 않고 먹통이 되는 현상을 원천 방지.
+
+### 2. v1.5.5 비주얼 & 마이크로 인터랙션 대개편 (Visual & Micro-Interactions Overhaul)
 - [x] **헤더 18px 모노크롬 SVG 벡터 아이콘 & 글래스 키캡 버튼**:
   - 기존 컬러 이모지(`📅`/`📆`, `📌`, `🔄`, `⚙️`, `🏠`)를 완전 퇴출하고, 상단 1px 반사 림 라이트와 호버 리프트가 적용된 고급 모노크롬 벡터 아이콘으로 교체.
 - [x] **앰비언트 호버 글로우(Hover Glow)**:
