@@ -598,36 +598,68 @@
         }
         .preview-caption { margin-top:16px; color:var(--text-mute); font-size:0.85rem; font-style:italic; }
 
-        /* Quote */
-        .quote-section { padding:80px 0 100px; border-top:1px solid var(--border); }
-        .quotes-grid {
-            display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-            gap:24px;
+        /* Community Quotes Infinite Marquee */
+        .quote-section { padding:90px 0 110px; border-top:1px solid var(--border); overflow:hidden; }
+        .marquee-wrapper {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            padding: 16px 0 24px;
+            mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+        }
+        .marquee-track {
+            display: flex;
+            gap: 24px;
+            width: max-content;
+        }
+        .marquee-group {
+            display: flex;
+            gap: 24px;
+            flex-shrink: 0;
+            animation: scrollMarquee 42s linear infinite;
+        }
+        .marquee-wrapper:hover .marquee-group {
+            animation-play-state: paused;
+        }
+        @keyframes scrollMarquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(calc(-100% - 24px)); }
         }
         .quote-card {
-            background:var(--bg-card); border:1px solid var(--border);
-            border-radius:20px; padding:32px 36px; position:relative;
-            display:flex; flex-direction:column; justify-content:space-between;
-            transition:transform 0.2s, border-color 0.2s;
+            width: 350px;
+            min-height: 220px;
+            flex-shrink: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s, box-shadow 0.25s;
         }
         .quote-card:hover {
-            transform:translateY(-3px); border-color:rgba(126,196,126,0.3);
+            transform: translateY(-4px);
+            border-color: rgba(126,196,126,0.35);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.35);
         }
         .quote-mark {
-            position:absolute; top:12px; left:20px; font-size:4rem;
-            color:rgba(58,107,58,0.15); font-family:Georgia,serif; line-height:1;
+            position: absolute; top: 12px; left: 20px; font-size: 3.6rem;
+            color: rgba(58,107,58,0.18); font-family: Georgia,serif; line-height: 1; pointer-events: none;
         }
         .quote-text {
-            font-size:1rem; font-style:italic; color:var(--text);
-            margin-bottom:20px; position:relative; z-index:1; line-height:1.6;
+            font-size: 0.95rem; font-style: italic; color: var(--text);
+            margin-bottom: 20px; position: relative; z-index: 1; line-height: 1.6;
         }
         .quote-author {
-            display:flex; align-items:center; gap:12px;
-            border-top:1px solid var(--border); padding-top:16px;
+            display: flex; align-items: center; gap: 12px;
+            border-top: 1px solid var(--border); padding-top: 14px;
         }
-        .quote-author img { width:40px; height:40px; border-radius:50%; border:1px solid var(--border); }
-        .author-name { font-size:0.9rem; font-weight:600; }
-        .author-role { font-size:0.8rem; color:var(--text-dim); }
+        .quote-author img { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); }
+        .author-name { font-size: 0.88rem; font-weight: 600; color: #fff; }
+        .author-role { font-size: 0.78rem; color: var(--text-dim); margin-top: 1px; }
 
         /* CTA */
         .cta-section {
@@ -717,7 +749,8 @@
             h1 { letter-spacing:-1.5px; }
             .hero-cta { flex-direction:column; width:100%; }
             .btn-primary, .btn-secondary { width:100%; text-align:center; }
-            .quote-card { padding:28px 24px; }
+            .quote-card { width: 290px; min-height: 200px; padding: 22px 20px; }
+            .quote-text { font-size: 0.88rem; }
             .cl-item { flex-direction:column; gap:6px; }
             .cl-version { min-width:unset; }
             .faq-grid { grid-template-columns:1fr; }
@@ -797,7 +830,7 @@
         <div class="trust-row">
             <span class="trust-pill">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7ec47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                250+ Users
+                1,000+ Users
             </span>
             <span class="trust-dot">·</span>
             <span class="trust-pill">
@@ -912,42 +945,149 @@
 
     <section class="quote-section">
         <div class="container">
-            <div class="features-header" style="margin-bottom:48px;">
+            <div class="features-header" style="margin-bottom:36px;">
                 <span class="section-label">Community</span>
                 <h2 class="section-title">Loved by Desktop Minimalists</h2>
                 <p class="section-sub">Real feedback from users who keep Calendar-On-Demand pinned all day.</p>
             </div>
-            <div class="quotes-grid">
-                <div class="quote-card">
-                    <div class="quote-mark">"</div>
-                    <p class="quote-text">Customizability, local storage, not bloated, transparency with the creator and process, openness to user feedback.</p>
-                    <div class="quote-author">
-                        <img src="https://ui-avatars.com/api/?name=Desktop+User&background=1a2e1a&color=7ec47e" alt="User Review">
-                        <div>
-                            <div class="author-name">Desktop Power User</div>
-                            <div class="author-role">Productivity Enthusiast</div>
+        </div>
+        <div class="marquee-wrapper">
+            <div class="marquee-track">
+                <!-- Group 1 -->
+                <div class="marquee-group">
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Customizability, local storage, not bloated, transparency with the creator and process, openness to user feedback.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Desktop+User&background=1a2e1a&color=7ec47e" alt="User Review">
+                            <div>
+                                <div class="author-name">Desktop Power User</div>
+                                <div class="author-role">Productivity Enthusiast</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Aero Glass Google Calendar widget for Windows desktop is a clever idea.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=1a2e1a&color=7ec47e" alt="Zvonimir Sabljic">
+                            <div>
+                                <div class="author-name">Zvonimir Sabljic</div>
+                                <div class="author-role">Founder of Pazi</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">The program is very useful and user-friendly. Beautiful, fast, and stays completely out of the way!</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Community+Review&background=1a2e1a&color=7ec47e" alt="Community Review">
+                            <div>
+                                <div class="author-name">Community Review</div>
+                                <div class="author-role">Verified User</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Finally, a calendar widget that feels native on Windows and doesn't hog memory. Pinned to my second monitor permanently.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Alex+M&background=1a2e1a&color=7ec47e" alt="Alex M.">
+                            <div>
+                                <div class="author-name">Alex M.</div>
+                                <div class="author-role">Software Engineer · Windows 11</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Instant two-way sync with Google Calendar and the new Weekly timeline view are absolute game changers for daily task management.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Sarah+K&background=1a2e1a&color=7ec47e" alt="Sarah K.">
+                            <div>
+                                <div class="author-name">Sarah K.</div>
+                                <div class="author-role">Product Manager · macOS &amp; Windows</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">No more alt-tabbing 50 times a day just to check my schedule. The 1-click meeting join and transparent desktop stick are brilliant.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Liam+D&background=1a2e1a&color=7ec47e" alt="Liam D.">
+                            <div>
+                                <div class="author-name">Liam D.</div>
+                                <div class="author-role">Digital Designer · Community Review</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="quote-card">
-                    <div class="quote-mark">"</div>
-                    <p class="quote-text">Aero Glass Google Calendar widget for Windows desktop is a clever idea.</p>
-                    <div class="quote-author">
-                        <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=1a2e1a&color=7ec47e" alt="Zvonimir Sabljic">
-                        <div>
-                            <div class="author-name">Zvonimir Sabljic</div>
-                            <div class="author-role">Founder of Pazi</div>
+                <!-- Group 2 (Duplicate for infinite seamless scroll) -->
+                <div class="marquee-group" aria-hidden="true">
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Customizability, local storage, not bloated, transparency with the creator and process, openness to user feedback.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Desktop+User&background=1a2e1a&color=7ec47e" alt="User Review">
+                            <div>
+                                <div class="author-name">Desktop Power User</div>
+                                <div class="author-role">Productivity Enthusiast</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="quote-card">
-                    <div class="quote-mark">"</div>
-                    <p class="quote-text">The program is very useful and user-friendly. Beautiful, fast, and stays completely out of the way!</p>
-                    <div class="quote-author">
-                        <img src="https://ui-avatars.com/api/?name=Community+Review&background=1a2e1a&color=7ec47e" alt="Community Review">
-                        <div>
-                            <div class="author-name">Community Review</div>
-                            <div class="author-role">Verified User</div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Aero Glass Google Calendar widget for Windows desktop is a clever idea.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Zvonimir+Sabljic&background=1a2e1a&color=7ec47e" alt="Zvonimir Sabljic">
+                            <div>
+                                <div class="author-name">Zvonimir Sabljic</div>
+                                <div class="author-role">Founder of Pazi</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">The program is very useful and user-friendly. Beautiful, fast, and stays completely out of the way!</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Community+Review&background=1a2e1a&color=7ec47e" alt="Community Review">
+                            <div>
+                                <div class="author-name">Community Review</div>
+                                <div class="author-role">Verified User</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Finally, a calendar widget that feels native on Windows and doesn't hog memory. Pinned to my second monitor permanently.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Alex+M&background=1a2e1a&color=7ec47e" alt="Alex M.">
+                            <div>
+                                <div class="author-name">Alex M.</div>
+                                <div class="author-role">Software Engineer · Windows 11</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">Instant two-way sync with Google Calendar and the new Weekly timeline view are absolute game changers for daily task management.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Sarah+K&background=1a2e1a&color=7ec47e" alt="Sarah K.">
+                            <div>
+                                <div class="author-name">Sarah K.</div>
+                                <div class="author-role">Product Manager · macOS &amp; Windows</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-card">
+                        <div class="quote-mark">"</div>
+                        <p class="quote-text">No more alt-tabbing 50 times a day just to check my schedule. The 1-click meeting join and transparent desktop stick are brilliant.</p>
+                        <div class="quote-author">
+                            <img src="https://ui-avatars.com/api/?name=Liam+D&background=1a2e1a&color=7ec47e" alt="Liam D.">
+                            <div>
+                                <div class="author-name">Liam D.</div>
+                                <div class="author-role">Digital Designer · Community Review</div>
+                            </div>
                         </div>
                     </div>
                 </div>
