@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.4)
+- **Product**: **Calendar on Demand** (v1.5.5)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.4` (Multi-Day All-Day Events, Bright Wallpaper Legibility, Anti-Truncation Todo Layout & Instant 0ms Navigation)
+- **Current Version**: `v1.5.5` (Visual & Micro-Interactions Overhaul — Monochrome SVG Header Icons, Glassmorphic Setting Controls & Ambient Hover Glows)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 - **Key URLs**:
   - Web: https://cal-ondemand.com
@@ -102,9 +102,21 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ---
 
-## ✅ Completed Features (v1.5.4 최신 현황)
+## ✅ Completed Features (v1.5.5 최신 현황)
 
-### 1. 캘린더 & 투두 핵심 기능
+### 1. v1.5.5 비주얼 & 마이크로 인터랙션 대개편 (Visual & Micro-Interactions Overhaul)
+- [x] **헤더 18px 모노크롬 SVG 벡터 아이콘 & 글래스 키캡 버튼**:
+  - 기존 컬러 이모지(`📅`/`📆`, `📌`, `🔄`, `⚙️`, `🏠`)를 완전 퇴출하고, 상단 1px 반사 림 라이트와 호버 리프트가 적용된 고급 모노크롬 벡터 아이콘으로 교체.
+- [x] **앰비언트 호버 글로우(Hover Glow)**:
+  - 월간 뷰 날짜 셀 및 일정 카드 호버 시 상단 반사선과 은은한 악센트 글로우 발광, 타일이 맑게 반짝이는 시각적 피드백 제공.
+- [x] **주간 뷰 현재 시간선 2단계 네온 펄스 광채**:
+  - 빨간 현재 시각 표시선(Now Line)과 인디케이터 점에 발광 섀도우를 적용해 어두운 바탕 위에서 선명한 시간 인지 제공.
+- [x] **설정창 드롭다운 & 폼 컨트롤 완전 일체화**:
+  - OS 기본 흰색 셀렉트를 다크 글래스 드롭다운(커스텀 SVG 화살표)으로 통일하고, `+ Add Account` 버튼을 대시드 보더 블루 글래스 스타일로 리뉴얼.
+- [x] **온오프 토글스위치 우측 완벽 일렬 정렬**:
+  - 일반 라벨과 스위치 라벨의 셀렉터를 분리하고, 텍스트 말줄임표 처리 및 `margin-left: auto`를 적용하여 모든 스위치가 오른쪽 끝 칼각 정렬 유지.
+
+### 2. 캘린더 & 투두 핵심 기능
 - [x] **Google Calendar 동기화**: 15분 주기 자동 백그라운드 동기화 + 수동 동기화 + 에러 시 지수 백오프 재시도.
 - [x] **다중 계정 (Multi-Account) 지원**:
   - 복수 Google 계정 로그인 및 저장.

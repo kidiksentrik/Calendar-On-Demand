@@ -590,7 +590,9 @@ try {
 
     function renderCalendar() {
         if (viewToggleBtn) {
-            viewToggleBtn.innerText = currentViewMode === 'month' ? '📅' : '📆';
+            viewToggleBtn.innerHTML = currentViewMode === 'month' 
+                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="M9 3v18"/><path d="M15 3v18"/><rect x="9.75" y="7" width="4.5" height="5" rx="1" fill="currentColor" fill-opacity="0.35" stroke="none"/></svg>` 
+                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="3.5" ry="3.5"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><circle cx="8" cy="15" r="1.3" fill="currentColor"/><circle cx="12" cy="15" r="1.3" fill="currentColor"/><circle cx="16" cy="15" r="1.3" fill="currentColor"/></svg>`;
             viewToggleBtn.title = currentViewMode === 'month' ? 'Switch to Week view (W)' : 'Switch to Month view (M)';
         }
 
@@ -1993,7 +1995,13 @@ try {
         renderCalendar();
         debouncedFetchEvents(250);
     };
-    if (syncBtn) syncBtn.onclick = () => fetchEvents();
+    if (syncBtn) {
+        syncBtn.onclick = () => {
+            syncBtn.classList.add('sync-spinning');
+            setTimeout(() => syncBtn.classList.remove('sync-spinning'), 750);
+            fetchEvents();
+        };
+    }
 
     window.addEventListener('keydown', (e) => {
         const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
@@ -2011,9 +2019,10 @@ try {
 
     function updateLockUI(isLocked) {
         if (lockBtn) {
-            lockBtn.style.opacity = isLocked ? '1' : '0.6';
-            lockBtn.style.background = isLocked ? 'rgba(79, 142, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)';
-            lockBtn.style.borderColor = isLocked ? 'var(--accent-color)' : 'rgba(255, 255, 255, 0.1)';
+            lockBtn.classList.toggle('is-locked', isLocked);
+            lockBtn.style.opacity = '';
+            lockBtn.style.background = '';
+            lockBtn.style.borderColor = '';
         }
         if (lockPositionCheck) lockPositionCheck.checked = isLocked;
         document.body.classList.toggle('locked-mode', isLocked);
