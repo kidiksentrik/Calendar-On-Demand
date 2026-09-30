@@ -43,17 +43,20 @@ $html = Get-Content "docs/index.html" -Raw -Encoding UTF8
 
 # Replace update banner
 $html = $html -replace '(<strong>v[\d\.]+ is out!</strong>[^<]*)', "<strong>v$Version is out!</strong> - $Notes"
+$html = $html -replace '(<span class="update-tag"><span class="pulse-dot"></span>)v[\d\.]+ Released(</span>\s*<span class="update-text">)[^<]*(</span>)', "`${1}v$Version Released`${2}$Notes`${3}"
 $html = $html -replace '("softwareVersion":\s*")[^"]+(")', "`${1}$Version`${2}"
 
-# Changelog: insert new version at top
-$today = Get-Date -Format "MMM dd, yyyy"
-$newEntry = @"
+# Changelog: insert new version at top if not already present
+if ($html -notmatch "v$Version <span class=""cl-date""") {
+    $today = Get-Date -Format "MMM dd, yyyy"
+    $newEntry = @"
                 <div class="cl-item">
                     <div class="cl-version">v$Version <span class="cl-date">$today</span></div>
                     <div class="cl-body">$Notes</div>
                 </div>
 "@
-$html = $html -replace '(<div class="changelog-list" id="changelog-list">)', "`$1`r`n$newEntry"
+    $html = $html -replace '(<div class="changelog-list"[^>]*>)', "`$1`r`n$newEntry"
+}
 
 [System.IO.File]::WriteAllText((Resolve-Path "docs/index.html").Path, $html, [System.Text.UTF8Encoding]::new($false))
 # Mirror to landing/index.html
@@ -64,14 +67,14 @@ Write-Host "      [OK] docs/index.html and landing/index.html synchronized" -For
 
 # ── 3. Commit Release Changes ───────────────────────────
 Write-Host "[3/4] Committing version bump and release notes..." -ForegroundColor Yellow
-git add package.json docs/index.html landing/index.html
-git commit -m "Release v$Version: $Notes"
+git add package.json docs/index.html landing/index.html HANDOFF.md main.js styles.css widget.html widget.js release.ps1
+git commit -m "Release v${Version}: $Notes"
 git push origin main
 Write-Host "      [OK] Pushed release commit to main" -ForegroundColor Green
 
 # ── 4. Push Git Tag -> Triggers GitHub Actions Build ────
 Write-Host "[4/4] Creating and pushing git tag v$Version..." -ForegroundColor Yellow
-git tag "v$Version" -m "v$Version: $Notes"
+git tag "v$Version" -m "v${Version}: $Notes"
 git push origin "v$Version"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "      [ERROR] Failed to push tag. Release may already exist." -ForegroundColor Red

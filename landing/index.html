@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.5.6",
+          "softwareVersion": "1.5.7",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -789,8 +789,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.5.6 Released</span>
-                <span class="update-text">Hotfix: Quick Add Timezone Offset &amp; Auto-Save Event Persistence</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.5.7 Released</span>
+                <span class="update-text">Global Toggle Hotkey Presets & Zero-Drift Desktop Positioning</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -1125,6 +1125,17 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.5.7 <span class="cl-date">Sep 30, 2026</span></div>
+                    <div class="cl-body">
+                        <strong>Global Toggle Hotkey Presets &amp; Zero-Drift Desktop Positioning:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Customizable Global Toggle Hotkeys:</strong> Added curated hotkey presets in Settings (<code>Ctrl+Shift+C</code>, <code>Alt+C</code>, <code>Ctrl+Alt+C</code>, <code>Alt+Space</code>, <code>None</code>) with native macOS (<code>Cmd</code>) adaptation. Instantly pops the widget above active windows and drops it back down to the desktop without manual clicks.</li>
+                            <li><strong>Zero-Drift Startup Window Positioning:</strong> Eliminated multi-pixel coordinate drifting on system boot and restart by suppressing fractional DPI settling events during a 1500ms grace period and enforcing precise rounded coordinate locking.</li>
+                            <li><strong>Quality Assurance &amp; Focus Reliability:</strong> Seamlessly returns OS window focus to previous background applications when dismissed from foreground, verified against strict ESLint static analysis.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.5.6 <span class="cl-date">Sep 29, 2026</span></div>
                     <div class="cl-body">

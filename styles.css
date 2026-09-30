@@ -487,6 +487,26 @@ header button svg,
     margin-bottom: 0;
 }
 
+.modal-content select {
+    width: 100%;
+    padding: 8px 12px;
+    background: #2a2a32;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.modal-content select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.2);
+}
+
 .add-account-btn {
     width: 100%;
     margin-top: 10px;

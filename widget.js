@@ -290,6 +290,7 @@ try {
     const notificationsEnabledCheck = document.getElementById('notifications-enabled-check');
     const notifyBeforeRow = document.getElementById('notify-before-row');
     const notifyMinutesGroup = document.getElementById('notify-minutes-group');
+    const hotkeyPresetSelect = document.getElementById('hotkey-preset-select');
 
     // Containers for Month & Week Timeline Views
     const monthViewContainer = document.getElementById('month-view-container');
@@ -2063,6 +2064,11 @@ try {
                     });
                 }
                 
+                // Restore hotkey selection
+                if (hotkeyPresetSelect) {
+                    hotkeyPresetSelect.value = settings.hotkeyToggle || 'CommandOrControl+Shift+C';
+                }
+                
                 // Render accounts
                 await renderAccountsList();
                 
@@ -2196,6 +2202,19 @@ try {
                 ipcRenderer.send('set-theme-prop', { key: 'notifyMinutesBefore', value: notifyMinutesBefore });
             };
         });
+    }
+
+    // ── Global Hotkey management ───────────────────────────────────────────
+    if (navigator.platform.toUpperCase().indexOf('MAC') >= 0 && hotkeyPresetSelect) {
+        Array.from(hotkeyPresetSelect.options).forEach(opt => {
+            opt.textContent = opt.textContent.replace(/Ctrl/g, 'Cmd');
+        });
+    }
+
+    if (hotkeyPresetSelect) {
+        hotkeyPresetSelect.onchange = async (e) => {
+            await ipcRenderer.invoke('set-hotkey-toggle', e.target.value);
+        };
     }
 
     // ── Accounts management ─────────────────────────────────────────────────

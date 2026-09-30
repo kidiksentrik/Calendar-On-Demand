@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.6)
+- **Product**: **Calendar on Demand** (v1.5.7)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.6` (Hotfix: Quick Add Timezone Offset Scope & Auto-Save Event Persistence)
+- **Current Version**: `v1.5.7` (Global Toggle Hotkey Presets & Zero-Drift Desktop Positioning)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 - **Key URLs**:
   - Web: https://cal-ondemand.com
@@ -102,9 +102,20 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ---
 
-## ✅ Completed Features (v1.5.6 최신 현황)
+## ✅ Completed Features (v1.5.7 최신 현황)
 
-### 1. v1.5.6 핫픽스 (Hotfix: Quick Add Timezone Offset Scope & Auto-Save Persistence)
+### 1. v1.5.7 전역 토글 핫키 프리셋 & 창 위치 제로드리프트 (Global Hotkey & Precision Positioning)
+- [x] **전역 창 표시/숨김 단축키(Global Toggle Hotkey) 프리셋 탑재**:
+  - 설정창(Behavior)에서 `Ctrl+Shift+C (기본값)`, `Alt+C`, `Ctrl+Alt+C`, `Alt+Space`, `None` 프리셋 중 즉시 선택 가능.
+  - macOS 환경 감지 시 `Ctrl` 레이블을 `Cmd`로 자동 변환 표시.
+  - 풀스크린 브라우저나 타 작업 창 위에서도 단축키 하나로 최상단 즉각 팝업 (`screen-saver` 레벨).
+  - 팝업 상태에서 단축키 재입력 시, 타 창을 클릭하지 않아도 Windows OS 포커스를 이전 작업 창으로 자연스럽게 인계하며 바탕화면 레이어로 자동 복귀.
+- [x] **컴퓨터 재부팅/실행 시 창 위치 미세 이동(Drift) 현상 원천 차단**:
+  - Windows 배율(DPI 분수 스케일링) 및 HWND 생성 시 발생하는 인위적 `move`/`resize` 이벤트를 1500ms 유예 기간(Startup Grace Period) 동안 무시.
+  - 불필요한 테두리 자동 확장 원인이었던 `useContentSize: true` 제거 및 400ms 디바운스 정수형 좌표 클램핑 저장 적용.
+  - 창 잠금(`lockPosition: true`) 활성화 시 저장 좌표 불변 엄격 보장.
+
+### 2. v1.5.6 핫픽스 (Hotfix: Quick Add Timezone Offset Scope & Auto-Save Persistence)
 - [x] **일정 등록 시 타임존 오프셋(offset) 스코프 누락 해결**:
   - 시간을 지정한 일정 생성 시 `saveCurrentEvent()` 내부에서 `offset` 변수가 누락되어 `ReferenceError`가 발생하던 문제를 해결 (`const offset = getLocalTZOffset()`).
 - [x] **모달 바깥 클릭 시 자동 저장 및 닫기 방어 로직 강화**:
@@ -181,11 +192,9 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 1. **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
    - `winget install kidiksentrik.calendar-on-demand`
    - `brew install --cask calendar-on-demand`
-2. **Global Hotkey (전역 단축키)**:
-   - `Ctrl+Shift+C` 또는 `Alt+C` 등으로 다른 작업을 하다가도 백그라운드 위젯 즉시 최상단 포커스/토글.
-3. **반복 일정(Recurrence) 생성 & 표시**:
+2. **반복 일정(Recurrence) 생성 & 표시**:
    - 주간/월간 반복 룰 지원.
-4. **커스텀 디자인 옵션 추가**:
+3. **커스텀 디자인 옵션 추가**:
    - '오늘' 및 '주말' 하이라이트 색상 커스텀, 단색 심플 아이콘 옵션.
 
 ---

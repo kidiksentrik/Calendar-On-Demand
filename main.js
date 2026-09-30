@@ -12,6 +12,11 @@ let tray = null;
 let mainWindow = null;
 let authClient = null;
 let isQuitting = false;
+let isStartupGracePeriod = true;
+let saveBoundsTimeout = null;
+let currentHotkeyToggle = null;
+let isPoppedByHotkey = false;
+let desktopDismissTimeout = null;
 
 // ── Multi-account helpers ──────────────────────────────────────────────────
 
@@ -90,6 +95,20 @@ if (!gotTheLock) {
     
     app.on('before-quit', () => {
         isQuitting = true;
+        try {
+            globalShortcut.unregisterAll();
+        } catch (_e) {}
+        if (desktopDismissTimeout) clearTimeout(desktopDismissTimeout);
+        if (saveBoundsTimeout && mainWindow && !mainWindow.isDestroyed() && !store.get('lockPosition', false)) {
+            clearTimeout(saveBoundsTimeout);
+            const bounds = mainWindow.getBounds();
+            store.set('windowBounds', {
+                x: Math.round(bounds.x),
+                y: Math.round(bounds.y),
+                width: Math.max(370, Math.round(bounds.width)),
+                height: Math.max(430, Math.round(bounds.height))
+            });
+        }
     });
 
     app.whenReady().then(async () => {
@@ -107,6 +126,10 @@ if (!gotTheLock) {
 
             setupAutoUpdater();
             console.log('Auto-updater initialized.');
+
+            // Initialize customizable global toggle hotkey
+            const savedHotkey = store.get('hotkeyToggle', 'CommandOrControl+Shift+C');
+            registerGlobalToggleHotkey(savedHotkey);
 
             // Handle global shortcut separately
             globalShortcut.register('CommandOrControl+Shift+Space', () => {
@@ -135,9 +158,12 @@ if (!gotTheLock) {
 } // End of gotTheLock block
 
 async function createWindow() {
+    isStartupGracePeriod = true;
     let { width, height, x, y } = store.get('windowBounds') || { width: 380, height: 460, x: undefined, y: undefined };
-    width = Math.max(370, width || 380);
-    height = Math.max(430, height || 460);
+    width = Math.max(370, Math.round(width || 380));
+    height = Math.max(430, Math.round(height || 460));
+    if (x !== undefined) x = Math.round(x);
+    if (y !== undefined) y = Math.round(y);
 
     // Validate that stored coordinates are actually visible on an active display
     if (x !== undefined && y !== undefined) {
@@ -169,7 +195,6 @@ async function createWindow() {
         minHeight: 430,
         x,
         y,
-        useContentSize: true,
         frame: false,
         transparent: true,
         alwaysOnTop: alwaysOnTop,
@@ -187,6 +212,9 @@ async function createWindow() {
     // Explicitly center if coordinates are undefined or reset
     if (x === undefined || y === undefined) {
         mainWindow.center();
+    } else if (lockPosition) {
+        // Enforce exact saved bounds if locked
+        mainWindow.setBounds({ x, y, width, height });
     }
 
     if (desktopMode) {
@@ -221,18 +249,23 @@ async function createWindow() {
                 }
             }, 1000);
         }
+
+        // Release startup grace period after OS DPI and window initialization have settled
+        setTimeout(() => {
+            isStartupGracePeriod = false;
+        }, 1500);
     }
 
     mainWindow.setMinimumSize(370, 430);
 
     mainWindow.on('will-resize', (event, newBounds) => {
-        if (newBounds.width < 370 || newBounds.height < 430) {
+        if (store.get('lockPosition', false) || newBounds.width < 370 || newBounds.height < 430) {
             event.preventDefault();
         }
     });
 
     mainWindow.on('resize', () => {
-        if (!mainWindow) return;
+        if (!mainWindow || isStartupGracePeriod) return;
         const [w, h] = mainWindow.getSize();
         if (w < 370 || h < 430) {
             mainWindow.setSize(Math.max(370, w), Math.max(430, h));
@@ -241,6 +274,28 @@ async function createWindow() {
         saveBounds();
     });
     mainWindow.on('move', saveBounds);
+
+    mainWindow.on('blur', () => {
+        if (isPoppedByHotkey) {
+            isPoppedByHotkey = false;
+            if (mainWindow && !mainWindow.isDestroyed()) {
+                const desktopMode = store.get('desktopMode', false);
+                if (desktopMode) {
+                    mainWindow.setAlwaysOnTop(false);
+                    mainWindow.hide();
+                    clearTimeout(desktopDismissTimeout);
+                    desktopDismissTimeout = setTimeout(() => {
+                        if (mainWindow && !mainWindow.isDestroyed() && !isPoppedByHotkey) {
+                            mainWindow.showInactive();
+                        }
+                    }, 100);
+                } else {
+                    const keepTop = store.get('alwaysOnTop', false);
+                    mainWindow.setAlwaysOnTop(keepTop, keepTop ? 'floating' : 'normal');
+                }
+            }
+        }
+    });
 
     mainWindow.on('close', (event) => {
         if (!isQuitting) {
@@ -255,11 +310,22 @@ async function createWindow() {
 }
 
 function saveBounds() {
-    if (!mainWindow) return;
-    const bounds = mainWindow.getBounds();
-    bounds.width = Math.max(370, bounds.width);
-    bounds.height = Math.max(430, bounds.height);
-    store.set('windowBounds', bounds);
+    if (!mainWindow || isStartupGracePeriod) return;
+    if (store.get('lockPosition', false)) return;
+
+    clearTimeout(saveBoundsTimeout);
+    saveBoundsTimeout = setTimeout(() => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        if (store.get('lockPosition', false)) return;
+        const bounds = mainWindow.getBounds();
+        const cleanBounds = {
+            x: Math.round(bounds.x),
+            y: Math.round(bounds.y),
+            width: Math.max(370, Math.round(bounds.width)),
+            height: Math.max(430, Math.round(bounds.height))
+        };
+        store.set('windowBounds', cleanBounds);
+    }, 400);
 }
 
 function createTray() {
@@ -307,6 +373,81 @@ function toggleWindow() {
         } else {
             mainWindow.show();
         }
+    }
+}
+
+function toggleWindowWithFocus() {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+    }
+
+    const isCurrentlyActive = mainWindow.isVisible() && (mainWindow.isFocused() || isPoppedByHotkey);
+
+    if (isCurrentlyActive) {
+        // Dismiss
+        isPoppedByHotkey = false;
+        const desktopMode = store.get('desktopMode', false);
+        if (desktopMode) {
+            mainWindow.setAlwaysOnTop(false);
+            mainWindow.blur();
+            mainWindow.hide();
+            clearTimeout(desktopDismissTimeout);
+            desktopDismissTimeout = setTimeout(() => {
+                if (mainWindow && !mainWindow.isDestroyed() && !isPoppedByHotkey) {
+                    mainWindow.showInactive();
+                }
+            }, 100);
+        } else {
+            const keepTop = store.get('alwaysOnTop', false);
+            mainWindow.setAlwaysOnTop(keepTop, keepTop ? 'floating' : 'normal');
+            mainWindow.hide();
+        }
+    } else {
+        // Pop to front above all windows (bypassing desktopMode background restriction)
+        clearTimeout(desktopDismissTimeout);
+        isPoppedByHotkey = true;
+        mainWindow.show();
+        mainWindow.setAlwaysOnTop(true, 'screen-saver');
+        mainWindow.moveTop();
+        mainWindow.focus();
+        try {
+            app.focus({ steal: true });
+        } catch (_e) {}
+    }
+}
+
+function registerGlobalToggleHotkey(accelerator) {
+    if (currentHotkeyToggle) {
+        try {
+            globalShortcut.unregister(currentHotkeyToggle);
+        } catch (_e) {}
+        currentHotkeyToggle = null;
+    }
+
+    if (!accelerator || accelerator === 'none') {
+        store.set('hotkeyToggle', 'none');
+        return { success: true, hotkey: 'none' };
+    }
+
+    try {
+        const ok = globalShortcut.register(accelerator, () => {
+            console.log(`Global toggle shortcut (${accelerator}) triggered.`);
+            toggleWindowWithFocus();
+        });
+
+        if (ok) {
+            currentHotkeyToggle = accelerator;
+            store.set('hotkeyToggle', accelerator);
+            console.log(`Successfully registered global toggle hotkey: ${accelerator}`);
+            return { success: true, hotkey: accelerator };
+        } else {
+            console.warn(`Failed to register global toggle hotkey: ${accelerator}`);
+            return { success: false, error: 'Shortcut already in use or unavailable' };
+        }
+    } catch (err) {
+        console.error('Error registering global hotkey:', err);
+        return { success: false, error: err.message };
     }
 }
 
@@ -546,6 +687,17 @@ ipcMain.on('set-lock-position', (event, value) => {
         mainWindow.setMovable(!value);
         mainWindow.setResizable(!value);
         store.set('lockPosition', value);
+        if (value) {
+            clearTimeout(saveBoundsTimeout);
+            const bounds = mainWindow.getBounds();
+            const cleanBounds = {
+                x: Math.round(bounds.x),
+                y: Math.round(bounds.y),
+                width: Math.max(370, Math.round(bounds.width)),
+                height: Math.max(430, Math.round(bounds.height))
+            };
+            store.set('windowBounds', cleanBounds);
+        }
     }
 });
 
@@ -583,8 +735,13 @@ ipcMain.handle('get-settings', () => {
         soundEnabled: store.get('soundEnabled', true),
         notificationsEnabled: store.get('notificationsEnabled', false),
         notifyMinutesBefore: store.get('notifyMinutesBefore', 15),
+        hotkeyToggle: store.get('hotkeyToggle', 'CommandOrControl+Shift+C'),
         version: app.getVersion()
     };
+});
+
+ipcMain.handle('set-hotkey-toggle', (_event, accelerator) => {
+    return registerGlobalToggleHotkey(accelerator);
 });
 
 ipcMain.on('set-default-view-mode', (event, value) => {
