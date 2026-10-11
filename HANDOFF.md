@@ -62,7 +62,7 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
   └── Meeting Direct Join (📹 Google Meet / Video Conference)
 ```
 
-- **Runtime**: Electron 31+
+- **Runtime**: Electron **25.9.8** (EOL since 2024-04 — 보안 패치 없음. 업그레이드 필요하나 안정성 우려로 단계적 진행 예정)
 - **Frontend**: Vanilla HTML5, CSS3 (Glassmorphism, CSS Variables Theme System), JavaScript (ESNext)
 - **Google API**: OAuth 2.0 (`google-auth-library`), Google Calendar API v3 (`googleapis`)
 - **Release Automation**: GitHub Actions CI (`.github/workflows`) 트리거 (Git Tag `v*.*.*` 푸시 시 Win `.exe` & Mac `.dmg` 자동 빌드 및 릴리즈 드래프트 등록)
@@ -189,12 +189,18 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ## 🎯 Next Tasks (Immediate Priorities)
 
-1. **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
-   - `winget install kidiksentrik.calendar-on-demand`
-   - `brew install --cask calendar-on-demand`
+1. **보안 보강 1단계 (Electron 버전은 그대로 두고)**:
+   - `nodeIntegration: false` + `contextIsolation: true` + `preload.js` IPC 브리지 도입 → XSS→RCE 사슬 차단
+   - `widget.html`에 CSP 메타 태그 추가 (`script-src 'self'`)
+   - 이벤트 `description` 렌더링 시 `innerHTML` → `textContent` 또는 DOMPurify 적용
+   - `shell.openExternal` 호출 URL에 `http(s)://` 화이트리스트 검증 추가
+   - 참고: Electron 25→최신 메이저 업그레이드는 안정성 우려로 단계적 진행 예정 (25→27→29→31 LTS)
 2. **반복 일정(Recurrence) 생성 & 표시**:
    - 주간/월간 반복 룰 지원.
-3. **커스텀 디자인 옵션 추가**:
+3. **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
+   - `winget install kidiksentrik.calendar-on-demand`
+   - `brew install --cask calendar-on-demand`
+4. **커스텀 디자인 옵션 추가**:
    - '오늘' 및 '주말' 하이라이트 색상 커스텀, 단색 심플 아이콘 옵션.
 
 ---
@@ -216,3 +222,14 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
      2. 종일(All-day) 일정 추가 ➔ 외부 클릭 오토세이브 정상 작동 확인
      3. 기존 일정 수정 및 삭제 정상 작동 확인
      4. 설정창 토글 및 닫힘 동작 확인
+5. **HANDOFF.md 상시 업데이트 규칙** [필수 📝]:
+   - 매 작업(기능 개발, 버그 수정, 보안 보강 등) 종료 시 **반드시 HANDOFF.md를 최신 상태로 업데이트**함.
+   - 다른 컴퓨터/에이전트에서 작업을 이어받을 때 이 문서만 읽고도 전체 맥락을 파악할 수 있도록 변경 내용, 결정사항, 남은 할 일을 항상 반영함.
+   - 이 문서는 Git 레포에 포함되어 있으므로 어느 환경에서든 `git pull` 후 바로 접근 가능함.
+6. **보안 취약점 현황 (2026-10-11 기준)**:
+   - `nodeIntegration: true` + `contextIsolation: false` — XSS 발생 시 RCE로 이어질 수 있음. preload.js 브리지 도입 필요.
+   - Content Security Policy (CSP) 없음.
+   - 이벤트 `description`을 `innerHTML`로 렌더링하는 경로 존재 (`_showEventDetails` 함수).
+   - `shell.openExternal` 호출 시 URL 스킴 검증 없음.
+   - 의존성 취약점 27개 (런타임: fast-uri, js-yaml, node-forge, uuid).
+   - **주의**: 악성 코드나 백도어는 없으나, 아키텍처 수준의 보안 보강이 필요한 상태. Next Tasks의 1번(보안 보강 1단계) 참고.
