@@ -790,7 +790,7 @@
         <div>
             <a href="#changelog" class="update-banner">
                 <span class="update-tag"><span class="pulse-dot"></span>v1.6.0 Released</span>
-                <span class="update-text">Added Tasks Drawer & Time-blocking (drag-and-drop to calendar, Alt+T shortcut), smart task completion sync, settings UI polish, and natural language time parsing fixes.</span>
+                <span class="update-text">Tasks Drawer, Drag &amp; Drop Time-blocking, Alt+T Shortcut &amp; Smart Completion Sync</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -1125,9 +1125,18 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
-                <div class="cl-item">
-                    <div class="cl-version">v1.6.0 <span class="cl-date">Oct 16, 2026</span></div>
-                    <div class="cl-body">Added Tasks Drawer & Time-blocking (drag-and-drop to calendar, Alt+T shortcut), smart task completion sync, settings UI polish, and natural language time parsing fixes.</div>
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.6.0 <span class="cl-date">Oct 16, 2026</span> <span class="cl-tag" style="background:rgba(126,196,126,0.16);color:#7ec47e;border:1px solid rgba(126,196,126,0.3);font-weight:700;">NEW</span></div>
+                    <div class="cl-body">
+                        <strong>Tasks Drawer, Drag &amp; Drop Time-blocking &amp; Smart Sync:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Local Tasks Drawer (<kbd>Alt+T</kbd>):</strong> Built-in lightweight, distraction-free desktop todo list drawer. Add, edit, check off, and delete tasks instantly with real-time active counter badges and filter tabs (All / Active / Done). 100% offline-first local persistence.</li>
+                            <li><strong>Drag &amp; Drop Time-blocking:</strong> Seamlessly drag any task from the drawer directly onto Month day cells (for all-day/flexible events) or Weekly Timeline hourly slots to instantly schedule your day without manual typing.</li>
+                            <li><strong>Smart Multi-Day Completion Sync:</strong> Checking off an event on the calendar automatically completes the task in the drawer once all scheduled sessions are finished. Scheduled a task across multiple days? The task stays active until the final session is checked.</li>
+                            <li><strong>Safe Event Deletion:</strong> Removing a scheduled time block from the calendar cancels the time slot while safely preserving the task in your drawer for future rescheduling.</li>
+                            <li><strong>UI Polish &amp; Parser Fixes:</strong> Re-engineered the Settings modal with zero horizontal overflow and full Logout button visibility. Fixed natural language time parsing regex to prevent trailing text truncation (e.g. <code>Test 1500</code>).</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.5.7 <span class="cl-date">Sep 30, 2026</span></div>
