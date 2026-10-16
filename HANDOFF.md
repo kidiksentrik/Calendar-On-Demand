@@ -207,21 +207,38 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ---
 
-## 🎯 Next Tasks (Immediate Priorities)
+## 🎯 Next Tasks & Product Roadmap (우선순위 로드맵)
 
-1. **보안 보강 1단계 (Electron 버전은 그대로 두고)**:
-   - `nodeIntegration: false` + `contextIsolation: true` + `preload.js` IPC 브리지 도입 → XSS→RCE 사슬 차단
-   - `widget.html`에 CSP 메타 태그 추가 (`script-src 'self'`)
-   - 이벤트 `description` 렌더링 시 `innerHTML` → `textContent` 또는 DOMPurify 적용
-   - `shell.openExternal` 호출 URL에 `http(s)://` 화이트리스트 검증 추가
-   - 참고: Electron 25→최신 메이저 업그레이드는 안정성 우려로 단계적 진행 예정 (25→27→29→31 LTS)
-2. **반복 일정(Recurrence) 생성 & 표시**:
-   - 주간/월간 반복 룰 지원.
-3. **Windows 'winget' & macOS 'Homebrew' 패키지 매니저 등록**:
-   - `winget install kidiksentrik.calendar-on-demand`
-   - `brew install --cask calendar-on-demand`
-4. **커스텀 디자인 옵션 추가**:
-   - '오늘' 및 '주말' 하이라이트 색상 커스텀, 단색 심플 아이콘 옵션.
+### 1. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
+- **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.
+- **해결 방안**:
+  - macOS 환경을 위한 전용 **HUD Popover / 메뉴바 팝업 모드** 도입 (단축키 또는 트레이 아이콘 클릭 시만 즉각 팝업 후 포커스 이탈 시 자연스럽게 숨김).
+  - 맥북 실기기 환경(귀가 후)에서 포커스 전환 및 다크 테마 시각적 완성도 검증.
+- **Homebrew Cask 등록**:
+  - Mac 테스트 완료 후 `brew install --cask calendar-on-demand` 공식 Cask PR 제출.
+
+### 2. 구글 태스크(Google Tasks) 양방향 클라우드 동기화 (Pro 티어 유료화 로드맵)
+- **수익화 전략 원칙**:
+  - **로컬 투두 서랍장(현재 v1.6.0 기능)은 영구 무료(Free Forever) 보장** (기존 유저 신뢰 유지).
+  - 모바일(iOS / Android) 구글 태스크 앱과의 **원클릭 양방향 실시간 동기화**를 핵심 유료 Pro 기능($19~$29 평생 라이선스 또는 구독)으로 포지셔닝.
+- **기술적 선결 과제**:
+  - 구글 OAuth `https://www.googleapis.com/auth/tasks` 민감 권한(Sensitive Scope) 추가 및 Google 앱 재심사.
+  - v1.6.0에서 이미 Google Tasks 호환 스키마(`{ id, title, notes, status, due, createdAt }`)가 구축되어 있으므로 클라우드 싱크 엔진만 연결하면 됨.
+
+### 3. 아웃룩 & 마이크로소프트 365 캘린더 연동 (기업 고객 확장)
+- 현재 구글 계정 한정 멀티 계정 시스템을 Microsoft Graph API로 확장.
+- 직장인/기업 유저들의 피드백 접수 추이를 모니터링하여 Pro 플랜 패키지에 포함 검토.
+
+### 4. 로컬 투두 서랍장 디테일 폴리싱 (Tasks Backlog)
+- 완료된 항목 일괄 정리 버튼 (`Clear completed`).
+- 서랍장 내 드래그 앤 드롭을 통한 할 일 우선순위 순서 변경 (Reordering).
+- 간단 마감일(Due Date) 칩 표시.
+
+### 5. 아키텍처 보안 보강 1단계 (Electron 버전 유지 상태)
+- `nodeIntegration: false` + `contextIsolation: true` + `preload.js` IPC 브리지 도입 → XSS→RCE 사슬 원천 차단.
+- `widget.html`에 CSP 메타 태그 추가 (`script-src 'self'`).
+- 이벤트 `description` 렌더링 시 `innerHTML` → DOMPurify 적용.
+- `shell.openExternal` 호출 URL에 `http(s)://` 프로토콜 화이트리스트 검증 추가.
 
 ---
 
