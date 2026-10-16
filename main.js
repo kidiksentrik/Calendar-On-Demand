@@ -15,6 +15,7 @@ let isQuitting = false;
 let isStartupGracePeriod = true;
 let saveBoundsTimeout = null;
 let currentHotkeyToggle = null;
+let currentTaskHotkeyToggle = null;
 let isPoppedByHotkey = false;
 let desktopDismissTimeout = null;
 
@@ -130,6 +131,10 @@ if (!gotTheLock) {
             // Initialize customizable global toggle hotkey
             const savedHotkey = store.get('hotkeyToggle', 'CommandOrControl+Shift+C');
             registerGlobalToggleHotkey(savedHotkey);
+
+            // Initialize customizable global tasks toggle hotkey
+            const savedTaskHotkey = store.get('taskHotkeyToggle', 'Alt+T');
+            registerGlobalTaskHotkey(savedTaskHotkey);
 
             // Handle global shortcut separately
             globalShortcut.register('CommandOrControl+Shift+Space', () => {
@@ -451,6 +456,73 @@ function registerGlobalToggleHotkey(accelerator) {
     }
 }
 
+function toggleTasksWithFocus() {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+    }
+
+    const isVisible = mainWindow.isVisible();
+    const isCurrentlyActive = isVisible && (mainWindow.isFocused() || isPoppedByHotkey);
+    const currentlyOpen = store.get('isTaskDrawerOpen', false);
+
+    if (isCurrentlyActive && currentlyOpen) {
+        // Task drawer is already open and window active: close drawer
+        store.set('isTaskDrawerOpen', false);
+        mainWindow.webContents.send('set-task-drawer-state', false);
+    } else {
+        // Open drawer and bring window to front
+        store.set('isTaskDrawerOpen', true);
+        mainWindow.webContents.send('set-task-drawer-state', true);
+
+        if (!isVisible || !isCurrentlyActive) {
+            clearTimeout(desktopDismissTimeout);
+            isPoppedByHotkey = true;
+            mainWindow.show();
+            mainWindow.setAlwaysOnTop(true, 'screen-saver');
+            mainWindow.moveTop();
+            mainWindow.focus();
+            try {
+                app.focus({ steal: true });
+            } catch (_e) {}
+        }
+    }
+}
+
+function registerGlobalTaskHotkey(accelerator) {
+    if (currentTaskHotkeyToggle) {
+        try {
+            globalShortcut.unregister(currentTaskHotkeyToggle);
+        } catch (_e) {}
+        currentTaskHotkeyToggle = null;
+    }
+
+    if (!accelerator || accelerator === 'none') {
+        store.set('taskHotkeyToggle', 'none');
+        return { success: true, hotkey: 'none' };
+    }
+
+    try {
+        const ok = globalShortcut.register(accelerator, () => {
+            console.log(`Global task shortcut (${accelerator}) triggered.`);
+            toggleTasksWithFocus();
+        });
+
+        if (ok) {
+            currentTaskHotkeyToggle = accelerator;
+            store.set('taskHotkeyToggle', accelerator);
+            console.log(`Successfully registered global task hotkey: ${accelerator}`);
+            return { success: true, hotkey: accelerator };
+        } else {
+            console.warn(`Failed to register global task hotkey: ${accelerator}`);
+            return { success: false, error: 'Shortcut already in use or unavailable' };
+        }
+    } catch (err) {
+        console.error('Error registering global task hotkey:', err);
+        return { success: false, error: err.message };
+    }
+}
+
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -736,12 +808,17 @@ ipcMain.handle('get-settings', () => {
         notificationsEnabled: store.get('notificationsEnabled', false),
         notifyMinutesBefore: store.get('notifyMinutesBefore', 15),
         hotkeyToggle: store.get('hotkeyToggle', 'CommandOrControl+Shift+C'),
+        taskHotkeyToggle: store.get('taskHotkeyToggle', 'Alt+T'),
         version: app.getVersion()
     };
 });
 
 ipcMain.handle('set-hotkey-toggle', (_event, accelerator) => {
     return registerGlobalToggleHotkey(accelerator);
+});
+
+ipcMain.handle('set-task-hotkey-toggle', (_event, accelerator) => {
+    return registerGlobalTaskHotkey(accelerator);
 });
 
 ipcMain.on('set-default-view-mode', (event, value) => {
@@ -767,6 +844,31 @@ ipcMain.on('set-start-of-week', (event, value) => {
 
 ipcMain.on('set-selected-calendars', (event, value) => {
     store.set('selectedCalendarIds', value);
+});
+
+// ── Local Tasks & Drawer Management ────────────────────────
+ipcMain.handle('get-local-tasks', () => {
+    return store.get('localTasks', []);
+});
+
+ipcMain.handle('save-local-tasks', (_event, tasks) => {
+    store.set('localTasks', tasks);
+    return true;
+});
+
+ipcMain.handle('get-drawer-state', () => {
+    return store.get('isTaskDrawerOpen', false);
+});
+
+ipcMain.handle('toggle-task-drawer', (_event, shouldOpen) => {
+    if (!mainWindow) return false;
+    const currentlyOpen = store.get('isTaskDrawerOpen', false);
+    const targetState = (shouldOpen !== undefined) ? shouldOpen : !currentlyOpen;
+
+    if (targetState !== currentlyOpen) {
+        store.set('isTaskDrawerOpen', targetState);
+    }
+    return targetState;
 });
 
 ipcMain.handle('get-login-settings', () => {

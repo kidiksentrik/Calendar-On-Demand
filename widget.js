@@ -16,6 +16,10 @@ try {
     let notifyMinutesBefore = 15;
     const notifiedEventIds = new Set(); // track already-fired notifications
 
+    let localTasks = [];
+    let taskFilter = 'all'; // 'all' | 'active' | 'completed'
+    let isTaskDrawerOpen = false;
+
     // selectedCalendarIds will be loaded from ipcRenderer 'get-settings'
 
     let lastSyncTime = 0;
@@ -227,13 +231,27 @@ try {
     }
 
     function cleanDisplaySummary(summary, hasTime = false) {
-        let cleaned = stripTags(summary);
+        let cleaned = stripTags(summary).trim();
         if (!hasTime || !cleaned) return cleaned;
 
-        // Strip leading time patterns: e.g. "1000 ", "10:00 ", "10:00-11:00 ", "1000-1100 "
-        let withoutTime = cleaned.replace(/^(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9])\s*(?:[-~to]\s*(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9]))?\s*/i, '');
-        // Strip trailing time patterns: e.g. " 1000", " 10:00"
-        withoutTime = withoutTime.replace(/\s*(?:[-~to]\s*)?(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9])$/i, '');
+        const t = '(?:(?:[0-1]?[0-9]|2[0-3]):[0-5][0-9]|(?:[0-1][0-9]|2[0-3])[0-5][0-9])';
+        const sep = '\\s*(?:[~-]|to)\\s*';
+
+        // Strip trailing time range: e.g. "Meeting 14:00-15:00", "Meeting 1400-1500"
+        const trailingRange = new RegExp('\\s+' + t + sep + t + '$', 'i');
+        let withoutTime = cleaned.replace(trailingRange, '');
+
+        // Strip single trailing time: e.g. "Test 15:00", "Test 1500"
+        const trailingSingle = new RegExp('\\s+' + t + '$', 'i');
+        withoutTime = withoutTime.replace(trailingSingle, '');
+
+        // Strip leading time range: e.g. "14:00-15:00 Meeting"
+        const leadingRange = new RegExp('^' + t + sep + t + '\\s*', 'i');
+        withoutTime = withoutTime.replace(leadingRange, '');
+
+        // Strip single leading time: e.g. "15:00 Test", "1500 Test"
+        const leadingSingle = new RegExp('^' + t + '\\s*', 'i');
+        withoutTime = withoutTime.replace(leadingSingle, '');
 
         withoutTime = withoutTime.trim();
         return withoutTime.length > 0 ? withoutTime : cleaned;
@@ -291,6 +309,7 @@ try {
     const notifyBeforeRow = document.getElementById('notify-before-row');
     const notifyMinutesGroup = document.getElementById('notify-minutes-group');
     const hotkeyPresetSelect = document.getElementById('hotkey-preset-select');
+    const taskHotkeyPresetSelect = document.getElementById('task-hotkey-preset-select');
 
     // Containers for Month & Week Timeline Views
     const monthViewContainer = document.getElementById('month-view-container');
@@ -306,6 +325,17 @@ try {
     // New Todo list container
     const todoListContainer = document.getElementById('todo-list-container');
     const todoDateTitle = document.getElementById('todo-date-title');
+
+    // Side Task Drawer Elements
+    const taskDrawerToggle = document.getElementById('task-drawer-toggle');
+    const taskDrawer = document.getElementById('task-drawer');
+    const taskDrawerBadge = document.getElementById('task-drawer-badge');
+    const drawerCountBadge = document.getElementById('drawer-count-badge');
+    const closeDrawerBtn = document.getElementById('close-drawer-btn');
+    const drawerTaskInput = document.getElementById('drawer-task-input');
+    const drawerAddBtn = document.getElementById('drawer-add-btn');
+    const drawerTaskList = document.getElementById('drawer-task-list');
+    const drawerTabs = document.querySelectorAll('.drawer-tab');
 
     function updateAllDayUI() {
         if (!allDayCheck) return;
@@ -405,8 +435,8 @@ try {
     if (quickAddInput) {
         quickAddInput.addEventListener('input', () => {
             const val = quickAddInput.value;
-            const durationMatch = val.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/i);
-            const singleTimeMatch = val.match(/(\d{1,2}:?\d{2})/);
+            const durationMatch = val.match(/(?:^|\s)(\d{1,2}:?\d{2})\s*(?:[~-]|to)\s*(\d{1,2}:?\d{2})(?:\s|$)/i);
+            const singleTimeMatch = val.match(/(?:^|\s)(\d{1,2}:?\d{2})(?:\s|$)/);
 
             function formatPart(t) {
                 if (t.includes(':')) return t.padStart(5, '0');
@@ -428,7 +458,7 @@ try {
                     }
                 }
             } else if (singleTimeMatch) {
-                const s = formatPart(singleTimeMatch[0]);
+                const s = formatPart(singleTimeMatch[1]);
                 if (s && s.length === 5) {
                     if (eventStartTime) eventStartTime.value = s;
                     if (!isEndTimeUserModified && eventEndTime) {
@@ -991,6 +1021,47 @@ try {
                 }
             };
 
+            // Task Drawer Drag & Drop to Week Column Slot
+            col.ondragover = (ev) => {
+                ev.preventDefault();
+                col.classList.add('drag-over-slot');
+            };
+            col.ondragleave = () => {
+                col.classList.remove('drag-over-slot');
+            };
+            col.ondrop = (ev) => {
+                ev.preventDefault();
+                col.classList.remove('drag-over-slot');
+                const taskData = ev.dataTransfer.getData('application/json');
+                if (!taskData) return;
+                try {
+                    const task = JSON.parse(taskData);
+                    const rect = col.getBoundingClientRect();
+                    const offsetY = ev.clientY - rect.top;
+                    const clickedMins = (offsetY / HOUR_HEIGHT) * 60;
+                    const snapMins = Math.floor(clickedMins / 30) * 30;
+                    const clampedMins = Math.max(0, Math.min(23 * 60 + 30, snapMins));
+                    const startH = Math.floor(clampedMins / 60);
+                    const startM = clampedMins % 60;
+                    const endH = (startH + 1) % 24;
+
+                    const sTime = `${startH.toString().padStart(2, '0')}:${startM.toString().padStart(2, '0')}`;
+                    const eTime = `${endH.toString().padStart(2, '0')}:${startM.toString().padStart(2, '0')}`;
+
+                    editingEvent = null;
+                    selectedDay = dateStr;
+                    openQuickAdd();
+
+                    if (quickAddInput) quickAddInput.value = task.title;
+                    if (eventStartTime) eventStartTime.value = sTime;
+                    if (eventEndTime) eventEndTime.value = eTime;
+                    if (allDayCheck) {
+                        allDayCheck.checked = false;
+                        updateAllDayUI();
+                    }
+                } catch (_e) {}
+            };
+
             weekDaysColumns.appendChild(col);
         }
 
@@ -1201,6 +1272,32 @@ try {
             cell.style.background = `linear-gradient(135deg, ${cellHighlightColor}33 0%, ${cellHighlightColor}11 100%)`;
             cell.style.borderColor = cellHighlightColor;
         }
+
+        // Task Drawer Drag & Drop to Day Cell
+        cell.ondragover = (ev) => {
+            ev.preventDefault();
+            cell.classList.add('drag-over-cell');
+        };
+        cell.ondragleave = () => {
+            cell.classList.remove('drag-over-cell');
+        };
+        cell.ondrop = (ev) => {
+            ev.preventDefault();
+            cell.classList.remove('drag-over-cell');
+            const taskData = ev.dataTransfer.getData('application/json');
+            if (!taskData) return;
+            try {
+                const task = JSON.parse(taskData);
+                selectedDay = dateStr;
+                editingEvent = null;
+                openQuickAdd();
+                if (quickAddInput) quickAddInput.value = task.title;
+                if (allDayCheck) {
+                    allDayCheck.checked = true;
+                    updateAllDayUI();
+                }
+            } catch (_e) {}
+        };
 
         cell.onclick = () => { 
             editingEvent = null; 
@@ -1553,6 +1650,41 @@ try {
         eventItem.summary = newSummary; // Mutate local state directly for 0ms delay
         updateTodoListUI();
         renderCalendar();
+
+        // 3. Smart Task Drawer Sync
+        // When checking an event, if all calendar sessions for this task are completed, mark task Done.
+        // If unchecking an event, revert matching task to Active.
+        try {
+            const hasTime = !!(eventItem.start && eventItem.start.dateTime);
+            const cleanText = cleanDisplaySummary(newSummary, hasTime).trim();
+            const matchingTask = localTasks.find(t => t.title.trim().toLowerCase() === cleanText.toLowerCase());
+
+            if (matchingTask) {
+                if (!isCompleted) {
+                    // Event was just checked. Check if any OTHER calendar events for this task are still uncompleted.
+                    const otherIncompleteEvents = events.filter(e => {
+                        if (e.id === eventItem.id) return false;
+                        const eHasTime = !!(e.start && e.start.dateTime);
+                        const eClean = cleanDisplaySummary(e.summary, eHasTime).trim();
+                        const eIsIncomplete = !e.summary.startsWith('[x]');
+                        return eClean.toLowerCase() === cleanText.toLowerCase() && eIsIncomplete;
+                    });
+
+                    if (otherIncompleteEvents.length === 0) {
+                        matchingTask.status = 'completed';
+                        saveLocalTasks();
+                    }
+                } else {
+                    // Event was just unchecked. Revert task to Active.
+                    if (matchingTask.status === 'completed') {
+                        matchingTask.status = 'needsAction';
+                        saveLocalTasks();
+                    }
+                }
+            }
+        } catch (syncErr) {
+            console.error('Error syncing calendar event completion to task drawer:', syncErr);
+        }
         
         const eventData = {
             summary: newSummary,
@@ -1587,8 +1719,8 @@ try {
 
         // Fallback: parse from input text if not explicitly set in picker
         if (!startStr) {
-            const durationMatch = summary.match(/(\d{1,2}:?\d{2})\s*[-~to]\s*(\d{1,2}:?\d{2})/i);
-            const singleTimeMatch = summary.match(/(\d{1,2}:?\d{2})/);
+            const durationMatch = summary.match(/(?:^|\s)(\d{1,2}:?\d{2})\s*(?:[~-]|to)\s*(\d{1,2}:?\d{2})(?:\s|$)/i);
+            const singleTimeMatch = summary.match(/(?:^|\s)(\d{1,2}:?\d{2})(?:\s|$)/);
             function formatPart(t) {
                 if (t.includes(':')) return t.padStart(5, '0');
                 if (t.length === 3) return `0${t[0]}:${t.slice(1)}`;
@@ -1596,7 +1728,7 @@ try {
                 return t;
             }
             if (durationMatch) { startStr = formatPart(durationMatch[1]); endStr = formatPart(durationMatch[2]); }
-            else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[0]); }
+            else if (singleTimeMatch) { startStr = formatPart(singleTimeMatch[1]); }
         }
 
         const sDateVal = (eventStartDate && eventStartDate.value) ? eventStartDate.value : selectedDay;
@@ -2010,18 +2142,237 @@ try {
     }
 
     window.addEventListener('keydown', (e) => {
-        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
-        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
         const quickAddOpen = quickAddModal && !quickAddModal.classList.contains('hidden');
         const settingsOpen = settingsOverlay && !settingsOverlay.classList.contains('hidden');
+
+        // Alt+T shortcut toggles task drawer even if an input is focused (when modals are closed)
+        if (e.altKey && (e.key === 't' || e.key === 'T')) {
+            if (!quickAddOpen && !settingsOpen) {
+                e.preventDefault();
+                toggleTaskDrawer();
+                return;
+            }
+        }
+
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
         if (quickAddOpen || settingsOpen) return;
 
         if (e.key === 'w' || e.key === 'W') {
             if (currentViewMode !== 'week') toggleViewMode('week');
         } else if (e.key === 'm' || e.key === 'M') {
             if (currentViewMode !== 'month') toggleViewMode('month');
+        } else if (e.key === 't' || e.key === 'T') {
+            toggleTaskDrawer();
+        } else if (e.key === 'Escape') {
+            if (isTaskDrawerOpen) toggleTaskDrawer(false);
         }
     });
+
+    // ── Local Tasks & Drawer Logic ──────────────────────────────────────────
+    function updateTaskDrawerUI(isOpen) {
+        isTaskDrawerOpen = isOpen;
+        document.body.classList.toggle('task-drawer-open', isOpen);
+        if (taskDrawer) {
+            if (isOpen) {
+                taskDrawer.classList.remove('hidden');
+                taskDrawerToggle?.classList.add('active');
+                setTimeout(() => drawerTaskInput?.focus(), 100);
+            } else {
+                taskDrawer.classList.add('hidden');
+                taskDrawerToggle?.classList.remove('active');
+            }
+        }
+    }
+
+    ipcRenderer.on('set-task-drawer-state', (_event, state) => {
+        updateTaskDrawerUI(state);
+    });
+
+    async function toggleTaskDrawer(shouldOpen) {
+        try {
+            const newState = await ipcRenderer.invoke('toggle-task-drawer', shouldOpen);
+            updateTaskDrawerUI(newState);
+        } catch (err) {
+            console.error('Error toggling task drawer:', err);
+        }
+    }
+
+    async function saveLocalTasks() {
+        try {
+            await ipcRenderer.invoke('save-local-tasks', localTasks);
+            renderTasks();
+        } catch (err) {
+            console.error('Failed to save local tasks:', err);
+        }
+    }
+
+    function toggleTaskStatus(taskId) {
+        const task = localTasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        const isNowCompleted = task.status !== 'completed';
+        task.status = isNowCompleted ? 'completed' : 'needsAction';
+        playChimeSound(isNowCompleted);
+        saveLocalTasks();
+    }
+
+    function deleteTask(taskId) {
+        localTasks = localTasks.filter(t => t.id !== taskId);
+        saveLocalTasks();
+    }
+
+    function renderTasks() {
+        if (!drawerTaskList) return;
+        drawerTaskList.innerHTML = '';
+
+        const activeCount = localTasks.filter(t => t.status !== 'completed').length;
+        if (drawerCountBadge) drawerCountBadge.innerText = activeCount;
+        if (taskDrawerBadge) {
+            taskDrawerBadge.innerText = activeCount;
+            if (activeCount > 0) {
+                taskDrawerBadge.classList.remove('hidden');
+            } else {
+                taskDrawerBadge.classList.add('hidden');
+            }
+        }
+
+        const filtered = localTasks.filter(t => {
+            if (taskFilter === 'active') return t.status !== 'completed';
+            if (taskFilter === 'completed') return t.status === 'completed';
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            const emptyEl = document.createElement('div');
+            emptyEl.className = 'drawer-empty-state';
+            emptyEl.innerText = taskFilter === 'completed' 
+                ? 'No completed tasks yet.' 
+                : (taskFilter === 'active' ? 'All caught up! No active tasks.' : 'No tasks yet.\nType above to add one!');
+            drawerTaskList.appendChild(emptyEl);
+            return;
+        }
+
+        filtered.forEach(task => {
+            const item = document.createElement('div');
+            item.className = 'drawer-task-item' + (task.status === 'completed' ? ' completed' : '');
+            item.draggable = true;
+
+            // HTML5 Drag and Drop for Time-blocking onto calendar
+            item.ondragstart = (e) => {
+                e.dataTransfer.setData('text/plain', task.title);
+                e.dataTransfer.setData('application/json', JSON.stringify(task));
+                item.classList.add('dragging');
+            };
+            item.ondragend = () => {
+                item.classList.remove('dragging');
+            };
+
+            // Circular Checkbox
+            const checkbox = document.createElement('div');
+            checkbox.className = 'drawer-task-checkbox';
+            checkbox.title = task.status === 'completed' ? 'Mark incomplete' : 'Mark complete';
+            checkbox.innerHTML = `<svg class="drawer-task-checkbox-check" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            checkbox.onclick = (e) => {
+                e.stopPropagation();
+                toggleTaskStatus(task.id);
+            };
+
+            // Task title
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'drawer-task-text';
+            titleSpan.innerText = task.title;
+            titleSpan.title = 'Click to edit or drag to calendar to schedule';
+            titleSpan.contentEditable = 'true';
+            titleSpan.spellcheck = false;
+            titleSpan.onblur = () => {
+                const newTitle = titleSpan.innerText.trim();
+                if (newTitle && newTitle !== task.title) {
+                    task.title = newTitle;
+                    saveLocalTasks();
+                } else {
+                    titleSpan.innerText = task.title;
+                }
+            };
+            titleSpan.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    titleSpan.blur();
+                }
+            };
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'drawer-task-delete';
+            deleteBtn.title = 'Delete task';
+            deleteBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteTask(task.id);
+            };
+
+            item.appendChild(checkbox);
+            item.appendChild(titleSpan);
+            item.appendChild(deleteBtn);
+            drawerTaskList.appendChild(item);
+        });
+    }
+
+    function addNewTask(rawTitle) {
+        const title = (rawTitle || '').trim();
+        if (!title) return;
+
+        const newTask = {
+            id: 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+            title: title,
+            notes: '',
+            status: 'needsAction',
+            due: null,
+            createdAt: Date.now()
+        };
+
+        localTasks.unshift(newTask);
+        saveLocalTasks();
+        playChimeSound(false);
+
+        if (drawerTaskInput) {
+            drawerTaskInput.value = '';
+            drawerTaskInput.focus();
+        }
+    }
+
+    async function loadLocalTasks() {
+        try {
+            localTasks = await ipcRenderer.invoke('get-local-tasks') || [];
+            isTaskDrawerOpen = await ipcRenderer.invoke('get-drawer-state') || false;
+            updateTaskDrawerUI(isTaskDrawerOpen);
+            renderTasks();
+        } catch (err) {
+            console.error('Failed to load local tasks:', err);
+        }
+    }
+
+    if (taskDrawerToggle) taskDrawerToggle.onclick = () => toggleTaskDrawer();
+    if (closeDrawerBtn) closeDrawerBtn.onclick = () => toggleTaskDrawer(false);
+    if (drawerAddBtn) drawerAddBtn.onclick = () => addNewTask(drawerTaskInput ? drawerTaskInput.value : '');
+    if (drawerTaskInput) {
+        drawerTaskInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addNewTask(drawerTaskInput.value);
+            }
+        };
+    }
+    if (drawerTabs) {
+        drawerTabs.forEach(tab => {
+            tab.onclick = () => {
+                drawerTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                taskFilter = tab.dataset.filter || 'all';
+                renderTasks();
+            };
+        });
+    }
 
     function updateLockUI(isLocked) {
         if (lockBtn) {
@@ -2067,6 +2418,9 @@ try {
                 // Restore hotkey selection
                 if (hotkeyPresetSelect) {
                     hotkeyPresetSelect.value = settings.hotkeyToggle || 'CommandOrControl+Shift+C';
+                }
+                if (taskHotkeyPresetSelect) {
+                    taskHotkeyPresetSelect.value = settings.taskHotkeyToggle || 'Alt+T';
                 }
                 
                 // Render accounts
@@ -2205,15 +2559,28 @@ try {
     }
 
     // ── Global Hotkey management ───────────────────────────────────────────
-    if (navigator.platform.toUpperCase().indexOf('MAC') >= 0 && hotkeyPresetSelect) {
-        Array.from(hotkeyPresetSelect.options).forEach(opt => {
-            opt.textContent = opt.textContent.replace(/Ctrl/g, 'Cmd');
-        });
+    if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
+        if (hotkeyPresetSelect) {
+            Array.from(hotkeyPresetSelect.options).forEach(opt => {
+                opt.textContent = opt.textContent.replace(/Ctrl/g, 'Cmd');
+            });
+        }
+        if (taskHotkeyPresetSelect) {
+            Array.from(taskHotkeyPresetSelect.options).forEach(opt => {
+                opt.textContent = opt.textContent.replace(/Ctrl/g, 'Cmd').replace(/Alt/g, 'Option');
+            });
+        }
     }
 
     if (hotkeyPresetSelect) {
         hotkeyPresetSelect.onchange = async (e) => {
             await ipcRenderer.invoke('set-hotkey-toggle', e.target.value);
+        };
+    }
+
+    if (taskHotkeyPresetSelect) {
+        taskHotkeyPresetSelect.onchange = async (e) => {
+            await ipcRenderer.invoke('set-task-hotkey-toggle', e.target.value);
         };
     }
 
@@ -2359,6 +2726,7 @@ try {
         }
         renderCalendar(); // Render immediately with empty state/local settings
         fetchEvents();
+        loadLocalTasks();
     });
 
     window.addEventListener('focus', () => {

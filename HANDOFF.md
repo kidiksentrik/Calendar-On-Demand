@@ -1,9 +1,9 @@
 # HANDOFF.md - Calendar on Demand
 
 ## 📌 Project Overview
-- **Product**: **Calendar on Demand** (v1.5.7)
+- **Product**: **Calendar on Demand** (v1.6.0)
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
-- **Current Version**: `v1.5.7` (Global Toggle Hotkey Presets & Zero-Drift Desktop Positioning)
+- **Current Version**: `v1.6.0` (Tasks Drawer, Time-blocking Drag & Drop, Alt+T Hotkey & Smart Completion Sync)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
 - **Key URLs**:
   - Web: https://cal-ondemand.com
@@ -102,9 +102,29 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ---
 
-## ✅ Completed Features (v1.5.7 최신 현황)
+## ✅ Completed Features (v1.6.0 최신 현황)
 
-### 1. v1.5.7 전역 토글 핫키 프리셋 & 창 위치 제로드리프트 (Global Hotkey & Precision Positioning)
+### 1. v1.6.0 투두 서랍장 & 타임블로킹 & 스마트 완료 연동 (Local Tasks, Time-blocking & Smart Sync)
+- [x] **로컬 투두 서랍장 (Tasks Drawer) & Aero Glassmorphism**:
+  - 상단 헤더의 체크리스트 아이콘 또는 전역 단축키 `Alt+T` (인앱 `T`, `Esc`)로 서랍장 여닫기.
+  - 미완료 태스크 개수 실시간 뱃지 카운트 표시.
+  - 할 일 추가, 인라인 텍스트 편집, 완료 체크(Web Audio 차임 효과음), 삭제, 필터 탭(All / Active / Done).
+  - 영구 로컬 저장 (`electron-store`) 및 향후 클라우드 연동 호환 스키마 (`{ id, title, notes, status, due, createdAt }`).
+- [x] **타임블로킹 드래그 앤 드롭 (Time-blocking Drag & Drop)**:
+  - 서랍장의 할 일을 월간 뷰 날짜 칸으로 드래그: 해당 날짜의 종일/시간 일정으로 즉시 퀵애드 생성.
+  - 주간 타임라인 슬롯으로 드래그: 해당 시간대(1시간 블록)로 스냅되어 즉시 퀵애드 생성.
+- [x] **창 크기 고정 및 유연한 캘린더 압축 (Fixed Window Bounds & Flex Drawer)**:
+  - 창 크기를 강제로 늘리지 않고 기존 창 영역을 유지하며, 서랍장이 열릴 때 캘린더 영역이 유연하게 줄어들고 서랍장이 슬라이드 인.
+  - 화면 우측에 창을 고정해 두고 쓰는 환경에서도 화면 밖으로 삐져나가지 않음.
+- [x] **스마트 태스크 완료 연동 (Smart Task Completion Sync)**:
+  - 캘린더에서 일정 완료 체크(`[x]`) 시, 해당 태스크의 남은 캘린더 일정이 없으면 서랍장 태스크도 자동으로 `Done` 처리.
+  - 동일 태스크를 여러 날에 나눠 배치한 경우, 마지막 일정까지 모두 체크되어야 비로소 태스크 완료.
+  - 캘린더 일정 삭제는 태스크를 삭제하지 않고 안전하게 독립 보존.
+- [x] **버그 픽스 & UI 개선**:
+  - 설정창의 가로 스크롤바 제거 및 계정 목록의 `Logout` 버튼 잘림 버그 완벽 수정.
+  - 자연어 시간 파싱 Regex 버그 수정 (`Test 1500` 입력 시 `Tes`로 글자가 잘리던 정규표현식 결함 해결).
+
+### 2. v1.5.7 전역 토글 핫키 프리셋 & 창 위치 제로드리프트 (Global Hotkey & Precision Positioning)
 - [x] **전역 창 표시/숨김 단축키(Global Toggle Hotkey) 프리셋 탑재**:
   - 설정창(Behavior)에서 `Ctrl+Shift+C (기본값)`, `Alt+C`, `Ctrl+Alt+C`, `Alt+Space`, `None` 프리셋 중 즉시 선택 가능.
   - macOS 환경 감지 시 `Ctrl` 레이블을 `Cmd`로 자동 변환 표시.
