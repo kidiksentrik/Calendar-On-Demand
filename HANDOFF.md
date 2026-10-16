@@ -229,12 +229,22 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - 현재 구글 계정 한정 멀티 계정 시스템을 Microsoft Graph API로 확장.
 - 직장인/기업 유저들의 피드백 접수 추이를 모니터링하여 Pro 플랜 패키지에 포함 검토.
 
-### 4. 로컬 투두 서랍장 디테일 폴리싱 (Tasks Backlog)
+### 4. 12시간(AM/PM) / 24시간 시간 포맷 옵션 (12-Hour vs 24-Hour Localization)
+- **배경**: 현재 24시간제(`14:00`, `18:30`)가 기본 적용되어 있으나, 미국 및 글로벌 영미권 유저들은 12시간제(`2:00 PM`, `6:30 PM`)를 일상적으로 사용하여 피드백 접수됨.
+- **구현 계획**:
+  - 설정창(Appearance 또는 Behavior)에 `Time Format` 설정 추가: `24-Hour (14:00) [기본값]` / `12-Hour (2:00 PM)`.
+  - 적용 영역:
+    - 월간 뷰 마이크로 타임 뱃지 (`14:00` ➔ `2:00 PM` 또는 콤팩트 `2p`)
+    - 주간 뷰 타임라인 거터 라벨 (`14:00` ➔ `2 PM`)
+    - 데이 팝업 및 투두 리스트 메타 태그 (`14:00 ~ 15:00` ➔ `2:00 PM ~ 3:00 PM`)
+    - 퀵애드 시간 파서 및 시간 입력 필드
+
+### 5. 로컬 투두 서랍장 디테일 폴리싱 (Tasks Backlog)
 - 완료된 항목 일괄 정리 버튼 (`Clear completed`).
 - 서랍장 내 드래그 앤 드롭을 통한 할 일 우선순위 순서 변경 (Reordering).
 - 간단 마감일(Due Date) 칩 표시.
 
-### 5. 아키텍처 보안 보강 1단계 (Electron 버전 유지 상태)
+### 6. 아키텍처 보안 보강 1단계 (Electron 버전 유지 상태)
 - `nodeIntegration: false` + `contextIsolation: true` + `preload.js` IPC 브리지 도입 → XSS→RCE 사슬 원천 차단.
 - `widget.html`에 CSP 메타 태그 추가 (`script-src 'self'`).
 - 이벤트 `description` 렌더링 시 `innerHTML` → DOMPurify 적용.
