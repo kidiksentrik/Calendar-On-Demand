@@ -2,7 +2,7 @@ const { app, BrowserWindow, Tray, Menu, ipcMain, globalShortcut, screen, Notific
 const path = require('path');
 const Store = require('electron-store');
 const { autoUpdater } = require('electron-updater');
-const { authenticate, authenticateNewAccount, hasTasksScope, authenticateTasksScope } = require('./auth');
+const { authenticate, getTasksOAuthClient, authenticateNewAccount, hasTasksScope, authenticateTasksScope } = require('./auth');
 const {
     getCalendars,
     listEvents,
@@ -23,6 +23,7 @@ app.setAppUserModelId('com.calendar.ondemand'); // Required for Windows notifica
 let tray = null;
 let mainWindow = null;
 let authClient = null;
+let tasksAuthClient = null;
 let isQuitting = false;
 let isStartupGracePeriod = true;
 let saveBoundsTimeout = null;
@@ -964,9 +965,9 @@ ipcMain.handle('deactivate-pro-license', () => {
 
 ipcMain.handle('authorize-google-tasks', async () => {
     try {
-        authClient = await authenticateTasksScope();
+        tasksAuthClient = await authenticateTasksScope();
         store.set('tasksSourceMode', 'google');
-        const taskLists = await getTaskLists(authClient);
+        const taskLists = await getTaskLists(tasksAuthClient);
         return { success: true, hasScope: true, taskLists };
     } catch (err) {
         console.error('Google Tasks authorization failed:', err.message);
@@ -975,6 +976,8 @@ ipcMain.handle('authorize-google-tasks', async () => {
 });
 
 ipcMain.handle('disconnect-google-tasks', () => {
+    store.delete('tasksToken');
+    tasksAuthClient = null;
     const token = store.get('token');
     if (token && token.scope) {
         token.scope = token.scope
@@ -989,8 +992,8 @@ ipcMain.handle('disconnect-google-tasks', () => {
 
 ipcMain.handle('get-google-tasklists', async () => {
     try {
-        if (!authClient) authClient = await authenticate();
-        return await getTaskLists(authClient);
+        if (!tasksAuthClient) tasksAuthClient = await getTasksOAuthClient();
+        return await getTaskLists(tasksAuthClient);
     } catch (err) {
         console.error('Failed to get Google Task lists:', err.message);
         throw err;
@@ -999,9 +1002,9 @@ ipcMain.handle('get-google-tasklists', async () => {
 
 ipcMain.handle('get-google-tasks', async (_event, tasklistId) => {
     try {
-        if (!authClient) authClient = await authenticate();
+        if (!tasksAuthClient) tasksAuthClient = await getTasksOAuthClient();
         const listId = tasklistId || store.get('selectedTasklistId', '@default');
-        return await listGoogleTasks(authClient, listId);
+        return await listGoogleTasks(tasksAuthClient, listId);
     } catch (err) {
         console.error('Failed to list Google Tasks:', err.message);
         throw err;
@@ -1009,27 +1012,27 @@ ipcMain.handle('get-google-tasks', async (_event, tasklistId) => {
 });
 
 ipcMain.handle('create-google-task', async (_event, { tasklistId, taskData }) => {
-    if (!authClient) authClient = await authenticate();
+    if (!tasksAuthClient) tasksAuthClient = await getTasksOAuthClient();
     const listId = tasklistId || store.get('selectedTasklistId', '@default');
-    return await createGoogleTask(authClient, listId, taskData);
+    return await createGoogleTask(tasksAuthClient, listId, taskData);
 });
 
 ipcMain.handle('update-google-task', async (_event, { tasklistId, taskId, patchData }) => {
-    if (!authClient) authClient = await authenticate();
+    if (!tasksAuthClient) tasksAuthClient = await getTasksOAuthClient();
     const listId = tasklistId || store.get('selectedTasklistId', '@default');
-    return await updateGoogleTask(authClient, listId, taskId, patchData);
+    return await updateGoogleTask(tasksAuthClient, listId, taskId, patchData);
 });
 
 ipcMain.handle('delete-google-task', async (_event, { tasklistId, taskId }) => {
-    if (!authClient) authClient = await authenticate();
+    if (!tasksAuthClient) tasksAuthClient = await getTasksOAuthClient();
     const listId = tasklistId || store.get('selectedTasklistId', '@default');
-    return await deleteGoogleTask(authClient, listId, taskId);
+    return await deleteGoogleTask(tasksAuthClient, listId, taskId);
 });
 
 ipcMain.handle('clear-completed-google-tasks', async (_event, tasklistId) => {
-    if (!authClient) authClient = await authenticate();
+    if (!tasksAuthClient) tasksAuthClient = await getTasksOAuthClient();
     const listId = tasklistId || store.get('selectedTasklistId', '@default');
-    return await clearCompletedGoogleTasks(authClient, listId);
+    return await clearCompletedGoogleTasks(tasksAuthClient, listId);
 });
 
 ipcMain.handle('get-drawer-state', () => {

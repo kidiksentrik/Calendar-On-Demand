@@ -11,9 +11,25 @@ const store = new Store();
 let authPromise = null;
 
 function hasTasksScope(tokenObj) {
-    const t = tokenObj || store.get('token');
+    const t = tokenObj || store.get('tasksToken') || store.get('token');
     if (!t || !t.scope) return false;
     return t.scope.includes(TASKS_SCOPE);
+}
+
+async function getTasksOAuthClient() {
+    const credentials = JSON.parse(fs.readFileSync(path.join(__dirname, 'credentials.json')));
+    const { client_id, client_secret, redirect_uris } = credentials.installed;
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+
+    const tasksToken = store.get('tasksToken') || store.get('token');
+    if (tasksToken) {
+        oAuth2Client.setCredentials(tasksToken);
+        oAuth2Client.on('tokens', (tokens) => {
+            const currentTasksToken = store.get('tasksToken') || store.get('token') || {};
+            store.set('tasksToken', { ...currentTasksToken, ...tokens });
+        });
+    }
+    return oAuth2Client;
 }
 
 async function getOAuthClient() {
@@ -206,8 +222,8 @@ async function authenticateTasksScope() {
     if (activeTasksAuthCleanup) {
         activeTasksAuthCleanup();
     }
-    const oAuth2Client = await getOAuthClient();
-    const existingToken = store.get('token') || {};
+    const oAuth2Client = await getTasksOAuthClient();
+    const existingToken = store.get('tasksToken') || {};
 
     return new Promise((resolve, reject) => {
         let server;
@@ -250,7 +266,7 @@ async function authenticateTasksScope() {
                     const { tokens } = await oAuth2Client.getToken(code);
                     const mergedToken = { ...existingToken, ...tokens };
                     oAuth2Client.setCredentials(mergedToken);
-                    store.set('token', mergedToken);
+                    store.set('tasksToken', mergedToken);
                     resolve(oAuth2Client);
                 } else if (error) {
                     res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -273,8 +289,8 @@ async function authenticateTasksScope() {
             const authUrl = oAuth2Client.generateAuthUrl({
                 access_type: 'offline',
                 include_granted_scopes: true,
-                scope: [...SCOPES, TASKS_SCOPE],
-                prompt: 'consent'
+                scope: [TASKS_SCOPE],
+                prompt: 'select_account consent'
             });
             shell.openExternal(authUrl);
         });
@@ -286,4 +302,4 @@ async function authenticateTasksScope() {
     });
 }
 
-module.exports = { authenticate, getOAuthClient, authenticateNewAccount, hasTasksScope, authenticateTasksScope };
+module.exports = { authenticate, getOAuthClient, getTasksOAuthClient, authenticateNewAccount, hasTasksScope, authenticateTasksScope };
