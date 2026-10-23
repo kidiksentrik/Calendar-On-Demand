@@ -95,12 +95,12 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 2. **첫 유료 후원 달성($5, Ko-fi Oskar) & 시장 수요 검증 완료**:
    - 경쟁 유료 위젯("Agenda Widget", $10)을 유료 결제했던 유저로부터 *"yours are miiiiiles ahead!"* 극찬과 함께 첫 자발적 후원($5) 발생.
    - 특히 **"Google Tasks 동기화 옵션이 들어오면 평생 쓰겠으며, 구독제가 아닌 원타임 결제(One-time fee)라면 기꺼이 지불하겠다"**는 구체적 지불 의향(WTP) 확인 (동일 Google Tasks 연동 피드백 3~4건+ 연속 접수).
-3. **"얼리버드 계단식 가격 인상형 Pro 패스 (Tiered Early-Bird Lifetime Pro Pass)" 모델**:
+3. **"서포터 퍼크 + 계단식 가격 인상형 Pro 패스 (Supporter Perk / Tiered Early-Bird Lifetime Pass)" 모델**:
    - **왜 원타임 결제(One-Time Payment)인가**: 데스크톱 위젯 특성상 구독제는 유저 이탈을 부르며, Google Tasks API 등은 유저 로컬 PC에서 직접 통신하므로 **우리 측 월 서버/유지 비용이 $0**임.
-   - **단일 Pro Pass + 계단식 가격 인상(Price Ratcheting)**: 개별 기능을 DLC처럼 쪼개 팔지 않고 단일 `Calendar on Demand Pro (Lifetime)` 패스로 묶되, 심화 기능이 추가될 때마다 **신규 구매자 정가**를 단계적으로 인상:
-     - **Phase 1 (지금 — Google Tasks 실시간 양방향 동기화 + Tasks 파워 기능)**: **Early Bird $12** (정가 $24~$29 예정 명시 ➔ 조기 구매 FOMO 및 바이럴 유도)
-     - **Phase 2 (Outlook/M365 연동, 시간 분석 통계 리포트 등 추가 시)**: **$19**로 인상
-     - **Phase 3 (완성형 Pro 패키지 + BYOK AI 비서 등)**: **$25 ~ $29** 안착
+   - **따뜻한 인디 서포터 포지셔닝(`☕ SUPPORTER PERK`) + `$5+` 시작**: 딱딱한 상업용 페이월 대신 인디 개발자를 응원하면 평생 모든 서포터 혜택을 열어주는 방식으로 포지셔닝. 글로벌 구매력(PPP) 장벽을 낮추고 초기 서포터 모수를 빠르게 확보하기 위해 **`$5+` (Pay What You Want 최소 금액 $5)**부터 시작하며, 향후 심화 기능이 추가될 때마다 **신규 서포터 최소 금액**을 단계적으로 인상:
+     - **Phase 1 (지금 — Google Tasks 실시간 양방향 동기화)**: **`$5+` Supporter Perk** (Lemon Squeezy 라이선스 키 자동 발급)
+     - **Phase 2 (뽀모도로 타이머, 추가 Pro 기능 탑재 시)**: **`$9+`**로 인상
+     - **Phase 3 (Outlook/M365 연동, BYOK AI 비서 등 완성형 패키지)**: **`$15 ~ $19`** 안착
    - **서버 비용 발생 기능(AI 등) 처리 원칙**: 향후 LLM/AI 기능 추가 시 Pro 패스 보유자에게 무료 포함하되, 유저 본인의 Gemini/OpenAI API 키를 입력하는 **BYOK (Bring Your Own Key)** 방식을 채택하여 서버 변동비 $0 유지.
    - **초기 서포터 예우**: Oskar 등 초기 Ko-fi 후원자에게는 감사 메시지와 함께 1호 무료 평생 Pro 라이선스 키 증정.
 4. **오픈 코어 투트랙(Open-Core Dual-Track) GitHub 레포지토리 아키텍처 & 운용 원칙**:
@@ -259,9 +259,12 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
   - `auth/tasks` 스코프 추가, 40초 시연 영상(Unlisted YouTube) 및 영문 Scope Justification 제출 완료 (`Your app's data access is under review`).
   - `docs/privacy.html` 및 `landing/privacy.html`에 `https://www.googleapis.com/auth/tasks` 스코프 명시 및 라이브 홈페이지(`cal-ondemand.com/privacy.html`) 선제 반영 완료.
   - 구글 승인 이메일 수신 즉시 OAuth 동의 화면의 '확인되지 않은 앱' 경고가 자동으로 제거됨.
-- [ ] **Step 4. 서버리스 원타임 라이선스 키 검증 UI 장착 & 정식 배포**:
-  - 심사 대기 기간 동안 Lemon Squeezy / Polar / Gumroad 라이선스 키 API 연동 (`$12 Early Bird Pro Pass`).
-  - 서랍장/설정창 내 `🔑 Unlock Pro` 모달 장착 후 구글 스코프 승인 완료 즉시 `v1.7.0` 정식 릴리즈.
+- [x] **Step 4-A. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Lemon Squeezy 라이선스 키 검증 UI 구현 (완료 ✅)**:
+  - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료.
+  - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 로컬 마스터 테스트 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
+- [ ] **Step 4-B. Lemon Squeezy 스토어 개설, 심사 제출 & 체크아웃 URL 연결**:
+  - Lemon Squeezy 스토어 및 상품(`Supporter Pro Pass`, Pay what you want `$5+`, License Keys 활성화) 생성 후 Store Verification 제출.
+  - 발급된 체크아웃 링크를 `widget.js`의 `SUPPORTER_CHECKOUT_URL`에 반영하고 구글 스코프 승인 완료 즉시 `v1.7.0` 정식 릴리즈.
 
 ### 2. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
 - **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.

@@ -249,6 +249,9 @@
                         <button id="drawer-disconnect-tasks-btn" class="drawer-icon-btn hidden" title="Disconnect Google Tasks (Re-authenticate)">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                         </button>
+                        <button id="drawer-lock-pro-btn" class="drawer-icon-btn hidden" title="Lock Supporter Pass (Preview Supporter Screen)">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </button>
                         <button id="close-drawer-btn" class="drawer-icon-btn" title="Close drawer (Esc)">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </button>
@@ -262,6 +265,29 @@
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         <span>Google</span>
                     </button>
+                </div>
+
+                <!-- Supporter Pro Lock Card (Shown when Google mode & not yet unlocked) -->
+                <div id="drawer-pro-lock-box" class="drawer-pro-lock-box hidden">
+                    <div class="pro-lock-badge">☕ SUPPORTER PERK</div>
+                    <div class="pro-lock-title">Support & Unlock Google Tasks</div>
+                    <div class="pro-lock-desc">
+                        Calendar-On-Demand is built with care by a solo indie dev. Support the project once to unlock <strong>2-way Google Tasks sync</strong> and all future supporter perks forever.
+                    </div>
+                    <div class="pro-lock-perks">
+                        <div class="pro-perk-row"><span>✓</span><span>Real-time mobile & web Google Tasks sync</span></div>
+                        <div class="pro-perk-row"><span>✓</span><span>Drag Google Tasks to calendar to block time</span></div>
+                        <div class="pro-perk-row"><span>✓</span><span>One-time support (from $5) · No subscription</span></div>
+                    </div>
+                    <button id="drawer-get-pro-btn" class="drawer-get-pro-btn">
+                        <span>☕ Support the Project ($5+)</span>
+                    </button>
+                    <div class="pro-license-divider"><span>Already a supporter?</span></div>
+                    <div class="pro-license-input-row">
+                        <input type="text" id="drawer-license-input" placeholder="Enter supporter key" spellcheck="false" autocomplete="off">
+                        <button id="drawer-activate-license-btn" class="drawer-activate-license-btn">Unlock</button>
+                    </div>
+                    <div id="drawer-license-msg" class="drawer-license-msg hidden"></div>
                 </div>
 
                 <!-- Google Tasks Tasklist Selector (Shown when Google mode & authorized) -->

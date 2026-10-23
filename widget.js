@@ -21,9 +21,11 @@ try {
     let googleTaskLists = [];
     let tasksSourceMode = 'local'; // 'local' | 'google'
     let hasGoogleTasksScope = false;
+    let isProUnlocked = false;
     let selectedTasklistId = '@default';
     let taskFilter = 'all'; // 'all' | 'active' | 'completed'
     let isTaskDrawerOpen = false;
+    const SUPPORTER_CHECKOUT_URL = 'https://ko-fi.com/kidiksentrik'; // Replace with Lemon Squeezy checkout URL once created
 
     // selectedCalendarIds will be loaded from ipcRenderer 'get-settings'
 
@@ -349,7 +351,13 @@ try {
     const drawerMainControls = document.getElementById('drawer-main-controls');
     const drawerSyncTasksBtn = document.getElementById('drawer-sync-tasks-btn');
     const drawerDisconnectTasksBtn = document.getElementById('drawer-disconnect-tasks-btn');
+    const drawerLockProBtn = document.getElementById('drawer-lock-pro-btn');
     const drawerClearCompletedBtn = document.getElementById('drawer-clear-completed-btn');
+    const drawerProLockBox = document.getElementById('drawer-pro-lock-box');
+    const drawerGetProBtn = document.getElementById('drawer-get-pro-btn');
+    const drawerLicenseInput = document.getElementById('drawer-license-input');
+    const drawerActivateLicenseBtn = document.getElementById('drawer-activate-license-btn');
+    const drawerLicenseMsg = document.getElementById('drawer-license-msg');
 
     function updateAllDayUI() {
         if (!allDayCheck) return;
@@ -2216,14 +2224,18 @@ try {
         }
 
         const isGoogleMode = tasksSourceMode === 'google';
-        const needsAuth = isGoogleMode && !hasGoogleTasksScope;
+        const needsProUnlock = isGoogleMode && !isProUnlocked;
+        const needsAuth = isGoogleMode && isProUnlocked && !hasGoogleTasksScope;
+        const isGoogleReady = isGoogleMode && isProUnlocked && hasGoogleTasksScope;
 
+        if (drawerProLockBox) drawerProLockBox.classList.toggle('hidden', !needsProUnlock);
         if (drawerGoogleConnectBox) drawerGoogleConnectBox.classList.toggle('hidden', !needsAuth);
-        if (drawerMainControls) drawerMainControls.classList.toggle('hidden', needsAuth);
-        if (drawerTaskList) drawerTaskList.classList.toggle('hidden', needsAuth);
-        if (drawerTasklistRow) drawerTasklistRow.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
-        if (drawerSyncTasksBtn) drawerSyncTasksBtn.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
-        if (drawerDisconnectTasksBtn) drawerDisconnectTasksBtn.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
+        if (drawerMainControls) drawerMainControls.classList.toggle('hidden', needsProUnlock || needsAuth);
+        if (drawerTaskList) drawerTaskList.classList.toggle('hidden', needsProUnlock || needsAuth);
+        if (drawerTasklistRow) drawerTasklistRow.classList.toggle('hidden', !isGoogleReady);
+        if (drawerSyncTasksBtn) drawerSyncTasksBtn.classList.toggle('hidden', !isGoogleReady);
+        if (drawerDisconnectTasksBtn) drawerDisconnectTasksBtn.classList.toggle('hidden', !isGoogleReady);
+        if (drawerLockProBtn) drawerLockProBtn.classList.toggle('hidden', !(isGoogleMode && isProUnlocked));
     }
 
     function populateTasklistsSelect() {
@@ -2279,7 +2291,7 @@ try {
         tasksSourceMode = newMode;
         await ipcRenderer.invoke('set-tasks-sync-config', { mode: tasksSourceMode });
         updateDrawerSourceUI();
-        if (tasksSourceMode === 'google' && hasGoogleTasksScope) {
+        if (tasksSourceMode === 'google' && isProUnlocked && hasGoogleTasksScope) {
             await fetchGoogleTasks();
         } else {
             renderTasks();
@@ -2404,7 +2416,7 @@ try {
         }
 
         if (drawerClearCompletedBtn) {
-            const showClear = completedCount > 0 && !(tasksSourceMode === 'google' && !hasGoogleTasksScope);
+            const showClear = completedCount > 0 && !(tasksSourceMode === 'google' && (!isProUnlocked || !hasGoogleTasksScope));
             drawerClearCompletedBtn.classList.toggle('hidden', !showClear);
             if (showClear) {
                 drawerClearCompletedBtn.innerText = `Clear completed (${completedCount})`;
@@ -2566,16 +2578,97 @@ try {
                 tasksSourceMode = syncCfg.mode || 'local';
                 hasGoogleTasksScope = !!syncCfg.hasScope;
                 selectedTasklistId = syncCfg.selectedTasklistId || '@default';
+                isProUnlocked = !!syncCfg.isProUnlocked;
             }
             updateTaskDrawerUI(isTaskDrawerOpen);
             updateDrawerSourceUI();
             renderTasks();
-            if (tasksSourceMode === 'google' && hasGoogleTasksScope) {
+            if (tasksSourceMode === 'google' && isProUnlocked && hasGoogleTasksScope) {
                 await fetchGoogleTasks(true);
             }
         } catch (err) {
             console.error('Failed to load tasks:', err);
         }
+    }
+
+    async function handleActivateProLicense() {
+        if (!drawerLicenseInput || !drawerActivateLicenseBtn) return;
+        const key = drawerLicenseInput.value.trim();
+        if (!key) {
+            if (drawerLicenseMsg) {
+                drawerLicenseMsg.innerText = 'Please enter a supporter key.';
+                drawerLicenseMsg.className = 'drawer-license-msg error';
+            }
+            return;
+        }
+        drawerActivateLicenseBtn.disabled = true;
+        drawerActivateLicenseBtn.innerText = '...';
+        if (drawerLicenseMsg) {
+            drawerLicenseMsg.innerText = 'Verifying...';
+            drawerLicenseMsg.className = 'drawer-license-msg';
+        }
+        try {
+            const res = await ipcRenderer.invoke('activate-pro-license', key);
+            if (res && res.success) {
+                isProUnlocked = true;
+                drawerLicenseInput.value = '';
+                if (drawerLicenseMsg) {
+                    drawerLicenseMsg.innerText = 'Thank you for supporting! 🎉';
+                    drawerLicenseMsg.className = 'drawer-license-msg success';
+                }
+                playChimeSound(true);
+                setTimeout(async () => {
+                    if (drawerLicenseMsg) drawerLicenseMsg.classList.add('hidden');
+                    updateDrawerSourceUI();
+                    if (tasksSourceMode === 'google' && hasGoogleTasksScope) {
+                        await fetchGoogleTasks();
+                    } else {
+                        renderTasks();
+                    }
+                }, 500);
+            } else {
+                if (drawerLicenseMsg) {
+                    drawerLicenseMsg.innerText = (res && res.error) ? res.error : 'Invalid key.';
+                    drawerLicenseMsg.className = 'drawer-license-msg error';
+                }
+            }
+        } catch (err) {
+            if (drawerLicenseMsg) {
+                drawerLicenseMsg.innerText = err.message || 'Verification failed.';
+                drawerLicenseMsg.className = 'drawer-license-msg error';
+            }
+        } finally {
+            drawerActivateLicenseBtn.disabled = false;
+            drawerActivateLicenseBtn.innerText = 'Unlock';
+        }
+    }
+
+    if (drawerGetProBtn) {
+        drawerGetProBtn.onclick = () => {
+            require('electron').shell.openExternal(SUPPORTER_CHECKOUT_URL);
+        };
+    }
+
+    if (drawerActivateLicenseBtn) {
+        drawerActivateLicenseBtn.onclick = () => handleActivateProLicense();
+    }
+
+    if (drawerLicenseInput) {
+        drawerLicenseInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleActivateProLicense();
+            }
+        };
+    }
+
+    if (drawerLockProBtn) {
+        drawerLockProBtn.onclick = async () => {
+            await ipcRenderer.invoke('deactivate-pro-license');
+            isProUnlocked = false;
+            updateDrawerSourceUI();
+            renderTasks();
+        };
     }
 
     if (drawerSourceBtns) {

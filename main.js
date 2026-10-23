@@ -872,6 +872,7 @@ ipcMain.handle('get-tasks-sync-config', () => {
     return {
         mode: store.get('tasksSourceMode', 'local'), // 'local' | 'google'
         hasScope: hasTasksScope(),
+        isProUnlocked: store.get('proLicenseValid', false),
         selectedTasklistId: store.get('selectedTasklistId', '@default')
     };
 });
@@ -882,8 +883,83 @@ ipcMain.handle('set-tasks-sync-config', (_event, config = {}) => {
     return {
         mode: store.get('tasksSourceMode', 'local'),
         hasScope: hasTasksScope(),
+        isProUnlocked: store.get('proLicenseValid', false),
         selectedTasklistId: store.get('selectedTasklistId', '@default')
     };
+});
+
+ipcMain.handle('activate-pro-license', async (_event, rawKey) => {
+    const key = (rawKey || '').trim();
+    if (!key) {
+        return { success: false, error: 'Please enter a license key.' };
+    }
+
+    // Built-in founder / dev test keys for instant local verification
+    const DEV_KEYS = ['CAL-PRO-2026', 'SUPPORTER-DEV'];
+    if (DEV_KEYS.includes(key.toUpperCase())) {
+        store.set('proLicenseValid', true);
+        store.set('proLicenseKey', key.toUpperCase());
+        return { success: true, isProUnlocked: true };
+    }
+
+    // Lemon Squeezy Official License API activation
+    const https = require('https');
+    const os = require('os');
+    const postData = new URLSearchParams({
+        license_key: key,
+        instance_name: os.hostname() || 'Calendar-On-Demand-Desktop'
+    }).toString();
+
+    return new Promise((resolve) => {
+        const req = https.request(
+            'https://api.lemonsqueezy.com/v1/licenses/activate',
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Length': Buffer.byteLength(postData)
+                }
+            },
+            (res) => {
+                let body = '';
+                res.on('data', chunk => { body += chunk; });
+                res.on('end', () => {
+                    try {
+                        const data = JSON.parse(body);
+                        if (data && (data.activated === true || data.valid === true)) {
+                            store.set('proLicenseValid', true);
+                            store.set('proLicenseKey', key);
+                            if (data.instance && data.instance.id) {
+                                store.set('proLicenseInstanceId', data.instance.id);
+                            }
+                            resolve({ success: true, isProUnlocked: true });
+                        } else {
+                            resolve({
+                                success: false,
+                                error: (data && data.error) ? data.error : 'Invalid or expired supporter key.'
+                            });
+                        }
+                    } catch (_e) {
+                        resolve({ success: false, error: 'Could not verify license key response.' });
+                    }
+                });
+            }
+        );
+
+        req.on('error', (err) => {
+            resolve({ success: false, error: 'Network error while verifying key: ' + err.message });
+        });
+
+        req.write(postData);
+        req.end();
+    });
+});
+
+ipcMain.handle('deactivate-pro-license', () => {
+    store.set('proLicenseValid', false);
+    store.delete('proLicenseKey');
+    return { success: true, isProUnlocked: false };
 });
 
 ipcMain.handle('authorize-google-tasks', async () => {
