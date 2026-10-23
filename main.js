@@ -898,6 +898,19 @@ ipcMain.handle('authorize-google-tasks', async () => {
     }
 });
 
+ipcMain.handle('disconnect-google-tasks', () => {
+    const token = store.get('token');
+    if (token && token.scope) {
+        token.scope = token.scope
+            .split(' ')
+            .filter(s => s !== 'https://www.googleapis.com/auth/tasks')
+            .join(' ');
+        store.set('token', token);
+        if (authClient) authClient.setCredentials(token);
+    }
+    return { success: true, hasScope: false };
+});
+
 ipcMain.handle('get-google-tasklists', async () => {
     try {
         if (!authClient) authClient = await authenticate();

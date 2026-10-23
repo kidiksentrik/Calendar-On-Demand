@@ -348,6 +348,7 @@ try {
     const drawerConnectGoogleBtn = document.getElementById('drawer-connect-google-btn');
     const drawerMainControls = document.getElementById('drawer-main-controls');
     const drawerSyncTasksBtn = document.getElementById('drawer-sync-tasks-btn');
+    const drawerDisconnectTasksBtn = document.getElementById('drawer-disconnect-tasks-btn');
     const drawerClearCompletedBtn = document.getElementById('drawer-clear-completed-btn');
 
     function updateAllDayUI() {
@@ -2222,6 +2223,7 @@ try {
         if (drawerTaskList) drawerTaskList.classList.toggle('hidden', needsAuth);
         if (drawerTasklistRow) drawerTasklistRow.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
         if (drawerSyncTasksBtn) drawerSyncTasksBtn.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
+        if (drawerDisconnectTasksBtn) drawerDisconnectTasksBtn.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
     }
 
     function populateTasklistsSelect() {
@@ -2620,6 +2622,16 @@ try {
 
     if (drawerSyncTasksBtn) {
         drawerSyncTasksBtn.onclick = () => fetchGoogleTasks();
+    }
+
+    if (drawerDisconnectTasksBtn) {
+        drawerDisconnectTasksBtn.onclick = async () => {
+            await ipcRenderer.invoke('disconnect-google-tasks');
+            hasGoogleTasksScope = false;
+            googleTasks = [];
+            updateDrawerSourceUI();
+            renderTasks();
+        };
     }
 
     if (drawerClearCompletedBtn) {
