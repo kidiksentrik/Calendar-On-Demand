@@ -5,9 +5,10 @@
 - **Concept**: Windows/macOS 데스크톱 트레이에서 바로 열고 쓰는 빠르고 미려한 Google Calendar & Todo 위젯.
 - **Current Version**: `v1.6.0` (Tasks Drawer, Time-blocking Drag & Drop, Alt+T Hotkey & Smart Completion Sync)
 - **Live Landing Page**: GitHub Pages (`docs/` & `landing/`) with Custom Domain + GA4 (`G-DTN5BM6653`)
-- **Key URLs**:
+- **Key URLs & Dual-Track Repositories**:
   - Web: https://cal-ondemand.com
-  - GitHub: https://github.com/kidiksentrik/Calendar-On-Demand
+  - **Private Core Repo (`origin`)**: https://github.com/kidiksentrik/Calendar-On-Demand-Pro (실제 개발 본진, Pro 소스코드 및 `HANDOFF.md` 전략 문서 관리)
+  - **Public Release Repo (`public`)**: https://github.com/kidiksentrik/Calendar-On-Demand (랜딩페이지 `docs/`, GitHub Releases 설치 파일 배포 및 `electron-updater` 자동 업데이트 서버 역할)
   - Releases: https://github.com/kidiksentrik/Calendar-On-Demand/releases
   - Feedback (Tally): https://tally.so/r/ODZJJR
   - Sponsor (Ko-fi): https://ko-fi.com/kidiksentrik
@@ -23,10 +24,11 @@
 - **Git**: 최신 버전
 - **Google Cloud Console OAuth 자격증명 (`credentials.json`)**
 
-### 2. 클론 및 의존성 설치
+### 2. 클론 및 의존성 설치 (Private 본진 레포 기준)
 ```bash
-git clone https://github.com/kidiksentrik/Calendar-On-Demand.git
-cd Calendar-On-Demand
+git clone https://github.com/kidiksentrik/Calendar-On-Demand-Pro.git
+cd Calendar-On-Demand-Pro
+git remote add public https://github.com/kidiksentrik/Calendar-On-Demand.git
 npm install
 ```
 
@@ -85,20 +87,26 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ## 💡 Business & Freemium Strategy (비즈니스 및 수익화 기본 원칙)
 
-2026년 9월 전략 회의를 통해 수립된 핵심 원칙입니다:
+2026년 9~10월 전략 회의 및 첫 실제 후원/피드백 검증을 통해 확정된 핵심 원칙입니다:
 
 1. **"기존 기능 영구 무료(Free Forever) 보장" (러그풀 절대 금지)**:
-   - v1.5.4까지 구현된 모든 기능(다중 계정 연동, 월간/주간 뷰, 24개 컬러 팔레트, 바탕화면 고정 핀, 투두 등)은 앞으로도 영구히 100% 무료로 제공합니다.
+   - `v1.6.0`까지 구현된 모든 기능(다중 계정 연동, 월간/주간 뷰, 24개 컬러 팔레트, 바탕화면 고정 핀, **로컬 투두 서랍장 & 타임블로킹 드래그 앤 드롭** 등)은 앞으로도 영구히 100% 무료로 제공합니다.
    - 기존 무료 기능을 유료로 잠그는 행위는 유저 신뢰를 파괴하므로 절대 하지 않습니다.
-2. **향후 Pro/유료화는 순수 신규 파워 기능에만 적용**:
-   - 유료 모델 도입 시 일반 유저는 필요 없으나 헤비 유저가 원하는 '플러스 알파' 영역에만 부여:
-     - AI / LLM 자연어 스마트 일정 생성 (OpenAI/Gemini API 비용 연동)
-     - 외부 캘린더 연동 (Outlook 회사 계정, Apple iCloud, Notion DB)
-     - 미니멀 플로팅 메뉴바/트레이 HUD 모드
-     - 시간 분석 통계 리포트 (Time Analytics)
-3. **현재 단계 (1.1k 활성 유저 돌파 / 런칭 3개월 차)**:
-   - 강제 결제벽을 세우지 않고 오가닉 유입 및 팬덤 확장에 집중.
-   - 설정 창의 은은한 `☕ Buy me a coffee` 자발적 후원 링크 유지.
+2. **첫 유료 후원 달성($5, Ko-fi Oskar) & 시장 수요 검증 완료**:
+   - 경쟁 유료 위젯("Agenda Widget", $10)을 유료 결제했던 유저로부터 *"yours are miiiiiles ahead!"* 극찬과 함께 첫 자발적 후원($5) 발생.
+   - 특히 **"Google Tasks 동기화 옵션이 들어오면 평생 쓰겠으며, 구독제가 아닌 원타임 결제(One-time fee)라면 기꺼이 지불하겠다"**는 구체적 지불 의향(WTP) 확인 (동일 Google Tasks 연동 피드백 3~4건+ 연속 접수).
+3. **"얼리버드 계단식 가격 인상형 Pro 패스 (Tiered Early-Bird Lifetime Pro Pass)" 모델**:
+   - **왜 원타임 결제(One-Time Payment)인가**: 데스크톱 위젯 특성상 구독제는 유저 이탈을 부르며, Google Tasks API 등은 유저 로컬 PC에서 직접 통신하므로 **우리 측 월 서버/유지 비용이 $0**임.
+   - **단일 Pro Pass + 계단식 가격 인상(Price Ratcheting)**: 개별 기능을 DLC처럼 쪼개 팔지 않고 단일 `Calendar on Demand Pro (Lifetime)` 패스로 묶되, 심화 기능이 추가될 때마다 **신규 구매자 정가**를 단계적으로 인상:
+     - **Phase 1 (지금 — Google Tasks 실시간 양방향 동기화 + Tasks 파워 기능)**: **Early Bird $12** (정가 $24~$29 예정 명시 ➔ 조기 구매 FOMO 및 바이럴 유도)
+     - **Phase 2 (Outlook/M365 연동, 시간 분석 통계 리포트 등 추가 시)**: **$19**로 인상
+     - **Phase 3 (완성형 Pro 패키지 + BYOK AI 비서 등)**: **$25 ~ $29** 안착
+   - **서버 비용 발생 기능(AI 등) 처리 원칙**: 향후 LLM/AI 기능 추가 시 Pro 패스 보유자에게 무료 포함하되, 유저 본인의 Gemini/OpenAI API 키를 입력하는 **BYOK (Bring Your Own Key)** 방식을 채택하여 서버 변동비 $0 유지.
+   - **초기 서포터 예우**: Oskar 등 초기 Ko-fi 후원자에게는 감사 메시지와 함께 1호 무료 평생 Pro 라이선스 키 증정.
+4. **투트랙(Dual-Track) GitHub 레포지토리 아키텍처**:
+   - 오픈소스 코드 포크를 통한 유료 기능 무단 개조(바이브코딩 등) 및 비즈니스 전략 노출을 방지하기 위해 레포를 이원화:
+     - **Private 본진 (`kidiksentrik/Calendar-On-Demand-Pro`)**: `v1.7.0+` Pro 기능(Google Tasks 연동, 라이선스 키 검증 등) 및 `HANDOFF.md` 독점 관리.
+     - **Public 배포소 (`kidiksentrik/Calendar-On-Demand`)**: `v1.6.0` 오픈소스 스냅샷 유지, 랜딩페이지(`cal-ondemand.com`), GitHub Releases 설치 파일 배포 및 기존 1.1k+ 유저의 `electron-updater` 자동 업데이트 경로 100% 보존.
 
 ---
 
@@ -209,7 +217,23 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ## 🎯 Next Tasks & Product Roadmap (우선순위 로드맵)
 
-### 1. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
+### 1. [최우선] v1.7.0 Google Tasks Pro 연동 & 원타임 Freemium 런칭 (4단계 직진 플랜)
+- **Step 1. 투트랙 GitHub 레포 분리 (진행 중 ⚡)**:
+  - 신규 프라이빗 본진 `kidiksentrik/Calendar-On-Demand-Pro` 생성 및 로컬 `origin` 리모트 전환.
+  - 기존 퍼블릭 레포 `kidiksentrik/Calendar-On-Demand`는 `public` 리모트로 유지하여 웹사이트(`docs/`) 및 GitHub Releases 바이너리 배포 전용으로 고정 (`package.json`의 `publish` 타겟은 퍼블릭 레포 유지).
+- **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth(Incremental Auth) 로컬 구현**:
+  - GCP에서 `Google Tasks API` 활성화.
+  - `auth.js`: 기본 무료 로그인(`SCOPES`)은 기존처럼 `auth/calendar`만 유지하여 기존/신규 무료 유저에게 재로그인이나 미인증 경고창이 절대 뜨지 않도록 보호.
+  - Pro 유저가 Tasks 서랍장에서 `Google Tasks Sync`를 활성화할 때만 `https://www.googleapis.com/auth/tasks` 스코프를 점진적(Incremental)으로 추가 요청.
+  - v1.6.0 호환 스키마(`{ id, title, notes, status, due, createdAt }`)와 Google Tasks API v1 실시간 양방향 동기화 및 서랍장 파워 기능(완료 항목 일괄 정리 `Clear completed`, 드래그 순서 변경, 마감일 칩) 연결.
+- **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출**:
+  - `auth/tasks`는 Restricted가 아닌 Sensitive 등급이므로 유료 보안 감사(CASA) 불필요.
+  - Step 2 로컬 작동 화면을 30~40초 Unlisted 유튜브 영상으로 캡처 + 영문 Scope Justification 제출 후 승인 대기(약 3~7일).
+- **Step 4. 서버리스 원타임 라이선스 키 검증 UI 장착 & 정식 배포**:
+  - 심사 대기 기간 동안 Lemon Squeezy / Polar / Gumroad 라이선스 키 API 연동 (`$12 Early Bird Pro Pass`).
+  - 서랍장/설정창 내 `🔑 Unlock Pro` 모달 장착 후 구글 스코프 승인 완료 즉시 `v1.7.0` 릴리즈.
+
+### 2. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
 - **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.
 - **해결 방안**:
   - macOS 환경을 위한 전용 **HUD Popover / 메뉴바 팝업 모드** 도입 (단축키 또는 트레이 아이콘 클릭 시만 즉각 팝업 후 포커스 이탈 시 자연스럽게 숨김).
@@ -217,17 +241,9 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - **Homebrew Cask 등록**:
   - Mac 테스트 완료 후 `brew install --cask calendar-on-demand` 공식 Cask PR 제출.
 
-### 2. 구글 태스크(Google Tasks) 양방향 클라우드 동기화 (Pro 티어 유료화 로드맵)
-- **수익화 전략 원칙**:
-  - **로컬 투두 서랍장(현재 v1.6.0 기능)은 영구 무료(Free Forever) 보장** (기존 유저 신뢰 유지).
-  - 모바일(iOS / Android) 구글 태스크 앱과의 **원클릭 양방향 실시간 동기화**를 핵심 유료 Pro 기능($19~$29 평생 라이선스 또는 구독)으로 포지셔닝.
-- **기술적 선결 과제**:
-  - 구글 OAuth `https://www.googleapis.com/auth/tasks` 민감 권한(Sensitive Scope) 추가 및 Google 앱 재심사.
-  - v1.6.0에서 이미 Google Tasks 호환 스키마(`{ id, title, notes, status, due, createdAt }`)가 구축되어 있으므로 클라우드 싱크 엔진만 연결하면 됨.
-
-### 3. 아웃룩 & 마이크로소프트 365 캘린더 연동 (기업 고객 확장)
+### 3. 아웃룩 & 마이크로소프트 365 캘린더 연동 (Pro Phase 2 확장)
 - 현재 구글 계정 한정 멀티 계정 시스템을 Microsoft Graph API로 확장.
-- 직장인/기업 유저들의 피드백 접수 추이를 모니터링하여 Pro 플랜 패키지에 포함 검토.
+- 직장인/기업 유저들의 피드백 접수 추이를 모니터링하여 Pro Pass Phase 2($19 인상 시점) 핵심 기능으로 탑재.
 
 ### 4. 12시간(AM/PM) / 24시간 시간 포맷 옵션 (12-Hour vs 24-Hour Localization)
 - **배경**: 현재 24시간제(`14:00`, `18:30`)가 기본 적용되어 있으나, 미국 및 글로벌 영미권 유저들은 12시간제(`2:00 PM`, `6:30 PM`)를 일상적으로 사용하여 피드백 접수됨.
@@ -239,12 +255,7 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
     - 데이 팝업 및 투두 리스트 메타 태그 (`14:00 ~ 15:00` ➔ `2:00 PM ~ 3:00 PM`)
     - 퀵애드 시간 파서 및 시간 입력 필드
 
-### 5. 로컬 투두 서랍장 디테일 폴리싱 (Tasks Backlog)
-- 완료된 항목 일괄 정리 버튼 (`Clear completed`).
-- 서랍장 내 드래그 앤 드롭을 통한 할 일 우선순위 순서 변경 (Reordering).
-- 간단 마감일(Due Date) 칩 표시.
-
-### 6. 아키텍처 보안 보강 1단계 (Electron 버전 유지 상태)
+### 5. 아키텍처 보안 보강 1단계 (Electron 버전 유지 상태)
 - `nodeIntegration: false` + `contextIsolation: true` + `preload.js` IPC 브리지 도입 → XSS→RCE 사슬 원천 차단.
 - `widget.html`에 CSP 메타 태그 추가 (`script-src 'self'`).
 - 이벤트 `description` 렌더링 시 `innerHTML` → DOMPurify 적용.
@@ -258,7 +269,7 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
    - **사용자가 명시적으로 릴리즈를 요청할 때만** 버전을 올리고 배포를 트리거함.
    - 사소한 버그 수정이나 점진적 개발 시에는 임의로 버전을 올리지 않음.
 2. **웹사이트 동기화 규칙**:
-   - GitHub Pages의 퍼블리시 루트는 `docs/`이지만, 소스 트리에는 `landing/`도 함께 존재함.
+   - GitHub Pages의 퍼블리시 루트는 퍼블릭 레포(`public`)의 `docs/`이지만, 소스 트리에는 `landing/`도 함께 존재함.
    - 웹사이트를 수정할 때는 **반드시 `docs/index.html`과 `landing/index.html`을 동일하게 함께 업데이트**해야 함.
 3. **Google OAuth 보안**:
    - `credentials.json`과 `token.json`은 절대 git에 커밋하거나 외부에 노출하지 않음.
@@ -269,12 +280,12 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
      2. 종일(All-day) 일정 추가 ➔ 외부 클릭 오토세이브 정상 작동 확인
      3. 기존 일정 수정 및 삭제 정상 작동 확인
      4. 설정창 토글 및 닫힘 동작 확인
-5. **HANDOFF.md 상시 업데이트 및 문서 프라이빗화 고려사항** [필수 📝]:
+5. **HANDOFF.md 상시 업데이트 및 투트랙 레포 보안 규칙** [필수 📝]:
    - 매 작업(기능 개발, 버그 수정, 보안 보강 등) 종료 시 **반드시 HANDOFF.md를 최신 상태로 업데이트**함.
    - 다른 컴퓨터/에이전트에서 작업을 이어받을 때 이 문서만 읽고도 전체 맥락을 파악할 수 있도록 변경 내용, 결정사항, 남은 할 일을 항상 반영함.
-   - **문서 프라이빗화 고려사항 (Private Submodule)**:
-     - 현재는 개발 PC/맥북 등 멀티 환경 간 원활한 `git pull` 작업 연속성을 위해 퍼블릭 레포에 유지 중 (현재 트래픽 및 기여도 기준 노출 리스크 미미함).
-     - 향후 프로젝트 인지도 상승 및 외부 기여자 유입 시, 내부 비즈니스 전략과 아키텍처 메모를 안전하게 분리하기 위해 **Private Git Submodule** (예: `kidiksentrik/cal-ondemand-notes`) 형태로 격리 전환 검토.
+   - **투트랙(Dual-Track) 레포 운용**:
+     - 모든 신규 코드 및 `HANDOFF.md` 커밋은 **프라이빗 본진(`origin`: `Calendar-On-Demand-Pro`)**에만 푸시함.
+     - 퍼블릭 레포(`public`: `Calendar-On-Demand`)는 랜딩 페이지(`docs/`) 업데이트 및 GitHub Releases 설치 파일 배포 용도로만 사용하며, Pro 소스코드나 최신 `HANDOFF.md`를 퍼블릭 레포에 푸시하지 않음.
 6. **보안 취약점 현황 (2026-10-11 기준)**:
    - `nodeIntegration: true` + `contextIsolation: false` — XSS 발생 시 RCE로 이어질 수 있음. preload.js 브리지 도입 필요.
    - Content Security Policy (CSP) 없음.
