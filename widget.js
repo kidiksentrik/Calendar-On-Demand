@@ -2670,10 +2670,9 @@ try {
     }
 
     if (drawerConnectGoogleBtn) {
+        const defaultConnectHtml = drawerConnectGoogleBtn.innerHTML;
         drawerConnectGoogleBtn.onclick = async () => {
-            const origHtml = drawerConnectGoogleBtn.innerHTML;
-            drawerConnectGoogleBtn.innerText = 'Waiting for browser...';
-            drawerConnectGoogleBtn.disabled = true;
+            drawerConnectGoogleBtn.innerText = 'Waiting for browser... (Click to retry)';
             try {
                 const res = await ipcRenderer.invoke('authorize-google-tasks');
                 if (res && res.success) {
@@ -2682,13 +2681,11 @@ try {
                     populateTasklistsSelect();
                     updateDrawerSourceUI();
                     await fetchGoogleTasks();
-                } else if (res && res.error) {
-                    alert('Google Tasks connection cancelled or failed: ' + res.error);
                 }
             } catch (err) {
-                alert('Error connecting Google Tasks: ' + err.message);
+                console.warn('Error connecting Google Tasks:', err.message);
             } finally {
-                drawerConnectGoogleBtn.innerHTML = origHtml;
+                drawerConnectGoogleBtn.innerHTML = defaultConnectHtml;
                 drawerConnectGoogleBtn.disabled = false;
             }
         };

@@ -200,19 +200,40 @@ async function authenticateNewAccount() {
     });
 }
 
+let activeTasksAuthCleanup = null;
+
 async function authenticateTasksScope() {
+    if (activeTasksAuthCleanup) {
+        activeTasksAuthCleanup();
+    }
     const oAuth2Client = await getOAuthClient();
     const existingToken = store.get('token') || {};
 
     return new Promise((resolve, reject) => {
         let server;
+        let timeoutId;
 
-        const cleanup = () => {
+        const cleanup = (cancelReason) => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
             if (server) {
                 server.close();
                 server = null;
             }
+            if (activeTasksAuthCleanup === cleanup) {
+                activeTasksAuthCleanup = null;
+            }
+            if (cancelReason) {
+                reject(new Error(cancelReason));
+            }
         };
+        activeTasksAuthCleanup = () => cleanup('Superseded by new auth request');
+
+        timeoutId = setTimeout(() => {
+            cleanup('Authorization timed out or browser window was closed.');
+        }, 90000);
 
         server = http.createServer(async (req, res) => {
             try {
