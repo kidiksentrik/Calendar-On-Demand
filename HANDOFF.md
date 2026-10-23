@@ -262,9 +262,10 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - [x] **Step 4-A. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Lemon Squeezy 라이선스 키 검증 UI 구현 (완료 ✅)**:
   - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료.
   - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 로컬 마스터 테스트 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
-- [ ] **Step 4-B. Lemon Squeezy 스토어 개설, 심사 제출 & 체크아웃 URL 연결**:
-  - Lemon Squeezy 스토어 및 상품(`Supporter Pro Pass`, Pay what you want `$5+`, License Keys 활성화) 생성 후 Store Verification 제출.
-  - 발급된 체크아웃 링크를 `widget.js`의 `SUPPORTER_CHECKOUT_URL`에 반영하고 구글 스코프 승인 완료 즉시 `v1.7.0` 정식 릴리즈.
+- [x] **Step 4-B. Lemon Squeezy 스토어 개설, 심사 제출 & 체크아웃 URL 연결 (완료 ✅ — Store Review & Google OAuth Review 대기 중)**:
+  - Lemon Squeezy 스토어(`cal-ondemand.lemonsqueezy.com`) 및 상품(`Calendar-On-Demand — Supporter Pro Pass`, Pay what you want `$5+`, License Keys 활성화, 기기 한도 5대) 생성 완료.
+  - 발급된 체크아웃 링크(`https://cal-ondemand.lemonsqueezy.com/checkout/buy/67e519aa-463e-4deb-b471-4f1a85d05cbe`)를 `widget.js`의 `SUPPORTER_CHECKOUT_URL`에 반영 및 실제 라이선스 키 발급/해제 End-to-End 검증 완료.
+  - Lemon Squeezy 스토어 최종 승인 및 Google Cloud Console `auth/tasks` 스코프 승인 메일 수신 즉시 `v1.7.0` 정식 릴리즈.
 
 ### 2. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
 - **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.
