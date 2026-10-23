@@ -255,9 +255,10 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - [x] **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth + GPU 라이트 빔 UI 로컬 구현 (완료 ✅)**:
   - GCP `Google Tasks API` 활성화 완료.
   - `auth.js` 점진적 권한 요청(`authenticateTasksScope`), `calendar.js` Google Tasks API v1 CRUD 및 `Clear completed`, `widget.js`/`styles.css` 서랍장 `Local` ↔ `✓ Google` 스위치 및 120fps GPU 코닉 라이트 빔 효과 구현 및 실기기 양방향 연동 테스트 완료.
-- [ ] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 (다음 스텝 ⏳)**:
-  - `auth/tasks`는 Restricted가 아닌 Sensitive 등급이므로 유료 보안 감사(CASA) 불필요.
-  - Step 2 로컬 작동 화면을 30~40초 Unlisted 유튜브 영상으로 캡처 + 영문 Scope Justification 제출 후 승인 대기(약 3~7일, 승인 즉시 OAuth 동의 화면의 '확인되지 않은 앱' 경고 제거됨).
+- [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 (완료 ✅ — Under Review)**:
+  - `auth/tasks` 스코프 추가, 40초 시연 영상(Unlisted YouTube) 및 영문 Scope Justification 제출 완료 (`Your app's data access is under review`).
+  - `docs/privacy.html` 및 `landing/privacy.html`에 `https://www.googleapis.com/auth/tasks` 스코프 명시 및 라이브 홈페이지(`cal-ondemand.com/privacy.html`) 선제 반영 완료.
+  - 구글 승인 이메일 수신 즉시 OAuth 동의 화면의 '확인되지 않은 앱' 경고가 자동으로 제거됨.
 - [ ] **Step 4. 서버리스 원타임 라이선스 키 검증 UI 장착 & 정식 배포**:
   - 심사 대기 기간 동안 Lemon Squeezy / Polar / Gumroad 라이선스 키 API 연동 (`$12 Early Bird Pro Pass`).
   - 서랍장/설정창 내 `🔑 Unlock Pro` 모달 장착 후 구글 스코프 승인 완료 즉시 `v1.7.0` 정식 릴리즈.
