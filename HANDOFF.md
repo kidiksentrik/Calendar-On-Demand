@@ -248,24 +248,32 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 
 ## 🎯 Next Tasks & Product Roadmap (우선순위 로드맵)
 
-### 1. [최우선] v1.7.0 Google Tasks Pro 연동 & 원타임 Freemium 런칭 (4단계 직진 플랜)
+### 1. [최우선] v1.7.0 Google Tasks Pro 연동 & 원타임 Freemium 런칭 (개발 완료 ✅ — 외부 심사 2건 승인 대기 중)
 - [x] **Step 1. 오픈 코어 투트랙 GitHub 레포 분리 (완료 ✅)**:
   - 신규 프라이빗 본진 `kidiksentrik/Calendar-On-Demand-Pro` 생성 및 로컬 `origin` 리모트 전환 완료.
   - 기존 퍼블릭 레포 `kidiksentrik/Calendar-On-Demand`는 `public` 리모트로 유지하고, 퍼블릭에서 `HANDOFF.md` 및 `.agents/` 내부 문서를 완전 소거하여 `v1.6.0` 오픈소스 스냅샷 + 웹사이트(`docs/`) + GitHub Releases 배포 서버로 고정 완료.
 - [x] **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth + GPU 라이트 빔 UI 로컬 구현 (완료 ✅)**:
   - GCP `Google Tasks API` 활성화 완료.
-  - `auth.js` 점진적 권한 요청(`authenticateTasksScope`), `calendar.js` Google Tasks API v1 CRUD 및 `Clear completed`, `widget.js`/`styles.css` 서랍장 `Local` ↔ `✓ Google` 스위치 및 120fps GPU 코닉 라이트 빔 효과 구현 및 실기기 양방향 연동 테스트 완료.
+  - `auth.js` 점진적 권한 요청(`authenticateTasksScope` + 브라우저 탭 강제 종료 시 즉시 재시도 및 90초 타임아웃 복구 처리), `calendar.js` Google Tasks API v1 CRUD 및 `Clear completed`, `widget.js`/`styles.css` 서랍장 `Local` ↔ `✓ Google` 스위치 및 120fps GPU 코닉 라이트 빔 효과 구현 및 실기기 양방향 연동 테스트 완료.
 - [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 (완료 ✅ — Under Review)**:
-  - `auth/tasks` 스코프 추가, 40초 시연 영상(Unlisted YouTube) 및 영문 Scope Justification 제출 완료 (`Your app's data access is under review`).
+  - `auth/tasks` 스코프 추가, 40초 시연 영상(Unlisted YouTube) 및 영문 Scope Justification 제출 완료 (`Homepage requirements` 및 `Branding guidelines` 2026-10-23 승인 완료, `Privacy policy requirements` 등 순차 검토 중).
   - `docs/privacy.html` 및 `landing/privacy.html`에 `https://www.googleapis.com/auth/tasks` 스코프 명시 및 라이브 홈페이지(`cal-ondemand.com/privacy.html`) 선제 반영 완료.
-  - 구글 승인 이메일 수신 즉시 OAuth 동의 화면의 '확인되지 않은 앱' 경고가 자동으로 제거됨.
 - [x] **Step 4-A. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Lemon Squeezy 라이선스 키 검증 UI 구현 (완료 ✅)**:
-  - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료.
-  - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 로컬 마스터 테스트 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
-- [x] **Step 4-B. Lemon Squeezy 스토어 개설, 심사 제출 & 체크아웃 URL 연결 (완료 ✅ — Store Review & Google OAuth Review 대기 중)**:
-  - Lemon Squeezy 스토어(`cal-ondemand.lemonsqueezy.com`) 및 상품(`Calendar-On-Demand — Supporter Pro Pass`, Pay what you want `$5+`, License Keys 활성화, 기기 한도 5대) 생성 완료.
-  - 발급된 체크아웃 링크(`https://cal-ondemand.lemonsqueezy.com/checkout/buy/67e519aa-463e-4deb-b471-4f1a85d05cbe`)를 `widget.js`의 `SUPPORTER_CHECKOUT_URL`에 반영 및 실제 라이선스 키 발급/해제 End-to-End 검증 완료.
-  - Lemon Squeezy 스토어 최종 승인 및 Google Cloud Console `auth/tasks` 스코프 승인 메일 수신 즉시 `v1.7.0` 정식 릴리즈.
+  - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료 (한 번 `Unlock` 시 로컬 PC에 영구 귀속되어 구글 계정 재연동 시에도 결제창 재노출 없음).
+  - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 개발자 전용 마스터 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
+- [x] **Step 4-B. Lemon Squeezy 스토어 개설, 심사 제출 & 체크아웃 URL 연결 (완료 ✅ — Store Review 대기 중)**:
+  - Lemon Squeezy 스토어(`cal-ondemand.lemonsqueezy.com`, 통화 `USD`, Tax-inclusive ON, 2FA 및 신분증/계좌 인증 제출 완료) 및 상품(`Calendar-On-Demand — Supporter Pro Pass`, Pay what you want `$5+`, License Keys 무제한 기한 + 기기 활성화 한도 5대) 생성 완료.
+  - 발급된 체크아웃 링크(`https://cal-ondemand.lemonsqueezy.com/checkout/buy/67e519aa-463e-4deb-b471-4f1a85d05cbe`)를 `widget.js`의 `SUPPORTER_CHECKOUT_URL`에 반영 및 실제 라이선스 키 발급/해제(`Active 1/5`) End-to-End 검증 완료.
+- [ ] **Step 5. [다음 액션 — 이메일 컨펌 2건 수신 후 진행할 체크리스트]**:
+  1. **Lemon Squeezy 스토어 승인 완료 메일 수신 시**:
+     - 대시보드(`https://app.lemonsqueezy.com/dashboard`) 좌측 하단 `Test mode` 토글이 OFF(Live 모드)로 전환되었는지 확인.
+     - Live 모드의 `Store ➔ Products`에 `Calendar-On-Demand — Supporter Pro Pass` (`$5+`, Generate license keys ON, Activation limit `5`) 상품이 동일하게 존재하는지 확인하고, 만약 Live 상품 체크아웃 URL이 Test mode 때와 달라졌다면 `widget.js` 상단 `SUPPORTER_CHECKOUT_URL`을 Live 체크아웃 링크로 교체.
+  2. **Google Cloud Console OAuth (`auth/tasks`) 승인 완료 메일 수신 시**:
+     - 위젯에서 `Connect Google Tasks` 클릭 시 'Google에서 확인하지 않은 앱' 경고 화면 없이 곧바로 깔끔한 권한 동의 화면이 뜨는지 최종 확인.
+  3. **랜딩 페이지(`docs/index.html` & `landing/index.html`) 업데이트 및 `v1.7.0` 정식 릴리즈 배포**:
+     - 랜딩 페이지에 **2-way Google Tasks Sync** 및 **Supporter Pro Pass (`$5+` 원타임 후원, 1개의 라이선스 키로 최대 5대 기기까지 무료 활성화 가능)** 안내 반영.
+     - 배포 전 필수 QA 4대 시나리오 및 `npm test` (0 errors, 0 warnings) 확인 후 `v1.7.0` 릴리즈 빌드하여 퍼블릭 레포(`public`)의 GitHub Releases(`latest.yml`) 및 `docs/` 업데이트 배포 (단, Pro 소스코드는 프라이빗 `origin`에만 유지).
+     - 1호 Ko-fi 후원자(Oskar님)에게 감사 메시지 및 신규 발급한 `0/5` 서포터 라이선스 키 선물 발송.
 
 ### 2. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
 - **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.
