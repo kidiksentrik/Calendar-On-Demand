@@ -2436,15 +2436,264 @@ body.task-drawer-open .day-cell:hover::after {
     line-height: 1.5;
 }
 
+.drawer-footer-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.drawer-clear-completed-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 5px 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+}
+
+.drawer-clear-completed-btn:hover {
+    background: rgba(255, 82, 82, 0.14);
+    border-color: rgba(255, 82, 82, 0.35);
+    color: #ff6b6b;
+}
+
 .drawer-footer-hint {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding-top: 8px;
-    margin-top: 6px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
     font-size: 0.68rem;
     color: rgba(255, 255, 255, 0.4);
+}
+
+.drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+@keyframes drawerSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.drawer-icon-btn.spinning svg {
+    animation: drawerSpin 0.8s linear infinite;
+    color: var(--accent-color);
+}
+
+.drawer-source-switch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 7px;
+    background: rgba(0, 0, 0, 0.36);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@keyframes googleBeamOrbitGPU {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.drawer-source-btn {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 5px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.drawer-source-btn:hover {
+    color: #f0f0f5;
+}
+
+.drawer-source-btn.active {
+    background: rgba(79, 142, 247, 0.2);
+    color: #ffffff;
+    font-weight: 600;
+    border-color: rgba(79, 142, 247, 0.36);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Google Tasks Button — GPU-Composited 120fps Conic Light Beam */
+.drawer-source-btn[data-source="google"] {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.drawer-source-btn[data-source="google"] svg {
+    transition: color 0.2s ease, filter 0.2s ease;
+}
+
+.drawer-source-btn[data-source="google"]:hover svg,
+.drawer-source-btn[data-source="google"].active svg {
+    color: #6ba3ff;
+    filter: drop-shadow(0 0 4px rgba(66, 133, 244, 0.7));
+}
+
+.drawer-source-btn[data-source="google"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 240%;
+    aspect-ratio: 1 / 1;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 190deg,
+        #4285f4 235deg,
+        #34a853 275deg,
+        #fbbc05 310deg,
+        #ea4335 340deg,
+        #ffffff 356deg,
+        transparent 360deg
+    );
+    transform: translate(-50%, -50%) rotate(0deg);
+    will-change: transform, opacity;
+    animation: googleBeamOrbitGPU 1.6s linear infinite;
+    animation-play-state: paused;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: -2;
+}
+
+.drawer-source-btn[data-source="google"]::after {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    border-radius: 4.5px;
+    background: #0d0d12;
+    transition: background 0.2s ease;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.drawer-source-btn[data-source="google"]:hover {
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(66, 133, 244, 0.22);
+}
+
+.drawer-source-btn[data-source="google"]:hover::after {
+    background: linear-gradient(135deg, #151824 0%, #12121a 100%);
+}
+
+.drawer-source-btn[data-source="google"].active {
+    background: transparent;
+    border-color: rgba(66, 133, 244, 0.38);
+    box-shadow: 0 2px 10px rgba(66, 133, 244, 0.25);
+}
+
+.drawer-source-btn[data-source="google"].active::after {
+    background: linear-gradient(135deg, #182338 0%, #1d172e 100%);
+}
+
+.drawer-source-btn[data-source="google"]:hover::before,
+.drawer-source-btn[data-source="google"].active:hover::before {
+    opacity: 1;
+    animation-play-state: running;
+}
+
+.drawer-tasklist-row {
+    margin-bottom: 7px;
+}
+
+#drawer-tasklist-select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.32);
+    color: #e8e8ed;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+
+#drawer-tasklist-select:focus {
+    border-color: var(--accent-color);
+}
+
+#drawer-tasklist-select option {
+    background: #16161d;
+    color: #e8e8ed;
+}
+
+.drawer-google-connect-box {
+    background: rgba(79, 142, 247, 0.08);
+    border: 1px solid rgba(79, 142, 247, 0.25);
+    border-radius: 8px;
+    padding: 12px 10px;
+    margin-bottom: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.connect-box-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.connect-box-desc {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.4;
+}
+
+.drawer-connect-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 8px rgba(79, 142, 247, 0.35);
+}
+
+.drawer-connect-google-btn:hover {
+    background: #6ba3ff;
+    transform: translateY(-1px);
+}
+
+.drawer-main-controls {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Drag & Drop Feedback on Calendar */

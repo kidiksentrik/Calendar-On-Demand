@@ -103,14 +103,45 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
      - **Phase 3 (완성형 Pro 패키지 + BYOK AI 비서 등)**: **$25 ~ $29** 안착
    - **서버 비용 발생 기능(AI 등) 처리 원칙**: 향후 LLM/AI 기능 추가 시 Pro 패스 보유자에게 무료 포함하되, 유저 본인의 Gemini/OpenAI API 키를 입력하는 **BYOK (Bring Your Own Key)** 방식을 채택하여 서버 변동비 $0 유지.
    - **초기 서포터 예우**: Oskar 등 초기 Ko-fi 후원자에게는 감사 메시지와 함께 1호 무료 평생 Pro 라이선스 키 증정.
-4. **투트랙(Dual-Track) GitHub 레포지토리 아키텍처**:
-   - 오픈소스 코드 포크를 통한 유료 기능 무단 개조(바이브코딩 등) 및 비즈니스 전략 노출을 방지하기 위해 레포를 이원화:
-     - **Private 본진 (`kidiksentrik/Calendar-On-Demand-Pro`)**: `v1.7.0+` Pro 기능(Google Tasks 연동, 라이선스 키 검증 등) 및 `HANDOFF.md` 독점 관리.
-     - **Public 배포소 (`kidiksentrik/Calendar-On-Demand`)**: `v1.6.0` 오픈소스 스냅샷 유지, 랜딩페이지(`cal-ondemand.com`), GitHub Releases 설치 파일 배포 및 기존 1.1k+ 유저의 `electron-updater` 자동 업데이트 경로 100% 보존.
+4. **오픈 코어 투트랙(Open-Core Dual-Track) GitHub 레포지토리 아키텍처 & 운용 원칙**:
+   - **배경 및 철학**:
+     - 기존 커뮤니티(Reddit, Product Hunt 등)에서 무료/오픈소스 이미지로 쌓아온 두터운 신뢰를 100% 지키기 위해, **기존 무료 버전인 `v1.6.0`까지의 코어 소스코드는 퍼블릭 레포에 그대로 오픈소스로 영구 보존**함.
+     - 동시에 누군가 앞으로 개발할 유료(Pro) 기능을 포크하여 바이브코딩 등으로 무단 개조/복제하거나 내부 비즈니스 전략(`HANDOFF.md`)을 열람하는 것을 원천 차단하기 위해 **`v1.6.0` 이후의 모든 개발 본진을 Private 레포로 분리**함.
+   - **두 레포지토리의 명확한 역할 분담**:
+     1. **Private 본진 (`origin` ➔ `https://github.com/kidiksentrik/Calendar-On-Demand-Pro.git`)**:
+        - 현재 및 향후 모든 신규 기능 개발(`v1.7.0+` Google Tasks 양방향 연동, 라이선스 키 검증, UI 폴리싱 등)과 `HANDOFF.md` 전략 문서를 독점 관리하는 진짜 작업 본진.
+        - 일상적인 `git commit` 및 `git push origin main`은 모두 이 프라이빗 레포로만 올라가며, **프라이빗 레포에 커밋/푸시하는 것만으로는 실제 라이브 서비스나 유저 배포판 버전이 절대 바뀌지 않음** (안전한 백업 및 멀티 PC 동기화 공간).
+     2. **Public 배포소 (`public` ➔ `https://github.com/kidiksentrik/Calendar-On-Demand.git`)**:
+        - 소스코드는 `v1.6.0` 무료 버전 스냅샷 상태에서 멈춰 둠 (`HANDOFF.md` 및 `.agents/` 내부 문서는 퍼블릭 히스토리에서 완전 삭제 처리 완료).
+        - **핵심 역할 3가지**: ① 공식 웹사이트(`cal-ondemand.com`, `docs/` 폴더) 호스팅, ② GitHub Releases 설치 파일(`.exe`, `.dmg`) 배포, ③ 기존 1,100명+ 실사용 유저들의 `electron-updater`(`latest.yml`) 무중단 자동 업데이트 피드 제공.
+   - **다른 컴퓨터(집 PC / 맥북)에서 작업 이어받기 규칙**:
+     - 기존에 퍼블릭 레포를 클론해 두었던 다른 PC에서는 최초 1회 아래 명령어로 기본 `origin`을 프라이빗 본진으로 전환한 뒤 작업:
+       ```bash
+       git remote rename origin public
+       git remote add origin https://github.com/kidiksentrik/Calendar-On-Demand-Pro.git
+       git fetch origin
+       git branch --set-upstream-to=origin/main main
+       git pull origin main
+       ```
 
 ---
 
-## ✅ Completed Features (v1.6.0 최신 현황)
+## ✅ Completed Features (최신 구현 현황)
+
+### 0. [Unreleased / Local Ready] Google Tasks 실시간 양방향 동기화 & Pro UI (v1.7.0 준비 단계)
+- [x] **점진적 OAuth 권한 요청 (Incremental Authorization, `auth.js`)**:
+  - 기본 로그인(`SCOPES`)은 기존과 동일하게 `https://www.googleapis.com/auth/calendar`만 유지하여 기존/신규 무료 유저에게 재로그인이나 미인증 경고창이 절대 뜨지 않도록 완벽 분리.
+  - 서랍장에서 `Google` 모드를 선택하고 `Connect Google Tasks`를 클릭했을 때만 `https://www.googleapis.com/auth/tasks` 스코프를 점진적으로 추가 요청(`authenticateTasksScope`)하고 기존 토큰에 병합 저장.
+- [x] **Google Tasks API v1 실시간 양방향 싱크 엔진 (`calendar.js`, `main.js`, `widget.js`)**:
+  - 유저 구글 계정의 실제 태스크 리스트 목록(`getTaskLists`) 자동 조회 및 드롭다운 선택(계정 언어 설정에 따라 `My Tasks`, `내 할 일 목록` 등 네이티브 표시).
+  - 할 일 추가(`createGoogleTask`), 인라인 텍스트 수정(`updateGoogleTask`), 완료/미완료 토글, 개별 삭제(`deleteGoogleTask`), 완료 항목 일괄 정리(`clearCompletedGoogleTasks` — `Clear completed (N)`) 0ms 낙관적 업데이트 및 양방향 실시간 반영.
+  - 서랍장 상단 수동 동기화(`🔄`) 스피너 버튼 및 캘린더 백그라운드 동기화 시 Google Tasks 자동 갱신 연동.
+- [x] **타임블로킹 & 스마트 완료 연동 Google Tasks 완벽 호환**:
+  - Google Tasks 항목을 월간/주간 캘린더로 드래그 앤 드롭하여 타임블로킹 일정 생성.
+  - 캘린더에서 해당 일정을 모두 완료(`[x]`) 체크 시 Google Tasks 서버의 원본 할 일까지 자동으로 `completed` 처리(체크 해제 시 `needsAction` 복귀).
+- [x] **Google 시그니처 120fps GPU 코닉 라이트 빔(Conic Light Beam) 마이크로 인터랙션 (`styles.css`)**:
+  - 서랍장 상단 `Local` | `✓ Google` 소스 스위치 중 `✓ Google` 버튼에 마우스 호버 시, 구글 4색(`#4285f4`, `#34a853`, `#fbbc05`, `#ea4335`) 빛줄기가 테두리를 따라 부드럽게 회전하는 프리미엄 시각 효과 적용.
+  - CPU 리페인트를 유발하는 커스텀 프로퍼티 애니메이션 대신 GPU 컴포지터 레이어(`transform: translate(-50%, -50%) rotate()`) + 상시 예열(`animation-play-state: paused -> running`) 방식을 적용하여 첫 호버 시 잔렉(Stutter) 0% 달성.
 
 ### 1. v1.6.0 투두 서랍장 & 타임블로킹 & 스마트 완료 연동 (Local Tasks, Time-blocking & Smart Sync)
 - [x] **로컬 투두 서랍장 (Tasks Drawer) & Aero Glassmorphism**:
@@ -218,20 +249,18 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 ## 🎯 Next Tasks & Product Roadmap (우선순위 로드맵)
 
 ### 1. [최우선] v1.7.0 Google Tasks Pro 연동 & 원타임 Freemium 런칭 (4단계 직진 플랜)
-- **Step 1. 투트랙 GitHub 레포 분리 (진행 중 ⚡)**:
-  - 신규 프라이빗 본진 `kidiksentrik/Calendar-On-Demand-Pro` 생성 및 로컬 `origin` 리모트 전환.
-  - 기존 퍼블릭 레포 `kidiksentrik/Calendar-On-Demand`는 `public` 리모트로 유지하여 웹사이트(`docs/`) 및 GitHub Releases 바이너리 배포 전용으로 고정 (`package.json`의 `publish` 타겟은 퍼블릭 레포 유지).
-- **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth(Incremental Auth) 로컬 구현**:
-  - GCP에서 `Google Tasks API` 활성화.
-  - `auth.js`: 기본 무료 로그인(`SCOPES`)은 기존처럼 `auth/calendar`만 유지하여 기존/신규 무료 유저에게 재로그인이나 미인증 경고창이 절대 뜨지 않도록 보호.
-  - Pro 유저가 Tasks 서랍장에서 `Google Tasks Sync`를 활성화할 때만 `https://www.googleapis.com/auth/tasks` 스코프를 점진적(Incremental)으로 추가 요청.
-  - v1.6.0 호환 스키마(`{ id, title, notes, status, due, createdAt }`)와 Google Tasks API v1 실시간 양방향 동기화 및 서랍장 파워 기능(완료 항목 일괄 정리 `Clear completed`, 드래그 순서 변경, 마감일 칩) 연결.
-- **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출**:
+- [x] **Step 1. 오픈 코어 투트랙 GitHub 레포 분리 (완료 ✅)**:
+  - 신규 프라이빗 본진 `kidiksentrik/Calendar-On-Demand-Pro` 생성 및 로컬 `origin` 리모트 전환 완료.
+  - 기존 퍼블릭 레포 `kidiksentrik/Calendar-On-Demand`는 `public` 리모트로 유지하고, 퍼블릭에서 `HANDOFF.md` 및 `.agents/` 내부 문서를 완전 소거하여 `v1.6.0` 오픈소스 스냅샷 + 웹사이트(`docs/`) + GitHub Releases 배포 서버로 고정 완료.
+- [x] **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth + GPU 라이트 빔 UI 로컬 구현 (완료 ✅)**:
+  - GCP `Google Tasks API` 활성화 완료.
+  - `auth.js` 점진적 권한 요청(`authenticateTasksScope`), `calendar.js` Google Tasks API v1 CRUD 및 `Clear completed`, `widget.js`/`styles.css` 서랍장 `Local` ↔ `✓ Google` 스위치 및 120fps GPU 코닉 라이트 빔 효과 구현 및 실기기 양방향 연동 테스트 완료.
+- [ ] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 (다음 스텝 ⏳)**:
   - `auth/tasks`는 Restricted가 아닌 Sensitive 등급이므로 유료 보안 감사(CASA) 불필요.
-  - Step 2 로컬 작동 화면을 30~40초 Unlisted 유튜브 영상으로 캡처 + 영문 Scope Justification 제출 후 승인 대기(약 3~7일).
-- **Step 4. 서버리스 원타임 라이선스 키 검증 UI 장착 & 정식 배포**:
+  - Step 2 로컬 작동 화면을 30~40초 Unlisted 유튜브 영상으로 캡처 + 영문 Scope Justification 제출 후 승인 대기(약 3~7일, 승인 즉시 OAuth 동의 화면의 '확인되지 않은 앱' 경고 제거됨).
+- [ ] **Step 4. 서버리스 원타임 라이선스 키 검증 UI 장착 & 정식 배포**:
   - 심사 대기 기간 동안 Lemon Squeezy / Polar / Gumroad 라이선스 키 API 연동 (`$12 Early Bird Pro Pass`).
-  - 서랍장/설정창 내 `🔑 Unlock Pro` 모달 장착 후 구글 스코프 승인 완료 즉시 `v1.7.0` 릴리즈.
+  - 서랍장/설정창 내 `🔑 Unlock Pro` 모달 장착 후 구글 스코프 승인 완료 즉시 `v1.7.0` 정식 릴리즈.
 
 ### 2. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
 - **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.

@@ -17,6 +17,11 @@ try {
     const notifiedEventIds = new Set(); // track already-fired notifications
 
     let localTasks = [];
+    let googleTasks = [];
+    let googleTaskLists = [];
+    let tasksSourceMode = 'local'; // 'local' | 'google'
+    let hasGoogleTasksScope = false;
+    let selectedTasklistId = '@default';
     let taskFilter = 'all'; // 'all' | 'active' | 'completed'
     let isTaskDrawerOpen = false;
 
@@ -336,6 +341,14 @@ try {
     const drawerAddBtn = document.getElementById('drawer-add-btn');
     const drawerTaskList = document.getElementById('drawer-task-list');
     const drawerTabs = document.querySelectorAll('.drawer-tab');
+    const drawerSourceBtns = document.querySelectorAll('.drawer-source-btn');
+    const drawerTasklistRow = document.getElementById('drawer-tasklist-row');
+    const drawerTasklistSelect = document.getElementById('drawer-tasklist-select');
+    const drawerGoogleConnectBox = document.getElementById('drawer-google-connect-box');
+    const drawerConnectGoogleBtn = document.getElementById('drawer-connect-google-btn');
+    const drawerMainControls = document.getElementById('drawer-main-controls');
+    const drawerSyncTasksBtn = document.getElementById('drawer-sync-tasks-btn');
+    const drawerClearCompletedBtn = document.getElementById('drawer-clear-completed-btn');
 
     function updateAllDayUI() {
         if (!allDayCheck) return;
@@ -1351,6 +1364,9 @@ try {
                 syncIndicator.style.cursor = 'default';
             }
             scheduleNextSync(NORMAL_SYNC_INTERVAL);
+            if (tasksSourceMode === 'google' && hasGoogleTasksScope) {
+                fetchGoogleTasks(true).catch(() => {});
+            }
         } catch (err) { 
             if (currentReqId !== fetchRequestId) return;
             console.error('Fetch error:', err);
@@ -1651,35 +1667,52 @@ try {
         updateTodoListUI();
         renderCalendar();
 
-        // 3. Smart Task Drawer Sync
+        // 3. Smart Task Drawer Sync (Local & Google Tasks)
         // When checking an event, if all calendar sessions for this task are completed, mark task Done.
         // If unchecking an event, revert matching task to Active.
         try {
             const hasTime = !!(eventItem.start && eventItem.start.dateTime);
             const cleanText = cleanDisplaySummary(newSummary, hasTime).trim();
-            const matchingTask = localTasks.find(t => t.title.trim().toLowerCase() === cleanText.toLowerCase());
 
-            if (matchingTask) {
-                if (!isCompleted) {
-                    // Event was just checked. Check if any OTHER calendar events for this task are still uncompleted.
-                    const otherIncompleteEvents = events.filter(e => {
-                        if (e.id === eventItem.id) return false;
-                        const eHasTime = !!(e.start && e.start.dateTime);
-                        const eClean = cleanDisplaySummary(e.summary, eHasTime).trim();
-                        const eIsIncomplete = !e.summary.startsWith('[x]');
-                        return eClean.toLowerCase() === cleanText.toLowerCase() && eIsIncomplete;
-                    });
+            const otherIncompleteEvents = !isCompleted ? events.filter(e => {
+                if (e.id === eventItem.id) return false;
+                const eHasTime = !!(e.start && e.start.dateTime);
+                const eClean = cleanDisplaySummary(e.summary, eHasTime).trim();
+                const eIsIncomplete = !e.summary.startsWith('[x]');
+                return eClean.toLowerCase() === cleanText.toLowerCase() && eIsIncomplete;
+            }) : [];
 
-                    if (otherIncompleteEvents.length === 0) {
-                        matchingTask.status = 'completed';
-                        saveLocalTasks();
-                    }
-                } else {
-                    // Event was just unchecked. Revert task to Active.
-                    if (matchingTask.status === 'completed') {
-                        matchingTask.status = 'needsAction';
-                        saveLocalTasks();
-                    }
+            // Sync with Local Tasks if matching
+            const matchingLocalTask = localTasks.find(t => t.title.trim().toLowerCase() === cleanText.toLowerCase());
+            if (matchingLocalTask) {
+                if (!isCompleted && otherIncompleteEvents.length === 0) {
+                    matchingLocalTask.status = 'completed';
+                    saveLocalTasks();
+                } else if (isCompleted && matchingLocalTask.status === 'completed') {
+                    matchingLocalTask.status = 'needsAction';
+                    saveLocalTasks();
+                }
+            }
+
+            // Sync with Google Tasks if matching
+            const matchingGoogleTask = googleTasks.find(t => t.title.trim().toLowerCase() === cleanText.toLowerCase());
+            if (matchingGoogleTask && hasGoogleTasksScope) {
+                if (!isCompleted && otherIncompleteEvents.length === 0 && matchingGoogleTask.status !== 'completed') {
+                    matchingGoogleTask.status = 'completed';
+                    renderTasks();
+                    ipcRenderer.invoke('update-google-task', {
+                        tasklistId: selectedTasklistId,
+                        taskId: matchingGoogleTask.id,
+                        patchData: { status: 'completed' }
+                    }).catch(err => console.error('Failed to sync completion to Google Task:', err));
+                } else if (isCompleted && matchingGoogleTask.status === 'completed') {
+                    matchingGoogleTask.status = 'needsAction';
+                    renderTasks();
+                    ipcRenderer.invoke('update-google-task', {
+                        tasklistId: selectedTasklistId,
+                        taskId: matchingGoogleTask.id,
+                        patchData: { status: 'needsAction' }
+                    }).catch(err => console.error('Failed to sync uncheck to Google Task:', err));
                 }
             }
         } catch (syncErr) {
@@ -2169,7 +2202,88 @@ try {
         }
     });
 
-    // ── Local Tasks & Drawer Logic ──────────────────────────────────────────
+    // ── Local Tasks & Google Tasks Drawer Logic ─────────────────────────────
+    function getCurrentTasksList() {
+        return tasksSourceMode === 'google' ? googleTasks : localTasks;
+    }
+
+    function updateDrawerSourceUI() {
+        if (drawerSourceBtns) {
+            drawerSourceBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.source === tasksSourceMode);
+            });
+        }
+
+        const isGoogleMode = tasksSourceMode === 'google';
+        const needsAuth = isGoogleMode && !hasGoogleTasksScope;
+
+        if (drawerGoogleConnectBox) drawerGoogleConnectBox.classList.toggle('hidden', !needsAuth);
+        if (drawerMainControls) drawerMainControls.classList.toggle('hidden', needsAuth);
+        if (drawerTaskList) drawerTaskList.classList.toggle('hidden', needsAuth);
+        if (drawerTasklistRow) drawerTasklistRow.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
+        if (drawerSyncTasksBtn) drawerSyncTasksBtn.classList.toggle('hidden', !(isGoogleMode && hasGoogleTasksScope));
+    }
+
+    function populateTasklistsSelect() {
+        if (!drawerTasklistSelect) return;
+        drawerTasklistSelect.innerHTML = '';
+        if (!googleTaskLists || googleTaskLists.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '@default';
+            opt.textContent = 'My Tasks';
+            drawerTasklistSelect.appendChild(opt);
+            return;
+        }
+        googleTaskLists.forEach(list => {
+            const opt = document.createElement('option');
+            opt.value = list.id;
+            opt.textContent = list.title;
+            drawerTasklistSelect.appendChild(opt);
+        });
+        if (googleTaskLists.some(l => l.id === selectedTasklistId)) {
+            drawerTasklistSelect.value = selectedTasklistId;
+        } else {
+            selectedTasklistId = googleTaskLists[0].id;
+            drawerTasklistSelect.value = selectedTasklistId;
+        }
+    }
+
+    async function fetchGoogleTasks(silent = false) {
+        if (!hasGoogleTasksScope) return;
+        try {
+            if (drawerSyncTasksBtn) drawerSyncTasksBtn.classList.add('spinning');
+            if (!googleTaskLists || googleTaskLists.length === 0) {
+                googleTaskLists = await ipcRenderer.invoke('get-google-tasklists') || [];
+                populateTasklistsSelect();
+            }
+            googleTasks = await ipcRenderer.invoke('get-google-tasks', selectedTasklistId) || [];
+            renderTasks();
+        } catch (err) {
+            console.error('Error fetching Google Tasks:', err);
+            const msg = (err.message || '').toLowerCase();
+            if (msg.includes('insufficient') || msg.includes('scope') || msg.includes('permission') || err.code === 403) {
+                hasGoogleTasksScope = false;
+                updateDrawerSourceUI();
+            } else if (!silent) {
+                console.warn('Google Tasks sync warning:', err.message);
+            }
+        } finally {
+            if (drawerSyncTasksBtn) drawerSyncTasksBtn.classList.remove('spinning');
+        }
+    }
+
+    async function switchTasksSourceMode(newMode) {
+        if (newMode !== 'local' && newMode !== 'google') return;
+        tasksSourceMode = newMode;
+        await ipcRenderer.invoke('set-tasks-sync-config', { mode: tasksSourceMode });
+        updateDrawerSourceUI();
+        if (tasksSourceMode === 'google' && hasGoogleTasksScope) {
+            await fetchGoogleTasks();
+        } else {
+            renderTasks();
+        }
+    }
+
     function updateTaskDrawerUI(isOpen) {
         isTaskDrawerOpen = isOpen;
         document.body.classList.toggle('task-drawer-open', isOpen);
@@ -2207,26 +2321,76 @@ try {
         }
     }
 
-    function toggleTaskStatus(taskId) {
-        const task = localTasks.find(t => t.id === taskId);
+    async function toggleTaskStatus(taskId) {
+        const list = getCurrentTasksList();
+        const task = list.find(t => t.id === taskId);
         if (!task) return;
 
         const isNowCompleted = task.status !== 'completed';
         task.status = isNowCompleted ? 'completed' : 'needsAction';
         playChimeSound(isNowCompleted);
-        saveLocalTasks();
+
+        if (tasksSourceMode === 'google') {
+            renderTasks();
+            try {
+                await ipcRenderer.invoke('update-google-task', {
+                    tasklistId: selectedTasklistId,
+                    taskId: task.id,
+                    patchData: { status: task.status }
+                });
+            } catch (err) {
+                console.error('Failed to update Google Task status:', err);
+                fetchGoogleTasks(true);
+            }
+        } else {
+            saveLocalTasks();
+        }
     }
 
-    function deleteTask(taskId) {
-        localTasks = localTasks.filter(t => t.id !== taskId);
-        saveLocalTasks();
+    async function deleteTask(taskId) {
+        if (tasksSourceMode === 'google') {
+            googleTasks = googleTasks.filter(t => t.id !== taskId);
+            renderTasks();
+            try {
+                await ipcRenderer.invoke('delete-google-task', {
+                    tasklistId: selectedTasklistId,
+                    taskId
+                });
+            } catch (err) {
+                console.error('Failed to delete Google Task:', err);
+                fetchGoogleTasks(true);
+            }
+        } else {
+            localTasks = localTasks.filter(t => t.id !== taskId);
+            saveLocalTasks();
+        }
+    }
+
+    async function clearCompletedTasks() {
+        if (tasksSourceMode === 'google') {
+            googleTasks = googleTasks.filter(t => t.status !== 'completed');
+            renderTasks();
+            try {
+                await ipcRenderer.invoke('clear-completed-google-tasks', selectedTasklistId);
+                await fetchGoogleTasks(true);
+            } catch (err) {
+                console.error('Failed to clear completed Google Tasks:', err);
+                fetchGoogleTasks(true);
+            }
+        } else {
+            localTasks = localTasks.filter(t => t.status !== 'completed');
+            saveLocalTasks();
+        }
     }
 
     function renderTasks() {
         if (!drawerTaskList) return;
         drawerTaskList.innerHTML = '';
 
-        const activeCount = localTasks.filter(t => t.status !== 'completed').length;
+        const currentList = getCurrentTasksList();
+        const activeCount = currentList.filter(t => t.status !== 'completed').length;
+        const completedCount = currentList.filter(t => t.status === 'completed').length;
+
         if (drawerCountBadge) drawerCountBadge.innerText = activeCount;
         if (taskDrawerBadge) {
             taskDrawerBadge.innerText = activeCount;
@@ -2237,7 +2401,15 @@ try {
             }
         }
 
-        const filtered = localTasks.filter(t => {
+        if (drawerClearCompletedBtn) {
+            const showClear = completedCount > 0 && !(tasksSourceMode === 'google' && !hasGoogleTasksScope);
+            drawerClearCompletedBtn.classList.toggle('hidden', !showClear);
+            if (showClear) {
+                drawerClearCompletedBtn.innerText = `Clear completed (${completedCount})`;
+            }
+        }
+
+        const filtered = currentList.filter(t => {
             if (taskFilter === 'active') return t.status !== 'completed';
             if (taskFilter === 'completed') return t.status === 'completed';
             return true;
@@ -2285,11 +2457,24 @@ try {
             titleSpan.title = 'Click to edit or drag to calendar to schedule';
             titleSpan.contentEditable = 'true';
             titleSpan.spellcheck = false;
-            titleSpan.onblur = () => {
+            titleSpan.onblur = async () => {
                 const newTitle = titleSpan.innerText.trim();
                 if (newTitle && newTitle !== task.title) {
                     task.title = newTitle;
-                    saveLocalTasks();
+                    if (tasksSourceMode === 'google') {
+                        try {
+                            await ipcRenderer.invoke('update-google-task', {
+                                tasklistId: selectedTasklistId,
+                                taskId: task.id,
+                                patchData: { title: newTitle }
+                            });
+                        } catch (err) {
+                            console.error('Failed to update Google Task title:', err);
+                            fetchGoogleTasks(true);
+                        }
+                    } else {
+                        saveLocalTasks();
+                    }
                 } else {
                     titleSpan.innerText = task.title;
                 }
@@ -2318,26 +2503,55 @@ try {
         });
     }
 
-    function addNewTask(rawTitle) {
+    async function addNewTask(rawTitle) {
         const title = (rawTitle || '').trim();
         if (!title) return;
-
-        const newTask = {
-            id: 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-            title: title,
-            notes: '',
-            status: 'needsAction',
-            due: null,
-            createdAt: Date.now()
-        };
-
-        localTasks.unshift(newTask);
-        saveLocalTasks();
-        playChimeSound(false);
 
         if (drawerTaskInput) {
             drawerTaskInput.value = '';
             drawerTaskInput.focus();
+        }
+        playChimeSound(false);
+
+        if (tasksSourceMode === 'google') {
+            const tempId = 'temp_' + Date.now();
+            const optimisticTask = {
+                id: tempId,
+                title,
+                notes: '',
+                status: 'needsAction',
+                due: null,
+                source: 'google',
+                tasklistId: selectedTasklistId
+            };
+            googleTasks.unshift(optimisticTask);
+            renderTasks();
+            try {
+                const created = await ipcRenderer.invoke('create-google-task', {
+                    tasklistId: selectedTasklistId,
+                    taskData: { title }
+                });
+                const idx = googleTasks.findIndex(t => t.id === tempId);
+                if (idx !== -1 && created) {
+                    googleTasks[idx] = created;
+                    renderTasks();
+                }
+            } catch (err) {
+                console.error('Failed to create Google Task:', err);
+                googleTasks = googleTasks.filter(t => t.id !== tempId);
+                renderTasks();
+            }
+        } else {
+            const newTask = {
+                id: 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                title: title,
+                notes: '',
+                status: 'needsAction',
+                due: null,
+                createdAt: Date.now()
+            };
+            localTasks.unshift(newTask);
+            saveLocalTasks();
         }
     }
 
@@ -2345,11 +2559,71 @@ try {
         try {
             localTasks = await ipcRenderer.invoke('get-local-tasks') || [];
             isTaskDrawerOpen = await ipcRenderer.invoke('get-drawer-state') || false;
+            const syncCfg = await ipcRenderer.invoke('get-tasks-sync-config');
+            if (syncCfg) {
+                tasksSourceMode = syncCfg.mode || 'local';
+                hasGoogleTasksScope = !!syncCfg.hasScope;
+                selectedTasklistId = syncCfg.selectedTasklistId || '@default';
+            }
             updateTaskDrawerUI(isTaskDrawerOpen);
+            updateDrawerSourceUI();
             renderTasks();
+            if (tasksSourceMode === 'google' && hasGoogleTasksScope) {
+                await fetchGoogleTasks(true);
+            }
         } catch (err) {
-            console.error('Failed to load local tasks:', err);
+            console.error('Failed to load tasks:', err);
         }
+    }
+
+    if (drawerSourceBtns) {
+        drawerSourceBtns.forEach(btn => {
+            btn.onclick = () => {
+                const targetSource = btn.dataset.source;
+                if (targetSource) switchTasksSourceMode(targetSource);
+            };
+        });
+    }
+
+    if (drawerConnectGoogleBtn) {
+        drawerConnectGoogleBtn.onclick = async () => {
+            const origHtml = drawerConnectGoogleBtn.innerHTML;
+            drawerConnectGoogleBtn.innerText = 'Waiting for browser...';
+            drawerConnectGoogleBtn.disabled = true;
+            try {
+                const res = await ipcRenderer.invoke('authorize-google-tasks');
+                if (res && res.success) {
+                    hasGoogleTasksScope = true;
+                    googleTaskLists = res.taskLists || [];
+                    populateTasklistsSelect();
+                    updateDrawerSourceUI();
+                    await fetchGoogleTasks();
+                } else if (res && res.error) {
+                    alert('Google Tasks connection cancelled or failed: ' + res.error);
+                }
+            } catch (err) {
+                alert('Error connecting Google Tasks: ' + err.message);
+            } finally {
+                drawerConnectGoogleBtn.innerHTML = origHtml;
+                drawerConnectGoogleBtn.disabled = false;
+            }
+        };
+    }
+
+    if (drawerTasklistSelect) {
+        drawerTasklistSelect.onchange = async (e) => {
+            selectedTasklistId = e.target.value;
+            await ipcRenderer.invoke('set-tasks-sync-config', { selectedTasklistId });
+            await fetchGoogleTasks();
+        };
+    }
+
+    if (drawerSyncTasksBtn) {
+        drawerSyncTasksBtn.onclick = () => fetchGoogleTasks();
+    }
+
+    if (drawerClearCompletedBtn) {
+        drawerClearCompletedBtn.onclick = () => clearCompletedTasks();
     }
 
     if (taskDrawerToggle) taskDrawerToggle.onclick = () => toggleTaskDrawer();

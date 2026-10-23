@@ -6,8 +6,15 @@ const path = require('path');
 const http = require('http');
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+const TASKS_SCOPE = 'https://www.googleapis.com/auth/tasks';
 const store = new Store();
 let authPromise = null;
+
+function hasTasksScope(tokenObj) {
+    const t = tokenObj || store.get('token');
+    if (!t || !t.scope) return false;
+    return t.scope.includes(TASKS_SCOPE);
+}
 
 async function getOAuthClient() {
     console.log('Loading credentials.json...');
@@ -193,4 +200,69 @@ async function authenticateNewAccount() {
     });
 }
 
-module.exports = { authenticate, getOAuthClient, authenticateNewAccount };
+async function authenticateTasksScope() {
+    const oAuth2Client = await getOAuthClient();
+    const existingToken = store.get('token') || {};
+
+    return new Promise((resolve, reject) => {
+        let server;
+
+        const cleanup = () => {
+            if (server) {
+                server.close();
+                server = null;
+            }
+        };
+
+        server = http.createServer(async (req, res) => {
+            try {
+                if (!server) return;
+                const parsedUrl = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`);
+                const code = parsedUrl.searchParams.get('code');
+                const error = parsedUrl.searchParams.get('error');
+
+                if (code) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><head><style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;background:#0a0a0c;color:#fff;text-align:center;}</style></head><body><div><h2>Google Tasks Connected!</h2><p>You can close this tab and return to Calendar-On-Demand.</p></div></body></html>');
+                    cleanup();
+
+                    const { tokens } = await oAuth2Client.getToken(code);
+                    const mergedToken = { ...existingToken, ...tokens };
+                    oAuth2Client.setCredentials(mergedToken);
+                    store.set('token', mergedToken);
+                    resolve(oAuth2Client);
+                } else if (error) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><body><h2>Google Tasks Authorization Cancelled</h2><p>You can close this tab.</p></body></html>');
+                    cleanup();
+                    reject(new Error('Google Tasks authorization rejected by user.'));
+                } else {
+                    res.writeHead(404);
+                    res.end();
+                }
+            } catch (e) {
+                cleanup();
+                reject(e);
+            }
+        });
+
+        server.listen(0, '127.0.0.1', () => {
+            const port = server.address().port;
+            oAuth2Client.redirectUri = `http://127.0.0.1:${port}`;
+            const authUrl = oAuth2Client.generateAuthUrl({
+                access_type: 'offline',
+                include_granted_scopes: true,
+                scope: [...SCOPES, TASKS_SCOPE],
+                prompt: 'consent'
+            });
+            shell.openExternal(authUrl);
+        });
+
+        server.on('error', (err) => {
+            cleanup();
+            reject(err);
+        });
+    });
+}
+
+module.exports = { authenticate, getOAuthClient, authenticateNewAccount, hasTasksScope, authenticateTasksScope };

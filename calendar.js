@@ -92,4 +92,111 @@ async function deleteEvent(auth, calendarId, eventId) {
     });
 }
 
-module.exports = { getCalendars, listEvents, createEvent, updateEvent, deleteEvent };
+// ── Google Tasks API v1 Integration ─────────────────────────────────────────
+
+async function getTaskLists(auth) {
+    const tasksApi = google.tasks({ version: 'v1', auth });
+    const res = await tasksApi.tasklists.list({ maxResults: 50 });
+    const items = res.data.items || [];
+    return items.map(list => ({
+        id: list.id,
+        title: list.title
+    }));
+}
+
+async function listGoogleTasks(auth, tasklistId = '@default') {
+    const tasksApi = google.tasks({ version: 'v1', auth });
+    const res = await tasksApi.tasks.list({
+        tasklist: tasklistId || '@default',
+        showCompleted: true,
+        showHidden: true,
+        maxResults: 100
+    });
+    const items = res.data.items || [];
+    // Filter out empty-title deleted/placeholder items that Google Tasks sometimes returns
+    return items
+        .filter(item => item.title && item.title.trim().length > 0 && !item.deleted)
+        .map(item => ({
+            id: item.id,
+            title: item.title,
+            notes: item.notes || '',
+            status: item.status === 'completed' ? 'completed' : 'needsAction',
+            due: item.due || null,
+            updated: item.updated || null,
+            position: item.position || '',
+            source: 'google',
+            tasklistId: tasklistId || '@default'
+        }));
+}
+
+async function createGoogleTask(auth, tasklistId = '@default', taskData = {}) {
+    const tasksApi = google.tasks({ version: 'v1', auth });
+    const requestBody = {
+        title: taskData.title,
+        notes: taskData.notes || '',
+        status: taskData.status || 'needsAction'
+    };
+    if (taskData.due) requestBody.due = taskData.due;
+
+    const res = await tasksApi.tasks.insert({
+        tasklist: tasklistId || '@default',
+        requestBody
+    });
+    const item = res.data;
+    return {
+        id: item.id,
+        title: item.title,
+        notes: item.notes || '',
+        status: item.status === 'completed' ? 'completed' : 'needsAction',
+        due: item.due || null,
+        updated: item.updated || null,
+        position: item.position || '',
+        source: 'google',
+        tasklistId: tasklistId || '@default'
+    };
+}
+
+async function updateGoogleTask(auth, tasklistId = '@default', taskId, patchData = {}) {
+    const tasksApi = google.tasks({ version: 'v1', auth });
+    const requestBody = { ...patchData };
+    if (requestBody.status === 'needsAction') {
+        requestBody.completed = null;
+    }
+    const res = await tasksApi.tasks.patch({
+        tasklist: tasklistId || '@default',
+        task: taskId,
+        requestBody
+    });
+    return res.data;
+}
+
+async function deleteGoogleTask(auth, tasklistId = '@default', taskId) {
+    const tasksApi = google.tasks({ version: 'v1', auth });
+    await tasksApi.tasks.delete({
+        tasklist: tasklistId || '@default',
+        task: taskId
+    });
+    return true;
+}
+
+async function clearCompletedGoogleTasks(auth, tasklistId = '@default') {
+    const tasksApi = google.tasks({ version: 'v1', auth });
+    await tasksApi.tasks.clear({
+        tasklist: tasklistId || '@default'
+    });
+    return true;
+}
+
+module.exports = {
+    getCalendars,
+    listEvents,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    getTaskLists,
+    listGoogleTasks,
+    createGoogleTask,
+    updateGoogleTask,
+    deleteGoogleTask,
+    clearCompletedGoogleTasks
+};

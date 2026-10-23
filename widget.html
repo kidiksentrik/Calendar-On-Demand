@@ -242,29 +242,65 @@
                         <span class="drawer-title">Tasks</span>
                         <span id="drawer-count-badge" class="drawer-count-badge">0</span>
                     </div>
-                    <button id="close-drawer-btn" class="drawer-icon-btn" title="Close drawer (Esc)">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <div class="drawer-header-actions">
+                        <button id="drawer-sync-tasks-btn" class="drawer-icon-btn hidden" title="Sync Google Tasks now">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></svg>
+                        </button>
+                        <button id="close-drawer-btn" class="drawer-icon-btn" title="Close drawer (Esc)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Source Switcher: Local (Free) vs Google Tasks (Cloud Sync) -->
+                <div class="drawer-source-switch">
+                    <button class="drawer-source-btn active" data-source="local" title="Local tasks stored on this PC">Local</button>
+                    <button class="drawer-source-btn" data-source="google" title="2-way sync with Google Tasks">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Google</span>
                     </button>
                 </div>
 
-                <div class="drawer-input-row">
-                    <input type="text" id="drawer-task-input" placeholder="Add a task (press Enter)..." autocomplete="off">
-                    <button id="drawer-add-btn" class="drawer-add-btn" title="Add task">+</button>
+                <!-- Google Tasks Tasklist Selector (Shown when Google mode & authorized) -->
+                <div id="drawer-tasklist-row" class="drawer-tasklist-row hidden">
+                    <select id="drawer-tasklist-select" title="Select Google Tasks List">
+                        <option value="@default">My Tasks</option>
+                    </select>
                 </div>
 
-                <div class="drawer-filter-tabs">
-                    <button class="drawer-tab active" data-filter="all">All</button>
-                    <button class="drawer-tab" data-filter="active">Active</button>
-                    <button class="drawer-tab" data-filter="completed">Done</button>
+                <!-- Google Tasks Connect Prompt (Shown when Google mode & not yet authorized) -->
+                <div id="drawer-google-connect-box" class="drawer-google-connect-box hidden">
+                    <div class="connect-box-title">Sync with Google Tasks</div>
+                    <div class="connect-box-desc">Access your mobile & web Google Tasks right from your desktop and drag them to block time.</div>
+                    <button id="drawer-connect-google-btn" class="drawer-connect-google-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        <span>Connect Google Tasks</span>
+                    </button>
+                </div>
+
+                <div id="drawer-main-controls" class="drawer-main-controls">
+                    <div class="drawer-input-row">
+                        <input type="text" id="drawer-task-input" placeholder="Add a task (press Enter)..." autocomplete="off">
+                        <button id="drawer-add-btn" class="drawer-add-btn" title="Add task">+</button>
+                    </div>
+
+                    <div class="drawer-filter-tabs">
+                        <button class="drawer-tab active" data-filter="all">All</button>
+                        <button class="drawer-tab" data-filter="active">Active</button>
+                        <button class="drawer-tab" data-filter="completed">Done</button>
+                    </div>
                 </div>
 
                 <div id="drawer-task-list" class="drawer-task-list">
                     <!-- Tasks injected by JS -->
                 </div>
 
-                <div class="drawer-footer-hint">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    <span>Drag task to calendar to block time</span>
+                <div class="drawer-footer-bar">
+                    <button id="drawer-clear-completed-btn" class="drawer-clear-completed-btn hidden" title="Remove all completed tasks">Clear completed</button>
+                    <div class="drawer-footer-hint">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        <span>Drag task to calendar to block time</span>
+                    </div>
                 </div>
             </aside>
         </div>
