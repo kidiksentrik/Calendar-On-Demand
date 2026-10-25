@@ -16,10 +16,14 @@
     <link rel="canonical" href="https://cal-ondemand.com/privacy.html">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #e8e8e8; line-height: 1.6; padding: 40px; max-width: 800px; margin: 0 auto; }
-        h1, h2 { color: #fff; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #e8e8e8; line-height: 1.65; padding: 40px; max-width: 820px; margin: 0 auto; }
+        h1, h2, h3 { color: #fff; }
+        h2 { margin-top: 32px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; }
         a { color: #4f8ef7; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        code { background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
         .back-link { display: inline-block; margin-bottom: 30px; font-weight: 600; }
     </style>
 </head>
@@ -27,24 +31,63 @@
     <a href="index.html" class="back-link">← Back to Home</a>
     
     <h1>Privacy Policy</h1>
-    <p>Last updated: August 2026</p>
+    <p>Last updated: October 2026</p>
 
     <h2>1. Introduction</h2>
-    <p>Calendar-On-Demand ("we", "our", or "us") is a desktop application designed to display and manage your Google Calendar events directly on your Windows desktop. We respect your privacy and are committed to protecting it through our compliance with this policy.</p>
+    <p>Calendar-On-Demand ("we", "our", or "us") is a desktop calendar and task management widget application for Windows and macOS. We respect your privacy and are committed to protecting your personal information and Google user data through strict compliance with this Privacy Policy.</p>
 
-    <h2>2. Data We Access</h2>
-    <p>To provide its core functionality, Calendar-On-Demand requests access to your Google Calendar data (specifically, the <code>https://www.googleapis.com/auth/calendar</code> scope) and, if you choose to enable Google Tasks synchronization in the Tasks Drawer, your Google Tasks data (specifically, the <code>https://www.googleapis.com/auth/tasks</code> scope). This allows the application to read and manage your calendar events and tasks directly on your desktop.</p>
+    <h2>2. Google User Data We Access (Data Accessed)</h2>
+    <p>When you explicitly authorize Calendar-On-Demand via Google OAuth 2.0, our application requests access solely to the following Google user data scopes necessary to provide its user-facing features:</p>
+    <ul>
+        <li><strong>Google Calendar Data (<code>https://www.googleapis.com/auth/calendar</code>):</strong> We access your calendar lists and calendar events (including event titles, start/end times, descriptions, locations, color labels, and video conference links) so you can view, create, edit, reschedule, and delete your calendar events directly from the desktop widget.</li>
+        <li><strong>Google Tasks Data (<code>https://www.googleapis.com/auth/tasks</code>):</strong> If you choose to connect Google Tasks in the Tasks Drawer, we access your task lists and tasks (including task titles, notes, due dates, and completion status) to enable real-time 2-way synchronization—allowing you to view, create, edit, complete, clear, and delete your Google Tasks directly from the widget.</li>
+        <li><strong>Basic Account Identifier (<code>openid</code>, <code>https://www.googleapis.com/auth/userinfo.email</code>):</strong> When connecting multiple Google accounts, we access your email address solely to label and distinguish your connected accounts within the widget's Settings menu.</li>
+    </ul>
 
-    <h2>3. How We Use and Store Your Data</h2>
-    <p><strong>Crucially, Calendar-On-Demand is a local application.</strong> All data retrieved from your Google Calendar and Google Tasks is processed and stored <strong>locally on your device</strong>. We do not operate any external backend servers, and we <strong>never</strong> transmit, upload, sell, or share your calendar or task data or personal information with ourselves or any third parties.</p>
+    <h2>3. How We Use Google User Data (Data Use)</h2>
+    <p>Calendar-On-Demand uses the accessed Google user data <strong>exclusively</strong> to provide user-facing calendar and task management functionality directly on your personal computer:</p>
+    <ul>
+        <li>Displaying your Google Calendar schedules in Month View, Week Timeline View, and Day Popups.</li>
+        <li>Creating, updating, and deleting Google Calendar events when you add or modify events in the widget or drag-and-drop tasks onto calendar slots to block time.</li>
+        <li>Synchronizing your Google Tasks lists and tasks in the side Tasks Drawer so you can add, edit, check off, and delete tasks in real time.</li>
+        <li>Triggering optional local desktop reminder notifications on your computer before scheduled events start.</li>
+    </ul>
+    <p><strong>No AI/ML Model Training:</strong> Calendar-On-Demand does <strong>not</strong> retain, use, or transfer any Google user data obtained through Google Workspace APIs to develop, improve, or train generalized or personalized artificial intelligence (AI) or machine learning (ML) models.</p>
 
-    <h2>4. Google API Services User Data Policy</h2>
+    <h2>4. Data Sharing, Transfer, and Disclosure</h2>
+    <p><strong>We do not share, sell, rent, transfer, or disclose your Google user data to any third parties.</strong></p>
+    <ul>
+        <li><strong>Zero Backend Servers:</strong> Calendar-On-Demand is a 100% client-side desktop application. All communication occurs directly between your local computer and Google's official API servers (<code>googleapis.com</code>).</li>
+        <li>We do not have access to your Google Calendar events, Google Tasks, or OAuth tokens, and we never transmit your Google user data to any external server, analytics provider, or advertising network.</li>
+        <li>Google user data is only disclosed if required to comply with applicable laws or valid legal processes, though as a purely local application we do not possess or store any user data on external servers.</li>
+    </ul>
+
+    <h2>5. Data Protection Mechanisms for Sensitive Data</h2>
+    <p>We implement strict technical and architectural security controls to protect your sensitive Google user data:</p>
+    <ul>
+        <li><strong>Encryption in Transit:</strong> All data transmitted between the Calendar-On-Demand desktop application and Google APIs is encrypted in transit using industry-standard <strong>HTTPS / TLS 1.2+</strong> protocols.</li>
+        <li><strong>Local Storage Isolation & Protection:</strong> OAuth 2.0 access/refresh tokens and cached local preferences are stored exclusively within your operating system's protected per-user application data directory (<code>%APPDATA%\calendar-on-demand</code> on Windows or <code>~/Library/Application Support/calendar-on-demand</code> on macOS), protected by your OS user account permissions and file-system access controls.</li>
+        <li><strong>OAuth 2.0 Principle of Least Privilege:</strong> We never ask for or see your Google account password. Authorization is handled strictly through the official system browser OAuth 2.0 flow with loopback redirect, and Google Tasks permissions are requested incrementally only when you explicitly click "Connect Google Tasks".</li>
+    </ul>
+
+    <h2>6. Data Retention and Deletion</h2>
+    <p>Because Calendar-On-Demand operates entirely on your local device without external servers, data retention and deletion are fully under your control:</p>
+    <ul>
+        <li><strong>Data Retention:</strong> Your Google Calendar events and Google Tasks are fetched on demand in memory for display while the application is running. Your OAuth 2.0 tokens and local preferences are retained locally on your device only for as long as your account remains connected in the application.</li>
+        <li><strong>Data Deletion Within the App:</strong>
+            <ul>
+                <li>Clicking the <strong>Sign Out / Remove Account</strong> button in Settings (or the <strong>Disconnect Google Tasks</strong> button in the Tasks Drawer) immediately and permanently deletes the stored OAuth tokens and clears all associated Google Calendar and Google Tasks data from your local device.</li>
+                <li>Uninstalling the Calendar-On-Demand application and removing its local application data folder permanently erases all locally stored tokens and settings.</li>
+            </ul>
+        </li>
+        <li><strong>Revoking Access via Google:</strong> You can also revoke Calendar-On-Demand's access at any time directly from your <a href="https://myaccount.google.com/permissions" target="_blank">Google Account Security & Permissions page</a>, which immediately invalidates any locally stored OAuth tokens.</li>
+        <li><strong>Deletion Requests:</strong> Since we do not collect or store any Google user data on external servers, no copy of your data exists on our systems. If you need assistance verifying local data removal, you may contact us at any time using the contact details below.</li>
+    </ul>
+
+    <h2>7. Google API Services User Data Policy Compliance</h2>
     <p>Calendar-On-Demand's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
 
-    <h2>5. Revoking Access</h2>
-    <p>You can revoke Calendar-On-Demand's access to your Google account at any time by visiting your Google Account's <a href="https://myaccount.google.com/permissions" target="_blank">Security settings page</a> and removing access for this application. You can also clear all local data by using the sign-out feature within the application itself.</p>
-
-    <h2>6. Contact Us</h2>
-    <p>If you have any questions about this Privacy Policy, please contact us via our <a href="https://github.com/kidiksentrik/Calendar-On-Demand/issues" target="_blank">GitHub repository</a>.</p>
+    <h2>8. Contact Us</h2>
+    <p>If you have any questions about this Privacy Policy, our data protection practices, or data deletion, please contact us via email at <a href="mailto:kidiksentrik@gmail.com">kidiksentrik@gmail.com</a> or through our <a href="https://github.com/kidiksentrik/Calendar-On-Demand/issues" target="_blank">GitHub repository</a>.</p>
 </body>
 </html>
