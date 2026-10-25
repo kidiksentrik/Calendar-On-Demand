@@ -255,9 +255,10 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - [x] **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth + GPU 라이트 빔 UI 로컬 구현 (완료 ✅)**:
   - GCP `Google Tasks API` 활성화 완료.
   - `auth.js` 점진적 권한 요청(`authenticateTasksScope` + 브라우저 탭 강제 종료 시 즉시 재시도 및 90초 타임아웃 복구 처리), `calendar.js` Google Tasks API v1 CRUD 및 `Clear completed`, `widget.js`/`styles.css` 서랍장 `Local` ↔ `✓ Google` 스위치 및 120fps GPU 코닉 라이트 빔 효과 구현 및 실기기 양방향 연동 테스트 완료.
-- [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 (완료 ✅ — Under Review)**:
-  - `auth/tasks` 스코프 추가, 40초 시연 영상(Unlisted YouTube) 및 영문 Scope Justification 제출 완료 (`Homepage requirements` 및 `Branding guidelines` 2026-10-23 승인 완료, `Privacy policy requirements` 등 순차 검토 중).
-  - `docs/privacy.html` 및 `landing/privacy.html`에 `https://www.googleapis.com/auth/tasks` 스코프 명시 및 라이브 홈페이지(`cal-ondemand.com/privacy.html`) 선제 반영 완료.
+- [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 & 1차 보완 회신 완료 (완료 ✅ — Final Approval 대기 중)**:
+  - 2026-10-25 구글 Trust & Safety 팀의 1차 검토 요청에 맞춰:
+    1. `docs/privacy.html` 및 `landing/privacy.html`에 5대 필수 공시 항목(Data Accessed, Data Use & No AI/ML Training, Data Sharing/Disclosure, Data Protection Mechanisms, Data Retention & Deletion) 전면 보강 및 라이브(`cal-ondemand.com/privacy.html`) 배포 완료.
+    2. OAuth 동의 화면(`See access details` 및 `1 service` 전체 펼침) + 2-way CRUD/드래그앤드롭을 상세 시연한 2분 40초 신규 데모 영상(`https://youtu.be/Q41LcRUSFUA`)으로 Cloud Console 교체 및 심사관 테스트 키(`CAL-PRO-2026`) 포함 영문 회신 완료.
 - [x] **Step 4-A. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Lemon Squeezy 라이선스 키 검증 UI 구현 (완료 ✅)**:
   - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료 (한 번 `Unlock` 시 로컬 PC에 영구 귀속되어 구글 계정 재연동 시에도 결제창 재노출 없음).
   - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 개발자 전용 마스터 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
