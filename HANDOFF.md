@@ -258,23 +258,16 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 & 최종 승인 완료 (완료 ✅ — Approved on 2026-10-27!)**:
   - 2026-10-27 Google Third Party Data Safety Team으로부터 프로젝트 `926265289282 (calendar-on-demand)`의 `.../auth/tasks` 스코프 정식 승인 이메일 수신 완료! (미확인 앱 경고 완전 제거됨)
   - `docs/privacy.html` 및 `landing/privacy.html` 5대 필수 공시 항목 및 `docs/index.html` FAQ(`Supporter Pro Pass $5+`) 라이브 배포 완료.
-- [x] **Step 4-A. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Lemon Squeezy 라이선스 키 검증 UI 구현 (완료 ✅)**:
-  - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료 (한 번 `Unlock` 시 로컬 PC에 영구 귀속되어 구글 계정 재연동 시에도 결제창 재노출 없음).
-  - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 개발자 전용 마스터 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
-- [x] **Step 4-B. Lemon Squeezy 스토어 개설, 심사 제출 & 체크아웃 URL 연결 (완료 ✅ — Store Review 대기 중)**:
-  - Lemon Squeezy 스토어(`cal-ondemand.lemonsqueezy.com`, 통화 `USD`, Tax-inclusive ON, 2FA 및 신분증/계좌 인증 제출 완료) 및 상품(`Calendar-On-Demand — Supporter Pro Pass`, Pay what you want `$5+`, License Keys 무제한 기한 + 기기 활성화 한도 5대) 생성 완료.
-  - 발급된 체크아웃 링크(`https://cal-ondemand.lemonsqueezy.com/checkout/buy/67e519aa-463e-4deb-b471-4f1a85d05cbe`)를 `widget.js`의 `SUPPORTER_CHECKOUT_URL`에 반영 및 실제 라이선스 키 발급/해제(`Active 1/5`) End-to-End 검증 완료.
-- [ ] **Step 5. [다음 액션 — 이메일 컨펌 2건 수신 후 진행할 체크리스트]**:
-  1. **Lemon Squeezy 스토어 승인 완료 메일 수신 시**:
-     - 대시보드(`https://app.lemonsqueezy.com/dashboard`) 좌측 하단 `Test mode` 토글이 OFF(Live 모드)로 전환되었는지 확인.
-     - Live 모드의 `Store ➔ Products`에 `Calendar-On-Demand — Supporter Pro Pass` (`$5+`, Generate license keys ON, Activation limit `5`) 상품이 동일하게 존재하는지 확인하고, 만약 Live 상품 체크아웃 URL이 Test mode 때와 달라졌다면 `widget.js` 상단 `SUPPORTER_CHECKOUT_URL`을 Live 체크아웃 링크로 교체.
-  2. ~~**Google Cloud Console OAuth (`auth/tasks`) 승인 완료 메일 수신 시**~~ **(2026-10-27 정식 승인 완료 ✅)**:
-     - 위젯에서 `Connect Google Tasks` 클릭 시 'Google에서 확인하지 않은 앱' 경고 화면 없이 곧바로 깔끔한 권한 동의 화면이 뜨는 상태 확보 완료.
-  3. **랜딩 페이지(`docs/index.html` & `landing/index.html`) 업데이트 및 `v1.7.0` 정식 릴리즈 배포**:
-     - 랜딩 페이지에 **2-way Google Tasks Sync** 및 **Supporter Pro Pass (`$5+` 원타임 후원, 1개의 라이선스 키로 최대 5대 기기까지 무료 활성화 가능)** 안내 반영.
-     - 배포 전 필수 QA 4대 시나리오 및 `npm test` (0 errors, 0 warnings) 확인 후 `v1.7.0` 릴리즈 빌드하여 퍼블릭 레포(`public`)의 GitHub Releases(`latest.yml`) 및 `docs/` 업데이트 배포 (단, Pro 소스코드는 프라이빗 `origin`에만 유지).
-     - 1호 Ko-fi 후원자(Oskar님)에게 감사 메시지 및 신규 발급한 `0/5` 서포터 라이선스 키 선물 발송.
-
+- [x] **Step 4. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Gumroad 공식 라이선스 검증 연동 (완료 ✅)**:
+  - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료.
+  - `main.js`: Gumroad Official License Verification API (`https://api.gumroad.com/v2/licenses/verify`, `product_id: BHIgJHKft20I7E01fTkJTA==`) 연동 및 환불/지급취소(`refunded`/`chargebacked`) 감지, 개발자 전용 마스터 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
+  - Gumroad 상품(`Calendar-On-Demand — Supporter Pro Pass`, `kidiquest.gumroad.com/l/supporter-pro-pass`, Pay what you want `$5+`, License key 블록 및 Product ID 생성) 및 정산(PLN/EUR Revolut) 설정 완료.
+- [ ] **Step 5. [다음 액션 — v1.7.0 최종 점검 및 릴리즈 배포]**:
+  1. **실제 라이선스 키 End-to-End 활성화 검증**:
+     - Gumroad 할인 코드(100% 무료 쿠폰)로 테스트 라이선스 키 발급받아 위젯 잠금 해제 동작 검증.
+  2. **배포 전 필수 QA 4대 시나리오 및 린트 검증**:
+     - `npm test` (`eslint .`) 0 errors & 0 warnings 확인.
+     - 사용자 최종 확인 시 `v1.7.0` 릴리즈 배포 진행.
 ### 2. macOS 단일 화면(노트북) UX 최적화 & HUD Popover 모드 (실기기 테스트 가능 시)
 - **배경**: 데스크톱 멀티 모니터 고정 위젯으로 상정되어 있어, 맥북 등 단일 노트북 화면에서는 상시 노출 창이 거치적거리거나 바탕화면 클릭 시 포커스가 튀는 현상 발생.
 - **해결 방안**:

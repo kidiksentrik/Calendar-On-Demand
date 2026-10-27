@@ -25,7 +25,7 @@ try {
     let selectedTasklistId = '@default';
     let taskFilter = 'all'; // 'all' | 'active' | 'completed'
     let isTaskDrawerOpen = false;
-    const SUPPORTER_CHECKOUT_URL = 'https://cal-ondemand.lemonsqueezy.com/checkout/buy/67e519aa-463e-4deb-b471-4f1a85d05cbe';
+    const SUPPORTER_CHECKOUT_URL = 'https://kidiquest.gumroad.com/l/supporter-pro-pass';
 
     // selectedCalendarIds will be loaded from ipcRenderer 'get-settings'
 

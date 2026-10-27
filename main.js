@@ -940,17 +940,17 @@ ipcMain.handle('activate-pro-license', async (_event, rawKey) => {
         return { success: true, isProUnlocked: true };
     }
 
-    // Lemon Squeezy Official License API activation
+    // Gumroad Official License API verification
     const https = require('https');
-    const os = require('os');
     const postData = new URLSearchParams({
+        product_id: store.get('gumroadProductId', 'BHIgJHKft20I7E01fTkJTA=='),
         license_key: key,
-        instance_name: os.hostname() || 'Calendar-On-Demand-Desktop'
+        increment_uses_count: 'true'
     }).toString();
 
     return new Promise((resolve) => {
         const req = https.request(
-            'https://api.lemonsqueezy.com/v1/licenses/activate',
+            'https://api.gumroad.com/v2/licenses/verify',
             {
                 method: 'POST',
                 headers: {
@@ -965,17 +965,16 @@ ipcMain.handle('activate-pro-license', async (_event, rawKey) => {
                 res.on('end', () => {
                     try {
                         const data = JSON.parse(body);
-                        if (data && (data.activated === true || data.valid === true)) {
+                        const purchase = data && data.purchase;
+                        const isRevoked = purchase && (purchase.refunded === true || purchase.chargebacked === true);
+                        if (data && data.success === true && !isRevoked) {
                             store.set('proLicenseValid', true);
                             store.set('proLicenseKey', key);
-                            if (data.instance && data.instance.id) {
-                                store.set('proLicenseInstanceId', data.instance.id);
-                            }
                             resolve({ success: true, isProUnlocked: true });
                         } else {
                             resolve({
                                 success: false,
-                                error: (data && data.error) ? data.error : 'Invalid or expired supporter key.'
+                                error: isRevoked ? 'This supporter key has been refunded or revoked.' : ((data && data.message) ? data.message : 'Invalid or expired supporter key.')
                             });
                         }
                     } catch (_e) {
