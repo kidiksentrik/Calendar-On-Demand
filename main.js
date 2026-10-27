@@ -348,20 +348,34 @@ function saveBounds() {
 
 function recenterWindow() {
     if (!mainWindow || mainWindow.isDestroyed()) return;
-    const cursorPoint = screen.getCursorScreenPoint();
-    const targetDisplay = screen.getDisplayNearestPoint(cursorPoint) || screen.getPrimaryDisplay();
-    const workArea = targetDisplay.workArea || targetDisplay.bounds;
-    const [w, h] = mainWindow.getSize();
-    const x = Math.round(workArea.x + (workArea.width - w) / 2);
-    const y = Math.round(workArea.y + (workArea.height - h) / 2);
+    const savedBounds = store.get('windowBounds') || {};
+    const currentBounds = mainWindow.getBounds();
+    const targetWidth = Math.max(370, Math.round(savedBounds.width || currentBounds.width || 380));
+    const targetHeight = Math.max(430, Math.round(savedBounds.height || currentBounds.height || 460));
 
     const wasLocked = store.get('lockPosition', false);
-    if (wasLocked) mainWindow.setMovable(true);
-    mainWindow.setPosition(x, y);
-    if (wasLocked) mainWindow.setMovable(false);
+    if (wasLocked) {
+        mainWindow.setMovable(true);
+        mainWindow.setResizable(true);
+    }
 
-    const savedBounds = store.get('windowBounds') || {};
-    store.set('windowBounds', { ...savedBounds, x, y, width: w, height: h });
+    // Use native Electron center(), then restore exact user-saved dimensions so DPI never drifts
+    mainWindow.center();
+    mainWindow.setSize(targetWidth, targetHeight);
+    mainWindow.center();
+
+    if (wasLocked) {
+        mainWindow.setMovable(false);
+        mainWindow.setResizable(false);
+    }
+
+    const finalBounds = mainWindow.getBounds();
+    store.set('windowBounds', {
+        x: Math.round(finalBounds.x),
+        y: Math.round(finalBounds.y),
+        width: targetWidth,
+        height: targetHeight
+    });
     if (!mainWindow.isVisible()) {
         toggleWindow();
     }
