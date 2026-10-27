@@ -183,20 +183,20 @@ async function createWindow() {
     if (x !== undefined) x = Math.round(x);
     if (y !== undefined) y = Math.round(y);
 
-    // Validate that stored coordinates are actually visible on an active display
+    // Validate that stored coordinates and the draggable top header are visible on an active display
     if (x !== undefined && y !== undefined) {
         const displays = screen.getAllDisplays();
         const isVisibleOnAnyDisplay = displays.some(display => {
-            const b = display.bounds;
+            const b = display.workArea || display.bounds;
             return (
-                x + width > b.x + 50 &&
-                x < b.x + b.width - 50 &&
-                y + height > b.y + 50 &&
-                y < b.y + b.height - 50
+                x + width > b.x + 80 &&
+                x < b.x + b.width - 80 &&
+                y >= b.y &&
+                y < b.y + b.height - 80
             );
         });
         if (!isVisibleOnAnyDisplay) {
-            console.log('Stored window position was off-screen, resetting to center.');
+            console.log('Stored window position or top header was off-screen, resetting to center.');
             x = undefined;
             y = undefined;
         }
@@ -346,6 +346,29 @@ function saveBounds() {
     }, 400);
 }
 
+function recenterWindow() {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    const cursorPoint = screen.getCursorScreenPoint();
+    const targetDisplay = screen.getDisplayNearestPoint(cursorPoint) || screen.getPrimaryDisplay();
+    const workArea = targetDisplay.workArea || targetDisplay.bounds;
+    const [w, h] = mainWindow.getSize();
+    const width = Math.min(Math.max(370, w), workArea.width - 40);
+    const height = Math.min(Math.max(430, h), workArea.height - 40);
+    const x = Math.round(workArea.x + (workArea.width - width) / 2);
+    const y = Math.round(workArea.y + (workArea.height - height) / 2);
+
+    const wasLocked = store.get('lockPosition', false);
+    if (wasLocked) mainWindow.setMovable(true);
+    mainWindow.setBounds({ x, y, width, height });
+    if (wasLocked) mainWindow.setMovable(false);
+
+    store.set('windowBounds', { x, y, width, height });
+    if (!mainWindow.isVisible()) {
+        toggleWindow();
+    }
+    mainWindow.focus();
+}
+
 function createTray() {
     if (tray) tray.destroy();
     const iconPath = path.join(__dirname, 'tray_icon.png');
@@ -354,6 +377,7 @@ function createTray() {
     const openAtLogin = store.get('openAtLogin', false);
     const contextMenu = Menu.buildFromTemplate([
         { label: 'Show/Hide', click: () => toggleWindow() },
+        { label: 'Re-center Window', click: () => recenterWindow() },
         { label: 'Sync Now', click: () => mainWindow.webContents.send('sync-now') },
         { type: 'separator' },
         { 
