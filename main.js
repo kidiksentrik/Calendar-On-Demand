@@ -352,17 +352,16 @@ function recenterWindow() {
     const targetDisplay = screen.getDisplayNearestPoint(cursorPoint) || screen.getPrimaryDisplay();
     const workArea = targetDisplay.workArea || targetDisplay.bounds;
     const [w, h] = mainWindow.getSize();
-    const width = Math.min(Math.max(370, w), workArea.width - 40);
-    const height = Math.min(Math.max(430, h), workArea.height - 40);
-    const x = Math.round(workArea.x + (workArea.width - width) / 2);
-    const y = Math.round(workArea.y + (workArea.height - height) / 2);
+    const x = Math.round(workArea.x + (workArea.width - w) / 2);
+    const y = Math.round(workArea.y + (workArea.height - h) / 2);
 
     const wasLocked = store.get('lockPosition', false);
     if (wasLocked) mainWindow.setMovable(true);
-    mainWindow.setBounds({ x, y, width, height });
+    mainWindow.setPosition(x, y);
     if (wasLocked) mainWindow.setMovable(false);
 
-    store.set('windowBounds', { x, y, width, height });
+    const savedBounds = store.get('windowBounds') || {};
+    store.set('windowBounds', { ...savedBounds, x, y, width: w, height: h });
     if (!mainWindow.isVisible()) {
         toggleWindow();
     }
