@@ -255,10 +255,9 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
 - [x] **Step 2. Google Tasks 양방향 동기화 엔진 & 점진적 OAuth + GPU 라이트 빔 UI 로컬 구현 (완료 ✅)**:
   - GCP `Google Tasks API` 활성화 완료.
   - `auth.js` 점진적 권한 요청(`authenticateTasksScope` + 브라우저 탭 강제 종료 시 즉시 재시도 및 90초 타임아웃 복구 처리), `calendar.js` Google Tasks API v1 CRUD 및 `Clear completed`, `widget.js`/`styles.css` 서랍장 `Local` ↔ `✓ Google` 스위치 및 120fps GPU 코닉 라이트 빔 효과 구현 및 실기기 양방향 연동 테스트 완료.
-- [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 & 1차 보완 회신 완료 (완료 ✅ — Final Approval 대기 중)**:
-  - 2026-10-25 구글 Trust & Safety 팀의 1차 검토 요청에 맞춰:
-    1. `docs/privacy.html` 및 `landing/privacy.html`에 5대 필수 공시 항목(Data Accessed, Data Use & No AI/ML Training, Data Sharing/Disclosure, Data Protection Mechanisms, Data Retention & Deletion) 전면 보강 및 라이브(`cal-ondemand.com/privacy.html`) 배포 완료.
-    2. OAuth 동의 화면(`See access details` 및 `1 service` 전체 펼침) + 2-way CRUD/드래그앤드롭을 상세 시연한 2분 40초 신규 데모 영상(`https://youtu.be/Q41LcRUSFUA`)으로 Cloud Console 교체 및 심사관 테스트 키(`CAL-PRO-2026`) 포함 영문 회신 완료.
+- [x] **Step 3. Google OAuth `auth/tasks` (Sensitive Scope) 심사 제출 & 최종 승인 완료 (완료 ✅ — Approved on 2026-10-27!)**:
+  - 2026-10-27 Google Third Party Data Safety Team으로부터 프로젝트 `926265289282 (calendar-on-demand)`의 `.../auth/tasks` 스코프 정식 승인 이메일 수신 완료! (미확인 앱 경고 완전 제거됨)
+  - `docs/privacy.html` 및 `landing/privacy.html` 5대 필수 공시 항목 및 `docs/index.html` FAQ(`Supporter Pro Pass $5+`) 라이브 배포 완료.
 - [x] **Step 4-A. 서포터 잠금 화면(`☕ SUPPORTER PERK`) & Lemon Squeezy 라이선스 키 검증 UI 구현 (완료 ✅)**:
   - `widget.html` / `styles.css` / `widget.js`: `✓ Google` 탭 선택 시 따뜻한 인디 서포터 감성의 `☕ SUPPORTER PERK` (`Support & Unlock Google Tasks`, `$5+`) 잠금 카드 및 서포터 키 입력/해제 UI 장착 완료 (한 번 `Unlock` 시 로컬 PC에 영구 귀속되어 구글 계정 재연동 시에도 결제창 재노출 없음).
   - `main.js`: Lemon Squeezy License API (`https://api.lemonsqueezy.com/v1/licenses/activate`) 연동 및 개발자 전용 마스터 키(`CAL-PRO-2026`, `SUPPORTER-DEV`) 검증 핸들러(`activate-pro-license`, `deactivate-pro-license`) 구현 완료.
@@ -269,8 +268,8 @@ npm run build      # 로컬 패키징 빌드 테스트 (dist/ 생성)
   1. **Lemon Squeezy 스토어 승인 완료 메일 수신 시**:
      - 대시보드(`https://app.lemonsqueezy.com/dashboard`) 좌측 하단 `Test mode` 토글이 OFF(Live 모드)로 전환되었는지 확인.
      - Live 모드의 `Store ➔ Products`에 `Calendar-On-Demand — Supporter Pro Pass` (`$5+`, Generate license keys ON, Activation limit `5`) 상품이 동일하게 존재하는지 확인하고, 만약 Live 상품 체크아웃 URL이 Test mode 때와 달라졌다면 `widget.js` 상단 `SUPPORTER_CHECKOUT_URL`을 Live 체크아웃 링크로 교체.
-  2. **Google Cloud Console OAuth (`auth/tasks`) 승인 완료 메일 수신 시**:
-     - 위젯에서 `Connect Google Tasks` 클릭 시 'Google에서 확인하지 않은 앱' 경고 화면 없이 곧바로 깔끔한 권한 동의 화면이 뜨는지 최종 확인.
+  2. ~~**Google Cloud Console OAuth (`auth/tasks`) 승인 완료 메일 수신 시**~~ **(2026-10-27 정식 승인 완료 ✅)**:
+     - 위젯에서 `Connect Google Tasks` 클릭 시 'Google에서 확인하지 않은 앱' 경고 화면 없이 곧바로 깔끔한 권한 동의 화면이 뜨는 상태 확보 완료.
   3. **랜딩 페이지(`docs/index.html` & `landing/index.html`) 업데이트 및 `v1.7.0` 정식 릴리즈 배포**:
      - 랜딩 페이지에 **2-way Google Tasks Sync** 및 **Supporter Pro Pass (`$5+` 원타임 후원, 1개의 라이선스 키로 최대 5대 기기까지 무료 활성화 가능)** 안내 반영.
      - 배포 전 필수 QA 4대 시나리오 및 `npm test` (0 errors, 0 warnings) 확인 후 `v1.7.0` 릴리즈 빌드하여 퍼블릭 레포(`public`)의 GitHub Releases(`latest.yml`) 및 `docs/` 업데이트 배포 (단, Pro 소스코드는 프라이빗 `origin`에만 유지).
