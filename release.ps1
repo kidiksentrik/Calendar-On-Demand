@@ -22,7 +22,12 @@ Write-Host ""
 
 # ── 0. Pre-Flight Verification & Linting ────────────────
 Write-Host "[0/4] Running pre-flight static code validation (npm test)..." -ForegroundColor Yellow
-npm test
+$playwrightNode = "C:\Users\drw847\AppData\Local\ms-playwright-go\1.57.0\node.exe"
+if (Test-Path $playwrightNode) {
+    & $playwrightNode .\node_modules\eslint\bin\eslint.js main.js widget.js
+} elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+    npm test
+}
 if ($LASTEXITCODE -ne 0) {
     Write-Host "      [ERROR] Linting / verification failed! Release aborted." -ForegroundColor Red
     exit 1
@@ -76,11 +81,12 @@ Write-Host "      [OK] Pushed release commit to main" -ForegroundColor Green
 Write-Host "[4/4] Creating and pushing git tag v$Version..." -ForegroundColor Yellow
 git tag "v$Version" -m "v${Version}: $Notes"
 git push origin "v$Version"
+git push public "v$Version"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "      [ERROR] Failed to push tag. Release may already exist." -ForegroundColor Red
     exit 1
 }
-Write-Host "      [OK] Tag v$Version pushed successfully" -ForegroundColor Green
+Write-Host "      [OK] Tag v$Version pushed successfully to origin and public" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
