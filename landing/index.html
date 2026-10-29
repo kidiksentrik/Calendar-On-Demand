@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.7.0",
+          "softwareVersion": "1.7.1",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -789,8 +789,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.7.0 Released</span>
-                <span class="update-text">Google Tasks 2-Way Real-time Sync, Supporter Pro Pass & Multi-Monitor Window Rescue</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.7.1 Released</span>
+                <span class="update-text">Clean uninstaller & process cleanup, universal ESC dismissal, month wheel scroll, and event overflow badges</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -1125,6 +1125,21 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.7.1 <span class="cl-date">Oct 29, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">PATCH</span></div>
+                    <div class="cl-body">
+                        <strong>Clean Uninstaller, Universal ESC Modal Dismissal, Month Wheel Navigation &amp; Event Overflow:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Clean Uninstaller &amp; Zero-Trace Cleanup (Critical Fix):</strong> Fixed an issue where the background tray process was not fully terminated during uninstallation, leaving locked files (~99MB) in <code>AppData\Local\Programs</code> and an orphaned Windows startup registry key. The uninstaller now cleanly force-terminates all running widget instances and completely purges startup registry entries and app artifacts.</li>
+                            <li><strong>Universal ESC Dismissal:</strong> Pressing <kbd>ESC</kbd> now unconditionally dismisses active modals (Settings, Quick Add / Day View, and Tasks Drawer) instantly, regardless of whether a text input, button, or container currently has active focus.</li>
+                            <li><strong>Month View Mouse Wheel Navigation:</strong> Smoothly scroll between months using the vertical mouse wheel over the Month View grid (with a 280ms debounce for natural feel). Weekly timeline scrolling remains completely unaffected.</li>
+                            <li><strong>Theme Consistency &amp; Dark Glass Polish:</strong> Re-styled the Weekly View &quot;Today&quot; header with a subtle dark-glass backdrop and neon accent border to match the Month View aesthetic, eliminating jarring contrast when switching views. Added a smooth fade-in view transition.</li>
+                            <li><strong>Event Overflow Badges (<code>+N more</code>):</strong> Days with dense schedules (&gt;3 events) in Month View now show a <code>+N more</code> badge instead of silently truncating events. Clicking the badge immediately opens the day popover.</li>
+                            <li><strong>Modal &amp; Description Box Sizing:</strong> Expanded modal widths and event description box height (to 160px) with automatic break-anywhere word wrapping for long meeting descriptions, Zoom links, and notes.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.7.0 <span class="cl-date">Oct 27, 2026</span> <span class="cl-tag" style="background:rgba(66,133,244,0.18);color:#6ba4f8;border:1px solid rgba(66,133,244,0.35);font-weight:700;">MAJOR</span></div>
                     <div class="cl-body">
