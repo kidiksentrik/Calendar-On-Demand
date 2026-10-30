@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.8.0",
+          "softwareVersion": "1.8.1",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -789,8 +789,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.8.0 Released</span>
-                <span class="update-text">Drag-to-Reschedule, Recurring Events with Bi-weekly Recurrence & Series Actions, 12h/24h Time Format, and 0ms Instant Save UX</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.8.1 Released</span>
+                <span class="update-text">Color-Coding Commit Fix, Tasks Time-blocking Auto-Confirm & Calendar Sync Polish</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -1125,6 +1125,19 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.8.1 <span class="cl-date">Oct 30, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">PATCH</span> <span class="cl-tag" style="background:rgba(242,153,74,0.18);color:#ffa24b;border:1px solid rgba(242,153,74,0.35);font-weight:700;">STABILITY</span></div>
+                    <div class="cl-body">
+                        <strong>Google Calendar Color-Coding Fix, Tasks Time-blocking Auto-Confirm &amp; Sync Polish:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Universal Google Calendar Color-Coding (Bugfix):</strong> Resolved an issue where selecting an entry color prevented events from committing to Google Calendar. Migrated from workspace-specific label properties to Google's standard universal <code>colorId</code> (&quot;1&quot;–&quot;11&quot;). All 24 color presets now commit seamlessly and remain perfectly synchronized across personal (@gmail.com) and Google Workspace accounts.</li>
+                            <li><strong>Tasks Drag-and-Drop Auto-Confirm:</strong> Dropping a task from the Google Tasks drawer onto the calendar now automatically confirms and dismisses the creation dialog upon saving (via the blue <code>+</code> button, <kbd>Enter</kbd>, or outside click) with an instant audio chime, placing the scheduled time block directly on your calendar.</li>
+                            <li><strong>Weekly All-Day Task Drop Support:</strong> Dragging a task onto the Week View &quot;All-day&quot; header row now properly initializes an all-day scheduled block for that day, matching Month View drop behavior.</li>
+                            <li><strong>Reschedule Payload Hardening:</strong> Purged legacy label references from event reschedule payloads across Week and Month views, preventing Google Calendar API 400 Bad Request errors during drag-to-reschedule.</li>
+                            <li><strong>Tactile Audio Feedback on Outside-Click Auto-Save:</strong> Auto-saving events by clicking outside the dialog now plays a subtle confirmation chime, ensuring consistent sensory feedback across all save workflows.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.8.0 <span class="cl-date">Oct 30, 2026</span> <span class="cl-tag" style="background:rgba(66,133,244,0.18);color:#6ba4f8;border:1px solid rgba(66,133,244,0.35);font-weight:700;">FEATURE</span> <span class="cl-tag" style="background:rgba(187,134,252,0.18);color:#c792ea;border:1px solid rgba(187,134,252,0.35);font-weight:700;">MAJOR</span></div>
                     <div class="cl-body">
