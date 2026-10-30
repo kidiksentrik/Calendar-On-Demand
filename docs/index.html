@@ -1125,9 +1125,19 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
-                <div class="cl-item">
-                    <div class="cl-version">v1.8.0 <span class="cl-date">Oct 30, 2026</span></div>
-                    <div class="cl-body">Drag-to-Reschedule, Recurring Events with Bi-weekly Recurrence & Series Actions, 12h/24h Time Format, and 0ms Instant Save UX</div>
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.8.0 <span class="cl-date">Oct 30, 2026</span> <span class="cl-tag" style="background:rgba(66,133,244,0.18);color:#6ba4f8;border:1px solid rgba(66,133,244,0.35);font-weight:700;">FEATURE</span> <span class="cl-tag" style="background:rgba(187,134,252,0.18);color:#c792ea;border:1px solid rgba(187,134,252,0.35);font-weight:700;">MAJOR</span></div>
+                    <div class="cl-body">
+                        <strong>Drag-to-Reschedule, Complete Recurring Events Engine, 12h/24h Time Format &amp; 0ms Instant UX:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Drag-to-Reschedule (Week &amp; Month Views):</strong> Effortlessly reschedule meetings by dragging events directly across day columns or time slots. Features 15-minute smart grid snapping in Week View, directional locking to prevent accidental time drift during horizontal day dragging, full multi-day duration preservation in Month View, and strict midnight boundary clamping.</li>
+                            <li><strong>Recurring Events Engine (RRULE):</strong> Full support for recurring event creation across Daily, Weekly, Bi-weekly (every 2 weeks, requested by Reddit feedback), Weekdays (Mon–Fri), Monthly, and Yearly schedules. Built with strict IANA time zone sanitization to prevent Google Calendar 400 Bad Request errors.</li>
+                            <li><strong>Smart Series Modification &amp; Deletion Modals:</strong> Editing or deleting a recurring event instance now seamlessly prompts with <em>&quot;This event only&quot;</em> vs. <em>&quot;All events in series&quot;</em>. Updating a series color or title immediately propagates across the entire calendar via Google Calendar API patch without breaking individual recurrence rules.</li>
+                            <li><strong>12-Hour (AM/PM) vs. 24-Hour Time Format:</strong> Added a user preference toggle in Settings. Supports smart AM/PM typographic compression (e.g., <code>9 – 11 AM</code> or <code>2:30 PM</code>) for high-density readability across both views.</li>
+                            <li><strong>0ms Instant Save &amp; Optimistic UI:</strong> Modal dismiss latency reduced to 0ms when auto-saving via outside click. The calendar updates instantaneously on screen while API calls persist smoothly in the background.</li>
+                            <li><strong>Double-Offset Time Shift Bugfix:</strong> Resolved an upstream Google Calendar API drift bug where pairing trailing offset strings with IANA time zones caused dragged events to drift backward by 1 hour on each update.</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.7.1 <span class="cl-date">Oct 29, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">PATCH</span> <span class="cl-tag" style="background:rgba(242,153,74,0.18);color:#ffa24b;border:1px solid rgba(242,153,74,0.35);font-weight:700;">BUGFIX</span></div>
