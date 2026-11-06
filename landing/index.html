@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.8.2",
+          "softwareVersion": "1.9.0",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -78,7 +78,7 @@
               "name": "Is Calendar-On-Demand free? What is the Supporter Pro Pass?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "All core features—including Google Calendar sync, Month & Week timeline views, multi-account support, and the Local Tasks Drawer—are 100% free forever with no subscriptions. Optional cloud add-ons like 2-way Google Tasks synchronization can be unlocked with a one-time Supporter Pro Pass ($5+, valid on up to 5 devices) to support ongoing indie development."
+                "text": "All core features—including Google Calendar sync, Month & Week timeline views, multi-account support, 1-click Google Meet video creation, and the Local Tasks Drawer—are 100% free forever with no subscriptions. Optional cloud and visual add-ons like 2-way Google Tasks synchronization, 8 curated signature themes, 6 designer fonts, ambient neon glow, and window corner morphing can be unlocked with a one-time Supporter Pro Pass ($5+ early bird, valid on up to 5 devices) to support ongoing indie development."
               }
             },
             {
@@ -765,6 +765,7 @@
             <a href="#" class="nav-logo">Calendar<span>·</span>On<span>·</span>Demand</a>
             <div style="display:flex;align-items:center;gap:12px;">
                 <a href="#faq" class="nav-link">FAQ</a>
+                <a href="https://kidiquest.gumroad.com/l/supporter-pro-pass" target="_blank" rel="noopener" class="nav-link" style="color:#f59e0b;font-weight:600;">Supporter Pro ⭐</a>
                 <a href="https://github.com/kidiksentrik/Calendar-On-Demand/discussions" target="_blank" rel="noopener" class="nav-link">
                     Community
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -793,8 +794,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.8.2 Released</span>
-                <span class="update-text">Persistent Notifications, Minimal Flat View Toggles & Save Entry Action</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.9.0 Released</span>
+                <span class="update-text">1-Click Google Meet Creation & Join, Supporter Pro Visual Suite (8 Curated Themes, 6 Fonts, Ambient Glow, Corner Radii), and Gumroad Auto-Revocation</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -827,9 +828,15 @@
             </button>
         </div>
 
-        <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener" style="color:var(--text-mute);font-size:0.85rem;text-decoration:none;transition:color 0.2s;margin-bottom:40px;" onmouseover="this.style.color='var(--text-dim)'" onmouseout="this.style.color='var(--text-mute)'">
-            It's free. But if it saved you 5 minutes today, buy me a coffee ☕
-        </a>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:40px;flex-wrap:wrap;justify-content:center;">
+            <a href="https://kidiquest.gumroad.com/l/supporter-pro-pass" target="_blank" rel="noopener" style="color:#f59e0b;font-size:0.85rem;font-weight:600;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                ⭐ Unlock Supporter Pro ($5+)
+            </a>
+            <span style="color:var(--border);">·</span>
+            <a href="https://ko-fi.com/kidiksentrik" target="_blank" rel="noopener" style="color:var(--text-mute);font-size:0.85rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-dim)'" onmouseout="this.style.color='var(--text-mute)'">
+                Buy me a coffee ☕
+            </a>
+        </div>
 
         <div class="trust-row">
             <span class="trust-pill">
@@ -909,14 +916,24 @@
                     <p>Connect multiple personal and work Google accounts with independent toggling and unified calendar view.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>10 Pastel Colorways</h3>
-                    <p>Categorize your events with 10 curated pastel colors and customize your Today neon highlight.</p>
+                    <div class="feature-icon">📹</div>
+                    <h3>1-Click Google Meet</h3>
+                    <p>Directly generate Google Meet video calls in the event scheduler, copy meeting links, and jump into calls from desktop notifications.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Supporter Pro Visuals</h3>
+                    <p>Personalize with 8 curated themes (Obsidian, Forest, Cyberpunk, Espresso, etc.), 6 designer typography fonts, ambient neon glow, and window corner morphing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Google Tasks 2-Way Sync</h3>
+                    <p>Bidirectional cloud sync for Google Tasks. Check off todos, schedule time-blocks with drag-and-drop, and stay organized seamlessly.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔄</div>
-                    <h3>Two-way Sync</h3>
-                    <p>Always in sync with Google Calendar. Changes made here reflect everywhere, instantly.</p>
+                    <h3>Two-Way Real-time Sync</h3>
+                    <p>Always in sync with Google Calendar. Changes made here reflect everywhere across all your devices instantly.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📅</div>
@@ -924,9 +941,9 @@
                     <p>Click and add your event — it lands on Google Calendar with the correct timezone, automatically.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔗</div>
-                    <h3>Magic URLs</h3>
-                    <p>One click to jump into Google Meet, Zoom, or event details. Built for efficiency.</p>
+                    <div class="feature-icon">⚡</div>
+                    <h3>Keyboard-First Speed</h3>
+                    <p>Universal shortcuts, instant search, distraction-free hotkeys, and quick outside-click auto-saving for maximum productivity.</p>
                 </div>
             </div>
         </div>
@@ -1128,7 +1145,20 @@
             <h2 class="section-title">What's New</h2>
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
-            <div class="changelog-list">
+            <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.9.0 <span class="cl-date">Nov 06, 2026</span> <span class="cl-tag" style="background:rgba(66,133,244,0.18);color:#6ba4f8;border:1px solid rgba(66,133,244,0.35);font-weight:700;">FEATURE</span> <span class="cl-tag" style="background:rgba(187,134,252,0.18);color:#c792ea;border:1px solid rgba(187,134,252,0.35);font-weight:700;">MAJOR</span></div>
+                    <div class="cl-body">
+                        <strong>Google Meet 1-Click Creation &amp; Quick Join, Supporter Pro Visual Suite &amp; Tasks 2-Way Sync:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>1-Click Google Meet Creation (Free Tier):</strong> Directly generate Google Meet video conference links inside the Add Event modal with a single click. Copy conference URLs to clipboard or launch straight into meetings from desktop event cards and Windows notifications.</li>
+                            <li><strong>Supporter Pro Visual &amp; Typography Suite (Pro Perk):</strong> Unlock 8 handcrafted signature themes (Obsidian, Forest, Cyberpunk, Espresso, Nordic, Crimson, Lavender, Paper), 6 designer typography choices (Inter, JetBrains Mono, Fira Code, Roboto, Geist, Lora, Space Mono), dynamic window corner morphing (Rounded, Modern, Sharp), and an ambient neon glow edge illumination.</li>
+                            <li><strong>Real-Time Settings Visual Preview:</strong> Theme presets, typography, corner radii, and neon glow immediately morph and style the widget and settings modal in real-time, persisting flawlessly across reboots.</li>
+                            <li><strong>Airtight License Verification &amp; Auto-Revocation:</strong> Background heartbeat verification checks license standing with Gumroad every 12 hours. If a key is refunded or revoked, the app smoothly reverts to free defaults and informs the user, with built-in network tolerance.</li>
+                            <li><strong>Polished Interaction &amp; Universal <kbd>Esc</kbd>:</strong> Refined modal controls with dark glassmorphic dismiss buttons, hierarchical <kbd>Esc</kbd> key dismissal for stacked dialogs, and instant <kbd>Enter</kbd> key supporter key activation.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.8.2 <span class="cl-date">Nov 03, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">PATCH</span></div>
                     <div class="cl-body">
@@ -1410,7 +1440,7 @@
                         Is Calendar-On-Demand free? What is the Supporter Pro Pass?
                     </div>
                     <div class="faq-answer">
-                        All core features—including Google Calendar sync, Month &amp; Week timeline views, multi-account support, and the Local Tasks Drawer—are <strong>100% free forever</strong> with no subscriptions. Optional cloud add-ons like <strong>2-way Google Tasks synchronization</strong> can be unlocked with a one-time <strong>Supporter Pro Pass ($5+, up to 5 devices)</strong> to support ongoing indie development.
+                        All core features—including Google Calendar sync, Month &amp; Week timeline views, multi-account support, 1-click Google Meet video creation, and the Local Tasks Drawer—are <strong>100% free forever</strong> with no subscriptions. Optional pro perks like <strong>2-way Google Tasks cloud synchronization, 8 curated signature themes, 6 designer typography fonts, ambient neon glow, and dynamic window corner morphing</strong> can be unlocked with a single lifetime <a href="https://kidiquest.gumroad.com/l/supporter-pro-pass" target="_blank" rel="noopener" style="color:var(--text-bright);text-decoration:underline;">Supporter Pro Pass ($5+ early bird, valid on up to 5 devices)</a> on Gumroad to support ongoing indie development.
                     </div>
                 </div>
 
@@ -1552,6 +1582,8 @@
             <p>&copy; 2026 Built with ❤️ by a solo developer.</p>
             <div class="footer-links">
                 <a href="#faq">FAQ</a>
+                <span class="footer-sep">|</span>
+                <a href="https://kidiquest.gumroad.com/l/supporter-pro-pass" target="_blank" rel="noopener">Supporter Pro Pass ⭐</a>
                 <span class="footer-sep">|</span>
                 <a href="https://github.com/kidiksentrik/Calendar-On-Demand/discussions" target="_blank" rel="noopener">Community</a>
                 <span class="footer-sep">|</span>
