@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.9.1",
+          "softwareVersion": "1.9.2",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -794,8 +794,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.9.1 Released</span>
-                <span class="update-text">1-Click Google Meet, Supporter Pro Visual Pack &amp; Tasks 2-Way Sync</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.9.2 Released</span>
+                <span class="update-text">Keyword Event Search (Ctrl+F), Today-First Rolling Week, and Sharper Grid Lines</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -1146,6 +1146,18 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.9.2 <span class="cl-date">Nov 17, 2026</span> <span class="cl-tag" style="background:rgba(66,133,244,0.18);color:#6ba4f8;border:1px solid rgba(66,133,244,0.35);font-weight:700;">FEATURE</span></div>
+                    <div class="cl-body">
+                        <strong>Keyword Event Search (<kbd>Ctrl+F</kbd>), Today-First Rolling Week View &amp; Crisp Grid Visibility:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Spotlight Keyword Event Search (Free Tier):</strong> Open instant schedule search anytime via the new header magnifying glass button or <kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Cmd</kbd>+<kbd>F</kbd>. Instantly matches cached events in 0ms while simultaneously querying all connected Google Calendars across past and upcoming schedules. Selecting any result jumps straight to that date, scrolls to the event hour, and highlights the target card.</li>
+                            <li><strong>&quot;Today&quot; Option in Start of Week (Rolling 7-Day Week View):</strong> Inspired by GitHub Discussions community feedback, Settings &gt; Behavior &gt; <em>Start of Week</em> now includes <strong>Today (Week View)</strong>. Keeps today pinned as the leftmost column so the next 7 days are always front and center while preserving your preferred Sunday/Monday grid layout in Month View.</li>
+                            <li><strong>Sharper Hourly Grid Lines Across Themes:</strong> Upgraded Week View horizontal hour and half-hour separators with theme-adaptive contrast variables so time slots remain crisp and effortless to scan in both dark themes and Paper Light mode.</li>
+                            <li><strong>Supporter Pro Architecture &amp; Security Polish:</strong> Modularized core utilities for snappier responsiveness and hardened Google Tasks backend IPC channels so every Pro endpoint verifies active license standing directly on the main process.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.9.0 &amp; v1.9.1 <span class="cl-date">Nov 06, 2026</span> <span class="cl-tag" style="background:rgba(66,133,244,0.18);color:#6ba4f8;border:1px solid rgba(66,133,244,0.35);font-weight:700;">FEATURE</span></div>
                     <div class="cl-body">
