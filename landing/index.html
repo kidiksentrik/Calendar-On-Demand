@@ -745,6 +745,45 @@
             color:var(--text-dim); font-size:0.9rem; line-height:1.65;
         }
 
+        /* FLOATING BACK TO TOP */
+        .back-to-top-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 95;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(17, 22, 17, 0.84);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-green);
+            color: #9ed69e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px var(--green-glow);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(12px) scale(0.92);
+            transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+        .back-to-top-btn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+        .back-to-top-btn:hover {
+            background: rgba(58, 107, 58, 0.35);
+            border-color: #7ec47e;
+            color: #ffffff;
+            transform: translateY(-2px) scale(1.04);
+        }
+        .back-to-top-btn:active {
+            transform: translateY(0) scale(0.96);
+        }
+
         @media (max-width:640px) {
             h1 { letter-spacing:-1.5px; }
             .hero-cta { flex-direction:column; width:100%; }
@@ -755,6 +794,7 @@
             .cl-version { min-width:unset; }
             .faq-grid { grid-template-columns:1fr; }
             .faq-card { padding:24px 20px; }
+            .back-to-top-btn { right:16px; bottom:16px; width:40px; height:40px; }
         }
     </style>
 </head>
@@ -1611,11 +1651,17 @@
         </div>
     </footer>
 
+    <button id="back-to-top-btn" class="back-to-top-btn" type="button" aria-label="Back to top" title="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    </button>
+
     <script>
-        // Nav scroll effect
+        // Nav scroll effect & floating back-to-top button
         const nav = document.getElementById('main-nav');
+        const backToTopBtn = document.getElementById('back-to-top-btn');
         window.addEventListener('scroll', () => {
             nav.classList.toggle('scrolled', window.scrollY > 20);
+            if (backToTopBtn) backToTopBtn.classList.toggle('visible', window.scrollY > 420);
         }, { passive: true });
 
         // Smooth scroll for # anchors only (not onclick handlers)
