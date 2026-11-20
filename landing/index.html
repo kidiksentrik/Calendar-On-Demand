@@ -968,7 +968,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">✅</div>
                     <h3>Google Tasks 2-Way Sync</h3>
-                    <p>Bidirectional cloud sync for Google Tasks. Check off todos, schedule time-blocks with drag-and-drop, and stay organized seamlessly.</p>
+                    <p>Bidirectional cloud sync for Google Tasks across multiple accounts. Customize account color dots, drag todos onto the calendar to block time, and stay organized seamlessly.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔄</div>
@@ -1189,11 +1189,12 @@
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.9.3 <span class="cl-date">Nov 20, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">UPDATE</span></div>
                     <div class="cl-body">
-                        <strong>Multi-Account Google Tasks (Pro), Faster Sync &amp; Reliability Fixes:</strong>
+                        <strong>Multi-Account Google Tasks (Pro), Parallel Sync Speedups &amp; Reliability Fixes:</strong>
                         <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
-                            <li><strong>Multi-Account Google Tasks &amp; Color Dots (Pro):</strong> Opt-in connect multiple Google accounts right inside the Tasks drawer, customize per-account color dots, toggle account visibility in <em>All Visible Accounts</em> view, and identify task sources cleanly at a glance.</li>
-                            <li><strong>Parallel Sync &amp; Backend Hardening:</strong> Multi-calendar refreshes now run concurrently with partial error isolation, safer OAuth timeout/cleanup recovery, and stricter HTTP(S) &amp; HTML sanitization for external links.</li>
-                            <li><strong>Notification &amp; Week-Switch Fixes:</strong> Clicking <em>Close</em> on Windows reminders now dismisses quietly without pulling the calendar window forward, and switching <em>Start of Week</em> to <strong>Today (Week View)</strong> cleanly preserves your existing Sunday/Monday Month View layout.</li>
+                            <li><strong>Multi-Account Google Tasks &amp; Color Dots (Pro):</strong> Opt-in connect multiple Google accounts directly inside the Tasks drawer without forcing every calendar account into Tasks. Customize each account's color dot, toggle account visibility on the fly in <em>All Visible Accounts</em> view, and tell accounts apart at a glance without cramping task titles.</li>
+                            <li><strong>Parallel Calendar Sync &amp; Error Isolation:</strong> Connected calendars now fetch concurrently for snappier refreshes—especially when syncing multiple calendars—while isolating individual shared-calendar errors so one broken feed never blocks the rest of your schedule.</li>
+                            <li><strong>OAuth Timeout Recovery &amp; Link Hardening:</strong> Stalled browser login attempts automatically time out and clean up lingering listeners on retry, while external meeting URLs and event descriptions are strictly validated and sanitized before rendering or opening.</li>
+                            <li><strong>Smarter Notifications &amp; Month-Start Preservation:</strong> Clicking <em>Close</em> on Windows event reminders now dismisses quietly without pulling the calendar window to the front, and switching <em>Start of Week</em> to <strong>Today (Week View)</strong> cleanly preserves your existing Sunday/Monday Month View preference.</li>
                         </ul>
                     </div>
                 </div>
