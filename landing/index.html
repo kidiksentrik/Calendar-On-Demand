@@ -46,7 +46,7 @@
             "priceCurrency": "USD"
           },
           "description": "A lightweight, always-on-screen Google Calendar desktop widget for Windows and macOS. Features seamless two-way sync, Google Tasks integration, multi-account support, and pinned desktop display.",
-          "softwareVersion": "1.9.3",
+          "softwareVersion": "1.9.4",
           "url": "https://cal-ondemand.com",
           "downloadUrl": "https://github.com/kidiksentrik/Calendar-On-Demand/releases",
           "author": {
@@ -834,8 +834,8 @@
 
         <div>
             <a href="#changelog" class="update-banner">
-                <span class="update-tag"><span class="pulse-dot"></span>v1.9.3 Released</span>
-                <span class="update-text">Multi-Account Google Tasks (Pro), Parallel Sync & Core Reliability Fixes</span>
+                <span class="update-tag"><span class="pulse-dot"></span>v1.9.4 Released</span>
+                <span class="update-text">Glassmorphic Visual Polish, Completed-Event Sorting & Desktop Mode Fixes</span>
                 <svg class="update-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </div>
@@ -1186,6 +1186,18 @@
             <p class="section-sub" style="margin-bottom:40px;">A running log of improvements, fixes, and new features.</p>
 
             <div class="changelog-list">
+                <div class="cl-item cl-visible">
+                    <div class="cl-version">v1.9.4 <span class="cl-date">Nov 24, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">PATCH</span></div>
+                    <div class="cl-body">
+                        <strong>Glassmorphic Visual Polish, Smarter Completed-Event Sorting &amp; Multi-Monitor Desktop Mode Fixes:</strong>
+                        <ul style="margin: 8px 0 4px 18px; line-height: 1.6; font-size: 0.88rem; color: var(--text-dim);">
+                            <li><strong>Community Visual Polish (Tasks Transparency, Custom Border &amp; Clean Rounded Corners):</strong> Inspired by GitHub Discussions feedback, the Tasks drawer now seamlessly follows your main <em>Opacity</em> slider for a unified glassy look. Added a dedicated <strong>Window Border</strong> color picker with a <em>None</em> (transparent) toggle in Settings &gt; Appearance, and eliminated the dark square shadow artifacts behind rounded window corners.</li>
+                            <li><strong>Active-First Event Sorting &amp; Color Preservation:</strong> Completed (<code>[x]</code>) events now automatically sink to the bottom of busy day cells (showing a clean <code>+N done</code> badge when tucked away) so remaining active events stay front and center. Toggling completion, restoring an event, or editing its title now reliably preserves its original color and schedule times.</li>
+                            <li><strong>Multi-Monitor Desktop Mode &amp; Hotkey Z-Order Fix:</strong> Dismissing the widget via global hotkey or clicking onto another monitor in <em>Desktop Mode</em> now sends the window cleanly to the bottom of the Windows Z-order (<code>HWND_BOTTOM</code>) without lingering on top of open apps.</li>
+                            <li><strong>Silent Windows Notification Dismissal:</strong> Closing or dismissing Windows event reminders no longer pulls the calendar window to the foreground, keeping your workflow uninterrupted.</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="cl-item cl-visible">
                     <div class="cl-version">v1.9.3 <span class="cl-date">Nov 20, 2026</span> <span class="cl-tag" style="background:rgba(52,199,89,0.18);color:#5cd67c;border:1px solid rgba(52,199,89,0.35);font-weight:700;">UPDATE</span></div>
                     <div class="cl-body">
